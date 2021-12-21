@@ -1,41 +1,42 @@
 <template>
-  <view class="cu-modal  bottom-modal {{hide?'show':''}}">
-    <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;">
-      <!-- <view class="bg-white justify-end">
-        <view class="content">提示</view>
-        <view class="action f-fec" bindtap="hideModel">
-          <text class="cuIcon-close font_40 color999" style="line-height: 40rpx;margin: 30rpx 30rpx 0 0;"></text>
-        </view>
-      </view> -->
-      <view class="text-center m_sha">
-        <view class="text-center font_32 bold color_333">分享至</view>
-        <view class="m_box f-fc">
-          <view class="text-center inline-block" @tap.stop="hideModel">
-            <button class="btn text-center font_28" open-type="share" style="line-height: 1.6;padding: 6rpx">
-              <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/d14663aeb3a6663ed926e8e3949ca8fb.png"></image>
-              <view class="font_24 black_6">微信好友</view>
-            </button>
+  <view>
+    <view class="cu-modal bottom-modal {{hide?'show':''}}">
+      <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;">
+        <!-- <view class="bg-white justify-end">
+          <view class="content">提示</view>
+          <view class="action f-fec" bindtap="hideModel">
+            <text class="cuIcon-close font_40 color999" style="line-height: 40rpx;margin: 30rpx 30rpx 0 0;"></text>
           </view>
-        </view>
-        <!-- <view style="width: 50%" class="text-center inline-block color-666">
-          <button class="btn text-center font_28"  style="line-height: 1.6;padding: 6rpx" @tap="showPic">
-            <block wx:if="{{poster == 'custom'}}">
-              <image class="share-image" mode="aspectFit" src="https://image.fulllinkai.com/202112/03/4e3908cc9b20b9af0c35908eb7b2fa7b.png"></image>
-              <view class="font_24 black_6">生成海报</view>
-            </block>
-            <block wx:else>
-              <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/114c3bcabf2fdabc555923d61a3b790d.png"></image>
-              <view class="font_24 black_6">朋友圈</view>
-            </block>
-          </button>
         </view> -->
-        <view class="clearfloat font_36 color999 text-center" bindtap="hideModel">
-          取消
+        <view class="text-center m_sha">
+          <view class="text-center font_32 bold color_333">分享至</view>
+          <view class="m_box f-fc">
+            <view class="text-center inline-block" @tap.stop="hideModel">
+              <button class="btn text-center font_28" open-type="share" style="line-height: 1.6;padding: 6rpx">
+                <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/d14663aeb3a6663ed926e8e3949ca8fb.png"></image>
+                <view class="font_24 black_6">微信好友</view>
+              </button>
+            </view>
+          </view>
+          <!-- <view style="width: 50%" class="text-center inline-block color-666">
+            <button class="btn text-center font_28"  style="line-height: 1.6;padding: 6rpx" @tap="showPic">
+              <block wx:if="{{poster == 'custom'}}">
+                <image class="share-image" mode="aspectFit" src="https://image.fulllinkai.com/202112/03/4e3908cc9b20b9af0c35908eb7b2fa7b.png"></image>
+                <view class="font_24 black_6">生成海报</view>
+              </block>
+              <block wx:else>
+                <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/114c3bcabf2fdabc555923d61a3b790d.png"></image>
+                <view class="font_24 black_6">朋友圈</view>
+              </block>
+            </button>
+          </view> -->
+          <view class="clearfloat font_36 color999 text-center" bindtap="hideModel">
+            取消
+          </view>
         </view>
       </view>
     </view>
-  </view>
-  <view class="cu-modal {{modalName=='Image'?'show':''}}">
+    <view class="cu-modal {{modalName=='Image'?'show':''}}">
       <view class="cu-dialog">
         <view class="cu-bar bg-white justify-end">
           <view class="content">分享海报</view>
@@ -55,22 +56,23 @@
           </view>
         </view>
       </view>
-  </view>
-  <view class="cu-modal {{modalName=='DialogModal'?'show':''}}">
-    <view class="cu-dialog">
-      <view class="cu-bar bg-white justify-end">
-        <view class="content">温馨提示</view>
-        <view class="action" bindtap="hideOpenSet">
-          <text class="cuIcon-close text-red"></text>
+    </view>
+    <view class="cu-modal {{modalName=='DialogModal'?'show':''}}">
+      <view class="cu-dialog">
+        <view class="cu-bar bg-white justify-end">
+          <view class="content">温馨提示</view>
+          <view class="action" bindtap="hideOpenSet">
+            <text class="cuIcon-close text-red"></text>
+          </view>
         </view>
-      </view>
-      <view class="padding-xl">
-        需要你授权才能保存到相册哦！
-      </view>
-      <view class="cu-bar bg-white justify-end">
-        <view class="action">
-          <button class="cu-btn line-green text-green" @tap="hideOpenSet">取消</button>
-          <button class="cu-btn bg-green margin-left" open-type="openSetting" @opensetting="openSetting_image">打开设置</button>
+        <view class="padding-xl">
+          需要你授权才能保存到相册哦！
+        </view>
+        <view class="cu-bar bg-white justify-end">
+          <view class="action">
+            <button class="cu-btn line-green text-green" @tap="hideOpenSet">取消</button>
+            <button class="cu-btn bg-green margin-left" open-type="openSetting" @opensetting="openSetting_image">打开设置</button>
+          </view>
         </view>
       </view>
     </view>
@@ -87,28 +89,34 @@
         default: null
       },
       hide: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       library_id: {
         type: Number,
         default: 0
       },
-	  poster: {
-		type: String,
-		default: null
-	  }
+      poster: {
+        type: String,
+        default: null
+      }
     }
     data = {
-      hide: false,
       showImage: true,
       showOpenSet: true,
       formID: [],
       modalName: ''
     }
     onLoad() {
-      console.log(this.shareImage)
     }
     computed = {
+    }
+    watch = {
+      'hide' () {
+        wx.showToast({
+          title: '提示'
+        })
+      }
     }
 
     methods = {
@@ -118,25 +126,24 @@
         this.$apply()
       },
       showPic() {
-		  if(this.poster == 'custom') {
-			  this.hide = true
-			  this.$emit('hideShare', this.hide)
-			  this.$apply()
-			  this.$emit('shareShow')
-		  }else {
-			  if (this.shareImage) {
-			    this.showImage = false
-			    this.hide = true
-			    this.modalName = 'Image'
-			    this.$apply()
-			  } else {
-			    wx.showModal({
-			      title: '提示',
-			      content: '海报生成失败，请重试！'
-			    })
-			  }
-		  }
-        
+        if (this.poster == 'custom') {
+          this.hide = true
+          this.$emit('hideShare', this.hide)
+          this.$apply()
+          this.$emit('shareShow')
+        } else {
+          if (this.shareImage) {
+            this.showImage = false
+            this.hide = true
+            this.modalName = 'Image'
+            this.$apply()
+          } else {
+            wx.showModal({
+              title: '提示',
+              content: '海报生成失败，请重试！'
+            })
+          }
+        }
       },
       listenerCancel () {
         this.modalName = ''

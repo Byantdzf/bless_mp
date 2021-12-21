@@ -35,7 +35,7 @@
 							<view>给你发了一个祝福！！！</view>
 						</view>
 					</view>
-          <view class="m_texTarea">
+          <view class="m_texTarea" wx:if="{{modalName=='obtainModal'}}">
             <texTarea
               :placeholderText.sync="placeholderText"
               :max.sync="max"
@@ -75,17 +75,15 @@
 			<view class="cancelPlaceholder" @tap="hideModal">
 				<image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="widthFix"></image>
 			</view>
-		    <view class="m_send_con">
+		    <view class="m_send_con" wx:if="{{modalName=='sendOutModal'}}">
 		      <view class="m_texTarea">
-		        <senTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue"></senTexTarea>
+		        <senTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue" :readonly="false"></senTexTarea>
 		      </view>
 		    </view>
 			<view class="m_share_bu">
 				<!-- <view class="u_share_bu bold font_20_30 f-fcc" @tap="shareQrcode">分享至朋友圈</view> -->
 				<view>
-					<view class="font_30 u_share_bu_s">
-						<view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="postBottle">分享给好友</view>
-					</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="postBottle">分享给好友</view>
 				</view>
 			</view>
 		  </view>
@@ -95,12 +93,12 @@
         <view class="envelope_box" wx:show="{{showEnvelope}}"></view>
       </button>
     </view>
-    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}">
+    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}" @tap="hideModal">
       <view class="openEnvelope_box">
         <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/21/920b694a9919092600eaca94d8586055.gif" mode="widthFix">
           <view class="m_open_send_con" wx:if="{{showEnvelopeText}}">
             <view class="m_open_texTarea">
-              <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue" :readonly="true"></openTexTarea>
+              <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue"></openTexTarea>
             </view>
           </view>
         </image>
@@ -108,123 +106,124 @@
       </view>
     </view>
 		<view class="cu-modal {{modalName=='shareModal'?'show':''}}">
-		<view class="share_code_box">
-			<view class="cancelShare" @tap="hideModal">
-			<image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/0fb3ec31f29628d09d18135a826154fe.png" mode="widthFix"></image>
-			</view>
-		</view>
+      <view class="share_code_box">
+        <view class="cancelShare" @tap="hideModal">
+        <image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/0fb3ec31f29628d09d18135a826154fe.png" mode="widthFix"></image>
+        </view>
+      </view>
 		</view>
 		<!-- 投诉 -->
-		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">
-		  <view class="perfect_data_box animation-slide-top" catchtap>
-		    <view class="m_comp_con">
-		      <view class="m_comp_tt font_32 color333 bold">举报{{obtainData[obtainIndex].name}}</view>
-					<view class="m_comp">
-						<view class="font_30 color333 bold text-left">举报类型</view>
-						<view class="m_comp_type f-fc f-wrap">
-							<block  wx:for="{{compType}}" wx:key="index">
-								<view class="u_comp_type f-fcc font_28 {{typeIndex == index?'sel':''}}" @tap="choiceType({{index}})">{{item}}</view>
-							</block>
-						</view>
-					</view>
-		      <view class="m_texTarea">
-		        <compTexTarea
-		          :placeholderText.sync="compPlaceholderText"
-		          :max.sync="max"
-		          :value.sync="compValue"
-							@textareaValue.user="compTextareaValue"
-		        ></compTexTarea>
-		      </view>
-		      <view class="m_ble_bu f-fcc">
-		        <view class="u_ble_bu bold fong_30 f-fcc" @tap="Submit">提交</view>
-		      </view>
-		    </view>
-		  </view>
-		</view>
-		<block wx:if="{{hide}}">
-				<shareComponent :hide.sync="hide" poster="custom" :shareImage.sync="pic"></shareComponent>
-			</block>
+<!--		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">-->
+<!--		  <view class="perfect_data_box animation-slide-top" catchtap>-->
+<!--		    <view class="m_comp_con">-->
+<!--		      <view class="m_comp_tt font_32 color333 bold">举报{{obtainData[obtainIndex].name}}</view>-->
+<!--					<view class="m_comp">-->
+<!--						<view class="font_30 color333 bold text-left">举报类型</view>-->
+<!--						<view class="m_comp_type f-fc f-wrap">-->
+<!--							<block  wx:for="{{compType}}" wx:key="index">-->
+<!--								<view class="u_comp_type f-fcc font_28 {{typeIndex == index?'sel':''}}" @tap="choiceType({{index}})">{{item}}</view>-->
+<!--							</block>-->
+<!--						</view>-->
+<!--					</view>-->
+<!--		      <view class="m_texTarea">-->
+<!--		        <compTexTarea-->
+<!--		          :placeholderText.sync="compPlaceholderText"-->
+<!--		          :max.sync="max"-->
+<!--		          :value.sync="compValue"-->
+<!--							@textareaValue.user="compTextareaValue"-->
+<!--              :readonly="false"-->
+<!--		        ></compTexTarea>-->
+<!--		      </view>-->
+<!--		      <view class="m_ble_bu f-fcc">-->
+<!--		        <view class="u_ble_bu bold fong_30 f-fcc" @tap="Submit">提交</view>-->
+<!--		      </view>-->
+<!--		    </view>-->
+<!--		  </view>-->
+<!--		</view>-->
+    <shareComponent :hide.sync="hide" poster="custom" :shareImage.sync="pic"></shareComponent>
   </view>
 </template>
 
 <script>
-import wepy from "wepy";
-import { service } from "../../config.js";
-import http from "../../mixins/http";
-import base from "../../mixins/base";
-import user from "../../mixins/user";
-import texTarea from "../../components/textarea";
+import wepy from 'wepy'
+import { service } from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+import texTarea from '../../components/textarea'
+import textareaV2 from '../../components/textareaV2'
 import shareComponent from '../../components/shareComponent'
 // import { getsubscription } from "../../utils/fn";
 
-let date = new Date();
+let date = new Date()
 export default class home extends wepy.page {
   mixins = [base, http, user];
   config = {
-    navigationBarTitleText: "首页推荐",
+    navigationBarTitleText: '首页推荐',
     onReachBottomDistance: 10,
-    navigationStyle: "custom",
-    enablePullDownRefresh: false,
+    navigationStyle: 'custom',
+    enablePullDownRefresh: false
   };
-  components = { texTarea, senTexTarea: texTarea, openTexTarea: texTarea, compTexTarea: texTarea, shareComponent };
+  components = { shareComponent, texTarea, senTexTarea: texTarea, openTexTarea: textareaV2, compTexTarea: texTarea };
   watch = {};
   data = {
-    modalName: "",
+    modalName: '',
+    pic: '',
     showEnvelope: false,
     showEnvelopeText: false,
-    placeholderText: "写下你的暖心祝福",
-		compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
+    placeholderText: '写下你的暖心祝福',
+    compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
     max: 800,
-    value: "",
-		senValue: "",
-		compValue: '',
-		compType: ['政治敏感', '色情低俗', '广告软文', '内容引起不适'],
-		obtainData: [
-			{
-				name: '郭老师',
-				content: '这个玩意现在特别的花里胡哨啊',
-				avatar: 'https://image.fulllinkai.com/202112/15/ebd7ffdfbb3b63efa2533a5255224cd5.jpeg'
-			},
-			{
-				name: '畅先生',
-				content: '真实做了孽，小时候吃了上顿没下顿，好不容易长大啦，看个视频又看了上集没下集',
-				avatar: 'https://image.fulllinkai.com/202112/15/2772e4e2b59d435c1cbfbc692b97476b.jpeg'
-			},
-			{
-				name: '微微一笑',
-				content: '笑死我了，我和我搭档仔细研究了图，觉得没问题了，决定明天发给老板，有问题明天改',
-				avatar: 'https://image.fulllinkai.com/202112/15/1b0c3507db8efca43d0177bfc7b7175a.jpeg'
-			},
-			{
-				name: '小恒',
-				content: '我好纳闷为什么我上学时候一天在班里坐10个小时 下课了还能玩上好久电脑 怎么我现在一天上8个小时班回家之后连玩电脑的时间都没了',
-				avatar: 'https://image.fulllinkai.com/202112/15/0055e87a6bbf1e5bd5cc3f6db21a7bba.jpeg'
-			},
-			{
-				name: '冰美式',
-				content: '我以为我去最后一个知道的？原来我不是最后',
-				avatar: 'https://image.fulllinkai.com/202112/15/1d96bf4b7859c179c84009b7d6d82c2b.png'
-			}
-		],
-		obtainIndex: 0,
-		typeIndex: null,
-		bottleData: {},
-		hide: false,
-		receiving_id: ''
+    value: '',
+    senValue: '',
+    compValue: '',
+    compType: ['政治敏感', '色情低俗', '广告软文', '内容引起不适'],
+    obtainData: [
+      {
+        name: '郭老师',
+        content: '这个玩意现在特别的花里胡哨啊',
+        avatar: 'https://image.fulllinkai.com/202112/15/ebd7ffdfbb3b63efa2533a5255224cd5.jpeg'
+      },
+      {
+        name: '畅先生',
+        content: '真实做了孽，小时候吃了上顿没下顿，好不容易长大啦，看个视频又看了上集没下集',
+        avatar: 'https://image.fulllinkai.com/202112/15/2772e4e2b59d435c1cbfbc692b97476b.jpeg'
+      },
+      {
+        name: '微微一笑',
+        content: '笑死我了，我和我搭档仔细研究了图，觉得没问题了，决定明天发给老板，有问题明天改',
+        avatar: 'https://image.fulllinkai.com/202112/15/1b0c3507db8efca43d0177bfc7b7175a.jpeg'
+      },
+      {
+        name: '小恒',
+        content: '我好纳闷为什么我上学时候一天在班里坐10个小时 下课了还能玩上好久电脑 怎么我现在一天上8个小时班回家之后连玩电脑的时间都没了',
+        avatar: 'https://image.fulllinkai.com/202112/15/0055e87a6bbf1e5bd5cc3f6db21a7bba.jpeg'
+      },
+      {
+        name: '冰美式',
+        content: '我以为我去最后一个知道的？原来我不是最后',
+        avatar: 'https://image.fulllinkai.com/202112/15/1d96bf4b7859c179c84009b7d6d82c2b.png'
+      }
+    ],
+    obtainIndex: 0,
+    typeIndex: null,
+    bottleData: {},
+    hide: false,
+    receiving_id: ''
   };
   computed = {};
   async onLoad(e) {
-		this.value = this.obtainData[this.obtainIndex].content
-    wx.hideTabBar({});
+    this.value = this.obtainData[this.obtainIndex].content
+    wx.hideTabBar({})
     wepy.$instance.userInfoReadyCallback = res => {
       if (e.receiving_id) {
-        console.log('111111------------')
         this.receiving_id = e.receiving_id
         this.modalName = 'envelope'
-        setTimeout(()=>{
+        this.$apply()
+        setTimeout(() => {
           this.showEnvelope = true
           this.$apply()
-        },400)
+        }, 400)
         this.$apply()
       }
     }
@@ -232,149 +231,140 @@ export default class home extends wepy.page {
   onShow() {}
 
   getCurrentPageUrlWithArgs() {
-		var pages = getCurrentPages() // 获取加载的页面
-		var currentPage = pages[pages.length - 1] // 获取当前页面的对象
-		var url = currentPage.route // 当前页面url
-		var options = currentPage.options // 如果要获取url中所带的参数可以查看options
-			// 拼接url的参数
-		var fromUserID = wx.getStorageSync('user_id')
-		var urlWithArgs = `${url}?openid=${wx.getStorageSync('openid')}&receiving_id=${this.bottleData.id}`
-		for (var key in options) {
-			var value = options[key]
-			if (key !== 'receiving_id') {
-				console.log(key)
-			// urlWithArgs = url + '?' + key + '=' + value + `&openid=` + wx.getStorageSync('openid')
-			}
-		}
-			// urlWithArgs = urlWithArgs.substring(0, urlWithArgs.length - 1)
-		return urlWithArgs
-	}
+    var pages = getCurrentPages() // 获取加载的页面
+    var currentPage = pages[pages.length - 1] // 获取当前页面的对象
+    var url = currentPage.route // 当前页面url
+    var options = currentPage.options // 如果要获取url中所带的参数可以查看options
+    var fromUserID = wx.getStorageSync('user_id') // 拼接url的参数
+    var urlWithArgs = `${url}?openid=${wx.getStorageSync('openid')}&receiving_id=${this.bottleData.id}`
+    for (var key in options) {
+      var value = options[key]
+      if (key !== 'receiving_id') {
+        console.log(key)
+      }
+    }
+    return urlWithArgs
+  }
   // 分享
   onShareAppMessage(res) {
-	let that = this,
-	url = that.getCurrentPageUrlWithArgs()
-	console.log(url)
-	return {
-		title: "分享祝福",
-		path: url,
-		success: function (res) {
-			console.log('成功', res)
-		}
-	}
+    let that = this,
+      url = that.getCurrentPageUrlWithArgs()
+    console.log(url)
+    return {
+      title: '分享祝福',
+      path: url,
+      success: function (res) {
+        console.log('成功', res)
+      }
+    }
   }
-
-	// 祝福详情
-	getBottleId (id) {
-		this.$showLoading('加载中...')
-		this.$get({url: `${service.bottleId}/${id}`}, {
-			success: ({
-				code,
-				data
-			}) => {
-				this.senValue = data.content
+  getBottleId (id) { // 祝福详情
+    this.$showLoading('加载中...')
+    this.$get({url: `${service.bottleId}/${id}`}, {
+      success: ({code, data}) => {
+        this.senValue = data.content
         this.modalName = 'openEnvelope'
-				wx.hideLoading()
-			}
-		})
-	}
+        wx.hideLoading()
+      }
+    })
+  }
   methods = {
-	  	userInfoHandler(e) {
-			if (e.detail.userInfo != undefined) {
-				wx.setStorageSync('userInfo', e.detail.userInfo);
-        this.getBottleId(this.receiving_id)
-				setTimeout(()=>{
-				  this.showEnvelopeText = true
+    userInfoHandler(e) {
+      if (e.detail.userInfo != undefined) {
+        wx.setStorageSync('userInfo', e.detail.userInfo)
+        if (this.receiving_id) {
+          this.getBottleId(this.receiving_id)
+          setTimeout(() => {
+            this.showEnvelopeText = true
+            this.$apply()
+          }, 1200)
+        } else {
+          this.modalName = 'sendOutModal'
           this.$apply()
-        }, 1200)
-			}
-		},
-	  	userInfoHandlerV2(e) {
-			if (e.detail.userInfo != undefined) {
-				wx.setStorageSync('userInfo', e.detail.userInfo);
-				this.$goto(`/pages/users/myNews`)
-			}
-		},
-		textareaValue(e) {
-			this.value = e
-		},
-		senTextareaValue(e) {
-			this.senValue = e
-		},
-		compTextareaValue(e) {
-			this.compValue = e
-		},
-		hideModal() {
-			console.log('11111111')
-			this.modalName = "";
-			this.senValue = ''
-			this.receiving_id = ''
-			this.$apply()
-		},
-		// 发祝福
-		postBottle () {
-			if(this.senValue == '') {
-				this.$showToast('说点什么吧')
-				return
-			}
-			var data = {
-				content: this.senValue
-			}
-			this.modalName = ''
-			this.$showLoading('加载中...')
-			this.$post({
-				url: `${service.bottle}`,
-				data
-			}, {
-				success: ({
-					code,
-					data
-				}) => {
-					this.hide = true
-					this.bottleData = data
-					wx.hideLoading()
-				}
-			})
-		},
-		displayModal(e) {
-			this.modalName = e
-		},
-		goToUrlId() {
-			this.$goto(`/pages/users/chat?receiving_id=${this.receiving_id}`)
+        }
+      }
+    },
+    userInfoHandlerV2(e) {
+      if (e.detail.userInfo != undefined) {
+        wx.setStorageSync('userInfo', e.detail.userInfo)
+        this.$goto(`/pages/users/myNews`)
+      }
+    },
+    textareaValue(e) {
+      this.value = e
+    },
+    senTextareaValue(e) {
+      this.senValue = e
+    },
+    compTextareaValue(e) {
+      this.compValue = e
+    },
+    hideModal() {
       this.modalName = ''
+      this.senValue = ''
+      this.receiving_id = ''
       this.$apply()
-		},
-		againGat() {
-			const that = this
-			that.modalName = "";
-			setTimeout(() => {
-				that.obtainIndex += 1
-				that.value = this.obtainData[this.obtainIndex].content
-				that.modalName = "obtainModal";
-				that.$apply()
-			}, 500)
-		},
-		sendOut(){
-			this.modalName = 'sendOutModal'
-		},
-		shareQrcode() {
-			if(this.senValue == '') {
-				this.$showToast('说点什么吧')
-				return
-			}
-			this.modalName = 'shareModal'
-		},
-		complaint() {
-			this.modalName = 'complaintModal'
-		},
-		choiceType(index) {
-			this.typeIndex = index
-		},
-		Submit() {
-			this.modalName = ''
-		}
-  };
+    },
+    postBottle () { // 发祝福
+      var data = {
+        content: this.senValue
+      }
+      this.modalName = ''
+      // this.$showLoading('加载中...')
+      this.$post({
+        url: `${service.bottle}`,
+        data
+      }, {
+        success: ({code, data}) => {
+          // wx.hideLoading()
+          this.bottleData = data
+          this.hide = true
+          this.$apply()
+        }
+      })
+    },
+    displayModal(e) {
+      this.modalName = e
+    },
+    goToUrlId() {
+      this.$goto(`/pages/users/chat?receiving_id=${this.receiving_id}`)
+      this.modalName = ''
+      this.senValue = ''
+      this.receiving_id = ''
+      this.$apply()
+    },
+    againGat() {
+      const that = this
+      that.modalName = ''
+      setTimeout(() => {
+        that.obtainIndex += 1
+        that.value = this.obtainData[this.obtainIndex].content
+        that.modalName = 'obtainModal'
+        that.$apply()
+      }, 500)
+    },
+    sendOut() {
+      this.modalName = 'sendOutModal'
+    },
+    shareQrcode() {
+      if (this.senValue == '') {
+        this.$showToast('说点什么吧')
+        return
+      }
+      this.modalName = 'shareModal'
+    },
+    complaint() {
+      this.modalName = 'complaintModal'
+    },
+    choiceType(index) {
+      this.typeIndex = index
+    },
+    Submit() {
+      this.modalName = ''
+    }
+  }
   events = {
-  };
+  }
 }
 </script>
 
