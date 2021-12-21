@@ -1,8 +1,8 @@
 <template>
   <view style="background:#f5f5f5;height:100%;">
-    <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
+    <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
       <view class="m_abo">
-        <view class="blessingBox" wx:for="{{list}}" wx:key="index">
+        <view class="blessingBox" wx:for="{{list}}" wx:key="index" @tap="goToUrlChat({{item}})">
           <view class="blessing_lst">
             <view class="m_lstImg">
               <image class="u_lstImg" src="{{item.pic}}" mode="aspectFill"></image>
@@ -67,7 +67,6 @@ export default class myNews extends wepy.page {
     this.$get({
       url: `${service.host}/official/bottle/list`,
       data: {
-        openid: 'oPC_2vgxDzn-G1DREnusMCXDD4Us',
         page: vm.blessingPage
       }
     }, {
@@ -139,7 +138,10 @@ export default class myNews extends wepy.page {
       this.blessingTopHandle = Math.random()
       this.blessingTatus = false
       this.$apply()
-    }
+    },
+    goToUrlChat(item) {
+			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&b_id=${item.b_id}$userName=${item.nickname}`)
+		},
   }
   events = {
   }

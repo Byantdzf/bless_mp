@@ -198,10 +198,14 @@ export default class home extends wepy.page {
   async onLoad(e) {
 		this.value = this.obtainData[this.obtainIndex].content
 		wx.hideTabBar({});
-		wepy.$instance.userInfoReadyCallback = res => {
-			if(e.receiving_id) {
-				this.receiving_id = e.receiving_id
-				this.getBottleId(e.receiving_id)
+		if(wepy.$instance.globalData.openid) {
+
+		}else {
+			wepy.$instance.userInfoReadyCallback = res => {
+				if(e.receiving_id) {
+					this.receiving_id = e.receiving_id
+					this.getBottleId(e.receiving_id)
+				}
 			}
 		}
   }
