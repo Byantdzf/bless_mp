@@ -7,6 +7,7 @@
       placeholder-style="placeholder_class"
       minlength="{{min}}"
       maxlength="{{max}}"
+      disabled="readonly"
       rows="6"
       bindinput="inputs"
       value="{{value}}"
@@ -46,6 +47,10 @@ export default class textarea extends wepy.component {
       type: Boolean,
       default: false
     },
+    readonly: {
+      type: Boolean,
+      default: false
+    }
   };
   watch = {
     value(e) {

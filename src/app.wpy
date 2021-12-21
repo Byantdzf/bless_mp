@@ -106,7 +106,7 @@ export default class extends wepy.app {
 
   onLaunch(options) {
     this.login();
-		
+
   }
   onShow(options) {}
 
@@ -125,7 +125,7 @@ export default class extends wepy.app {
       //   title: "加载中",
       //   mask: true,
       // });
-      
+
       wepy.login({
         success: (res) => {
           console.log(res, 'login--------------')

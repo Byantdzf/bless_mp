@@ -84,13 +84,29 @@
 				<!-- <view class="u_share_bu bold font_20_30 f-fcc" @tap="shareQrcode">分享至朋友圈</view> -->
 				<view>
 					<view class="font_30 u_share_bu_s">
-						<view class="u_share_bu_s bold fong_30 f-fcc" wx:if="{{receiving_id}}"  @tap.stop="goToUrlId(`/pages/users/chat?receiving_id=${receiving_id}`)">回复好友</view>
-						<view class="u_share_bu_s bold fong_30 f-fcc" wx:else @tap.stop="postBottle">分享给好友</view>
+						<view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="postBottle">分享给好友</view>
 					</view>
 				</view>
 			</view>
 		  </view>
 		</view>
+    <view class="cu-modal {{modalName=='envelope'?'show':''}}">
+      <button class="envelope_bto" open-type="getUserInfo" bindgetuserinfo="userInfoHandler">
+        <view class="envelope_box" wx:show="{{showEnvelope}}"></view>
+      </button>
+    </view>
+    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}">
+      <view class="openEnvelope_box">
+        <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/21/920b694a9919092600eaca94d8586055.gif" mode="widthFix">
+          <view class="m_open_send_con" wx:if="{{showEnvelopeText}}">
+            <view class="m_open_texTarea">
+              <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue" :readonly="true"></openTexTarea>
+            </view>
+          </view>
+        </image>
+        <view class="u_share_bu_s bold fong_30 f-fcc" wx:if="{{receiving_id}}" @tap.stop="goToUrlId">回复好友</view>
+      </view>
+    </view>
 		<view class="cu-modal {{modalName=='shareModal'?'show':''}}">
 		<view class="share_code_box">
 			<view class="cancelShare" @tap="hideModal">
@@ -150,10 +166,12 @@ export default class home extends wepy.page {
     navigationStyle: "custom",
     enablePullDownRefresh: false,
   };
-  components = { texTarea, senTexTarea: texTarea, compTexTarea: texTarea, shareComponent };
+  components = { texTarea, senTexTarea: texTarea, openTexTarea: texTarea, compTexTarea: texTarea, shareComponent };
   watch = {};
   data = {
     modalName: "",
+    showEnvelope: false,
+    showEnvelopeText: false,
     placeholderText: "写下你的暖心祝福",
 		compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
     max: 800,
@@ -198,12 +216,18 @@ export default class home extends wepy.page {
   async onLoad(e) {
 		this.value = this.obtainData[this.obtainIndex].content
     wx.hideTabBar({});
-	wepy.$instance.userInfoReadyCallback = res => {
-		if(e.receiving_id) {
-			this.receiving_id = e.receiving_id
-			this.getBottleId(e.receiving_id)
-		}
-	}
+    wepy.$instance.userInfoReadyCallback = res => {
+      if (e.receiving_id) {
+        console.log('111111------------')
+        this.receiving_id = e.receiving_id
+        this.modalName = 'envelope'
+        setTimeout(()=>{
+          this.showEnvelope = true
+          this.$apply()
+        },400)
+        this.$apply()
+      }
+    }
   }
   onShow() {}
 
@@ -238,7 +262,7 @@ export default class home extends wepy.page {
 		}
 	}
   }
-  
+
 	// 祝福详情
 	getBottleId (id) {
 		this.$showLoading('加载中...')
@@ -248,7 +272,7 @@ export default class home extends wepy.page {
 				data
 			}) => {
 				this.senValue = data.content
-				this.modalName = 'sendOutModal'
+        this.modalName = 'openEnvelope'
 				wx.hideLoading()
 			}
 		})
@@ -257,7 +281,11 @@ export default class home extends wepy.page {
 	  	userInfoHandler(e) {
 			if (e.detail.userInfo != undefined) {
 				wx.setStorageSync('userInfo', e.detail.userInfo);
-				this.modalName = 'sendOutModal'
+        this.getBottleId(this.receiving_id)
+				setTimeout(()=>{
+				  this.showEnvelopeText = true
+          this.$apply()
+        }, 1200)
 			}
 		},
 	  	userInfoHandlerV2(e) {
@@ -310,8 +338,10 @@ export default class home extends wepy.page {
 		displayModal(e) {
 			this.modalName = e
 		},
-		goToUrlId(e) {
-			this.$goto(e)
+		goToUrlId() {
+			this.$goto(`/pages/users/chat?receiving_id=${this.receiving_id}`)
+      this.modalName = ''
+      this.$apply()
 		},
 		againGat() {
 			const that = this
@@ -450,6 +480,60 @@ page {
 			}
     }
   }
+  .envelope_bto{
+    background-color: initial;
+    display: initial;
+  }
+  .envelope_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    background: url("https://image.fulllinkai.com/202112/21/0a03541a88c151ece67833869c4b6a37.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 600rpx;
+    height: 356rpx;
+    animation: warn 1.5s ease-in-out 1.5s 1 alternate, zy 2.5s ease-in-out 3s 1 alternate;
+  }
+  @keyframes warn {
+    0% {transform: scale(0);}
+    100% {transform: scale(1);}
+  }
+  @keyframes zy{
+    10%{transform: rotate(6deg);}
+    20%{transform: rotate(-6deg);}
+    30%{transform: rotate(6deg);}
+    40%{transform: rotate(-6deg);}
+    50%,100%{transform: rotate(0deg);}
+  }
+  .openEnvelope_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    top: -10%;
+    width: 600rpx;
+    height: 356rpx;
+    .openEnvelope_bg{
+      width: 100%;
+      display: block;
+      position: relative;
+    }
+    .m_open_send_con{
+      position: absolute;
+      top: -20rpx;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      .m_open_texTarea{
+        margin-bottom: 36rpx;
+        margin-top: 50rpx;
+      }
+    }
+  }
   .blessing_box{
     position: relative;
     display: inline-block;
@@ -522,21 +606,21 @@ page {
     align-items: center;
     bottom: 0;
     margin-bottom: -120rpx;
-    .u_share_bu, .u_share_bu_s{
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 240rpx;
-      height: 82rpx;
-      background: #F5F5F5;
-      border-radius: 40rpx;
-      color: #333333;
-    }
-    .u_share_bu_s{
-      //margin-left: 40rpx;
-      color: #994D2C;
-      background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
-    }
+  }
+  .u_share_bu, .u_share_bu_s{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 240rpx;
+    height: 82rpx;
+    background: #F5F5F5;
+    border-radius: 40rpx;
+    color: #333333;
+  }
+  .u_share_bu_s{
+    margin: 30rpx auto 0 auto;
+    color: #994D2C;
+    background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
   }
 	.m_comp_con {
 		padding: 30rpx 0rpx 50rpx;
