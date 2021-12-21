@@ -1,0 +1,87 @@
+<template>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import {service} from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  //  import ShareMessage from '../mixins/ShareMessage'
+  export default class uploadImages extends wepy.component {
+    mixins = [base, http]
+    props = {
+      pic: {
+        type: Array,
+        default: [],
+        twoWay: true
+      }
+    }
+    data = {
+      imgType: true
+    }
+    onLoad () {
+    }
+
+    uploadFile(filePath, filePaths, index) {
+      this.$showLoading('上传中')
+      wx.uploadFile({
+        url: service.image_upload,
+        filePath: filePath,
+        method: 'POST',
+        name: 'fileData',
+        header: {
+          'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+          'content-type': 'multipart/form-data',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: (res) => {
+          this.$emit('UpLoadImage', JSON.parse(res.data).data)
+          if (index == filePaths.length - 1) {
+            wx.hideLoading()
+          }
+        },
+        fail: (res) => {
+        },
+        complete: () => {
+        }
+      })
+    }
+
+    methods = {
+      chooseimage(num) {
+        console.log(num)
+        let vm = this
+        wx.chooseImage({
+          count: num,
+          // sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: (res) => {
+            console.log(res, '多张图片')
+            vm.imgType = true
+            if (res.tempFilePaths && res.tempFilePaths.length > 1) {
+              res.tempFilePaths.forEach((item) => {
+                if (item.indexOf('png') <= 0 && item.indexOf('jpeg') <= 0 && item.indexOf('jpg') <= 0) {
+                  vm.imgType = false
+                }
+              })
+            } else {
+              vm.imgType = res.tempFilePaths[0].indexOf('png') >= 0 || res.tempFilePaths[0].indexOf('jpg') >= 0 || res.tempFilePaths[0].indexOf('jpeg') >= 0
+            }
+            if (!vm.imgType) {
+              vm.$showToast('上传图片只能是 jpg、png、jpeg 格式!')
+              return false
+            }
+            let index = 0
+            for (let item of res.tempFilePaths) {
+              vm.uploadFile(item, res.tempFilePaths, index++)
+            }
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style type="less">
+</style>

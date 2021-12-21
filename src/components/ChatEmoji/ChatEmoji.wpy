@@ -1,0 +1,192 @@
+<template>
+  <view class="m_chat_emoji">
+    <view class="emoji-channel">
+      <span class="emoji-album {{item.name==currAlbum?'active':''}}" wx:for="{{emoji}}" wx:key="index" @tap="selectAlbum({{item}})">
+        <image mode="aspectFit" lazy-load="true" src="{{item.album}}">
+      </span>
+      <span wx:if="{{type==='session'}}" class="emoji-album {{item.name==currAlbum?'active':''}}" wx:for="{{pinup}}" wx:key="index" @tap="selectAlbum({{item}})">
+        <image mode="aspectFit" lazy-load="true" src="{{item.album}}">
+      </span>
+    </view>
+    <view class="emoji-content">
+        <scroll-view scroll-y style="width: 100%;height: 100%;">
+            <view>
+                <view class="cnt f-fc">
+                    <span class="emoji-item {{item.type==='pinup'?'pinup-item':''}}" wx:for="{{currEmoji.list}}" wx:key="index" @tap="selectEmoji({{item}})">
+                        <image mode="aspectFit" lazy-load="true" src="{{item.img}}">
+                    </span>
+                </view>
+            </view>
+        </scroll-view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import emojiObj from './emoji'
+export default class ChatEmoji extends wepy.component {
+  props = {
+    type: String,
+    scene: String,
+    to: String,
+    emoji: Array,
+  }
+  data = {
+    currType: 'emoji',
+    currAlbum: 'emoji',
+    // emoji: [],
+    pinup: [],
+    currEmoji: {
+        list: []
+    },
+  }
+  async onLoad(e) {
+    // this.emoji = this.emojiCts()
+    this.currEmoji = this.currEmojiCts()
+    this.pinup = this.pinupCts()
+    this.$apply()
+  }
+
+    genEmojiList (type, emojiList) {
+        let result = {}
+        for (let name in emojiList) {
+            let emojiMap = emojiList[name]
+            let list = []
+            for (let key in emojiMap) {
+            list.push({
+                type,
+                name,
+                key,
+                img: emojiMap[key].img
+            })
+            }
+            if (list.length > 0) {
+            result[name] = {
+                type,
+                name,
+                list,
+                album: list[0].img
+            }
+            }
+        }
+        return result
+    }
+    
+    emojiCts () {
+        console.log('emojiObj-----------------------------',this.genEmojiList('emoji', emojiObj.emojiList))
+      return this.genEmojiList('emoji', emojiObj.emojiList)
+    }
+
+    pinupCts () {
+      return this.genEmojiList('pinup', emojiObj.pinupList)
+    }
+
+    currEmojiCts () {
+      if (this.currType === 'emoji') {
+        return this.emoji[this.currAlbum]
+      } else if (this.currType === 'pinup') {
+        return this.pinup[this.currAlbum]
+      }
+      return []
+    }
+  methods = {
+    selectAlbum (album) {
+      this.currType = album.type
+      this.currAlbum = album.name
+      this.currEmoji = this.currEmojiCts()
+      this.$apply()
+    },
+    selectEmoji (emoji) {
+      if (this.currType === 'emoji') {
+        // 由触发父组件事件，增加表情文案
+        this.$emit('addEmoji', emoji.key)
+      } else if (this.currType === 'pinup') {
+        if (this.type === 'session') {
+            this.$emit('sendMsg', {
+                emoji,
+                currAlbum: this.currAlbum
+            })
+        } else if (this.type === 'chatroom') {
+          this.$store.dispatch('sendChatroomMsg', {
+            type: 'custom',
+            pushContent: '[贴图表情]',
+            content: {
+              type: 3,
+              data: {
+                catalog: this.currAlbum,
+                chartlet: emoji.key
+              }
+            }
+          })
+        }
+        this.$emit('hide-emoji')
+      }
+    },
+    
+  }
+}
+</script>
+
+<style lang="less">
+  .m_chat_emoji {
+    position: relative;
+    width: 100%;
+    height: 400rpx;
+    display: block;
+    .emoji-channel {
+        position: absolute;
+        left: 0;
+        top: 16rpx;
+        z-index: 9;
+        width: 100%;
+        display: block;
+        background-color: #fff;
+      .emoji-album {
+        display: inline-block;
+        padding: 10rpx;
+        width: 1.8rem;
+        height: 1.8rem;
+        border-right: 1px solid #f0f0f0;
+        image {
+          margin: 0;
+          display: block;
+          width: inherit;
+          height: inherit;
+        }
+        &.active {
+          background-color: #f0f0f0;
+        }
+      }
+    }
+    .emoji-content {
+      width: 100%;
+      height: 100%;
+      padding-top: 52px;
+      padding-bottom: 10px;
+      .cnt {
+        flex-wrap: wrap;
+      }
+      .emoji-item {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        padding: 10rpx;
+        vertical-align: middle;
+        /*border: 1px solid #fff;*/
+        /*margin-left: -1px;*/
+        /*margin-bottom: -1px;*/
+        image {
+          width: inherit;
+          height: inherit;
+        }
+      }
+      .pinup-item {
+        width: 94rpx;
+        height: 94rpx;
+      }
+    }
+  }
+</style>

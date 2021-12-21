@@ -1,0 +1,278 @@
+<template>
+  <view class='buyMian-slide'>
+    <view class='buyMian-slide-contain'>
+      <slider wx:if='{{!change2}}' style='width:{{slider1W}}%;z-index:{{zIndexFlag == 1 ? 1 : 3}}' class='slider-left' block-size="18" value="{{slider1Value}}" min='{{min}}' max='{{slider1Max}}' backgroundColor='rgba(255, 83, 128, .8)' activeColor='#f5f5f5' bindchanging='changing' catchtouchstart='changeStart' bindchange='changed' data-idx='1'></slider>
+      <slider wx:if='{{!change}}' style='width:{{slider2W}}%;z-index:{{zIndexFlag == 2 ? 1:3}}' class='slider-right' block-size="18" value="{{slider2Value}}" min='{{slider2Min}}' max='{{max}}' backgroundColor='#f5f5f5' activeColor='rgba(255, 83, 128, .8)' bindchanging='changing' catchtouchstart='changeStart' bindchange='changed' data-idx='2'></slider>
+
+<!--      <view class="showContentBox">-->
+<!--        <view wx:if='{{!change2 && !closeToFlag}}' class="show-min-content" style="left:{{showContent1}}%"><text>{{slider1Value}}</text></view>-->
+<!--        <view wx:if='{{!change && !closeToFlag}}' class="show-max-content" style="left:{{showContent2}}%"><text>{{slider2Value}}</text></view>-->
+<!--        &lt;!&ndash; 若是需要调整合并数字的盒子宽度 需要减去一半的margin &ndash;&gt;-->
+<!--        <view wx:if='{{closeToFlag}}' class="show-merge-content" style="left:{{closeToPosition}}%"><text>{{slider1Value}}{{slider2Value}}</text></view>-->
+<!--      </view>-->
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base'
+  import http from '../mixins/http'
+  import {service} from '../config'
+export default class sliderTwoWay extends wepy.component {
+    mixins = [base, http]
+    props = {
+      sliderData: {
+        type: Object,
+        default: {},
+        twoWay: true
+      }
+    }
+    components = {
+    }
+    data = {
+      getData: true,
+      change: false, // 当两个slider在最右端重合时，将change设置为true，从而隐藏slider2，才能继续操作slider1
+      change2: false, // 当两个slider在最左端重合时，将change2设置为true，从而隐藏slider1，才能继续操作slider2
+      max: 75, // 两个slider所能达到的最大值
+      min: 18,  // 两个slider所能取的最小值
+      rate: 57 / 100, // slider的最大最小值之差和100（或1000）之间的比率 即最大值-最小值/100
+      slider1Max: 75, // slider1的最大取值
+      slider1Value: 22, // slider1的值
+      slider2Value: 50, // slider2的值
+      slider2Min: 18, // slider2的最小取值
+      slider1W: 100, // slider1的宽度
+      slider2W: 0, // slider2的宽度
+      showContent1: 0, // 左边滑块离左边的距离
+      showContent2: 100, // 右边滑块离左边的距离
+      zIndexFlag: 1, // 控制层叠
+      closeTo: 20, // 靠近多少就合并数字 百分比
+      closeToFlag: false, // true时 合并数字
+      closeToPosition: 0// 合并数字的位置
+    }
+
+    watch = {
+      sliderData() {
+        this.slider1Value = this.sliderData.min_age
+        this.slider2Value = this.sliderData.max_age
+        console.log(this.sliderData, '79879')
+        if (this.getData) {
+          this.showContent1 = 100 - parseInt((this.max - this.slider1Value) / this.rate)
+          this.showContent2 = 100 - parseInt((this.max - this.slider2Value) / this.rate)
+          var dw = (this.max - this.slider1Value) / this.rate
+          console.log(dw, '7987')
+          this.slider2W = dw
+          this.slider1W = 100 - dw
+          this.slider1Max = this.slider1Value
+          this.slider2Min = this.slider1Value
+          this.zIndexFlag = 2
+          this.change2 = false
+          this.getData = false
+          this.$apply()
+        }
+      }
+    }
+
+    onLoad() {
+      this.slider1Value = 22
+      this.slider2Value = 30
+      this.showContent1 = 100 - parseInt((this.max - this.slider1Value) / this.rate)
+      this.showContent2 = 100 - parseInt((this.max - this.slider2Value) / this.rate)
+      var dw = (this.max - this.slider1Value) / this.rate
+      console.log(dw, '7987')
+      this.slider2W = dw
+      this.slider1W = 100 - dw
+      this.slider1Max = this.slider1Value
+      this.slider2Min = this.slider1Value
+      this.zIndexFlag = 2
+      this.change2 = false
+      this.$apply()
+    }
+
+    methods = {
+      // 开始滑动
+      changeStart (e) {
+        var idx = parseInt(e.currentTarget.dataset.idx)
+        if (this.data.slider1Value !== this.data.slider2Value) {
+          this.change = false
+          this.change2 = false
+        }
+        if (idx === 1) {
+          // dW是当前操作的slider所能占据的最大宽度百分数
+          var dW = (this.data.slider2Value - this.data.min) / this.data.rate
+          console.log(dW)
+          this.slider1W = dW
+          this.slider2W = 100 - dW
+          this.slider1Max = this.data.slider2Value
+          this.slider2Min = this.data.slider2Value
+          this.zIndexFlag = 1
+          this.change = false
+        } else if (idx === 2) {
+          var dw = (this.data.max - this.data.slider1Value) / this.data.rate
+          console.log(dw)
+          this.slider2W = dw
+          this.slider1W = 100 - dw
+          this.slider1Max = this.data.slider1Value
+          this.slider2Min = this.data.slider1Value
+          this.zIndexFlag = 2
+          this.change2 = false
+        }
+      },
+
+      // 正在滑动
+      changing (e) {
+        var idx = parseInt(e.currentTarget.dataset.idx)
+        var value = e.detail.value
+        if (idx === 1) {
+          this.slider1Value = value
+          this.showContent1 = 100 - parseInt((this.data.max - this.data.slider1Value) / this.data.rate)
+        } else if (idx === 2) {
+          this.slider2Value = value
+          this.showContent2 = 100 - parseInt((this.data.max - this.data.slider2Value) / this.data.rate)
+        }
+        // 当两个数字相近时 数字合并 太靠近两边会取一个足够显示的位置 15 85
+        // if (this.data.showContent2 - this.data.showContent1 < this.data.closeTo) {
+        //   let p = this.data.showContent1 + ((this.data.showContent2 - this.data.showContent1) / 2)
+        //   if (p > 85) {
+        //     this.closeToFlag = true
+        //     this.closeToPosition = 85
+        //   } else if (p < 15) {
+        //     this.closeToFlag = true
+        //     this.closeToPosition = 15
+        //   } else {
+        //     this.closeToFlag = true
+        //     this.closeToPosition = p
+        //   }
+        // } else {
+        //   this.closeToFlag = false
+        // }
+        let myEventDetail = {
+          slider1Value: this.slider1Value,
+          slider2Value: this.slider2Value
+        }
+        this.$emit('compontpass', myEventDetail)
+      },
+
+      changed (e) {
+        let idx = parseInt(e.currentTarget.dataset.idx)
+        if (idx === 1) {
+          this.showContent1 = 100 - parseInt((this.data.max - this.data.slider1Value) / this.data.rate)
+        } else if (idx === 2) {
+          this.showContent2 = 100 - parseInt((this.data.max - this.data.slider2Value) / this.data.rate)
+        }
+        if (this.data.slider1Value === this.data.slider2Value && this.data.slider2Value === this.data.max) {
+          console.log(e)
+          this.change = true
+        }
+        if (this.data.slider1Value === this.data.slider2Value && this.data.slider2Value === this.data.min) {
+          this.change2 = true
+        }
+      }
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+  @import "../styles/custom/fn.less";
+  .buyMian-slide, .buyMian-title {
+    width: 96%;
+    margin: 0 auto;
+  }
+
+  .buyMian-title {
+    font-size: 34rpx;
+    color: #212121;
+    line-height: 36rpx;
+    margin-top: 45rpx;
+  }
+
+  .buyMian-slide-title {
+    font-size: 36rpx;
+    color: #ff7500;
+    line-height: 38rpx;
+    margin-top: 25rpx;
+    text-align: center;
+  }
+
+  .buyMian-slide-slide {
+    margin: 10rpx auto 0;
+  }
+
+  /* range */
+
+  .buyMian-slide-contain {
+    width: 100%;
+    display: flex;
+    padding: 20px 0 10px;
+    position: relative;
+    /* left: -25rpx; */
+    /* background: red; */
+  }
+  .slider-left, .slider-right {
+    /* margin-right: -8rpx; */
+    margin: 0;
+  }
+
+  .showContentBox{
+    width: 100%;
+    height: 36rpx;
+    /* background: blue; */
+    position: absolute;
+    top: -6rpx;
+    /* left: 8rpx; */
+  }
+  .show-max-content,.show-min-content{
+    position: absolute;
+    width: 40rpx;
+    margin-left: -20rpx;
+    display: flex;
+    justify-content: center;
+  }
+  .show-max-content{
+    margin-left: -22rpx!important;
+  }
+  .show-min-content text{
+    position: absolute;
+    font-size: 26rpx;
+    font-weight: bold;
+    color: #f33b6c;
+  }
+  .show-max-content text{
+    position: absolute;
+    font-size: 26rpx;
+    font-weight: bold;
+    color: #f33b6c;
+  }
+  .show-merge-content{
+    position: absolute;
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    margin-left: -20%;
+  }
+  .show-merge-content text{
+    position: absolute;
+    font-size: 26rpx;
+    width: 100%;
+    font-weight: bold;
+    color: #f33b6c;
+    display: flex;
+    justify-content: center;
+  }
+  .flex {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    display: box;
+    flex-wrap: wrap;
+  }
+  .flexSb {
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+    -moz-justify-content: space-between;
+    -ms-justify-content: space-between;
+    -o-justify-content: space-between;
+  }
+</style>

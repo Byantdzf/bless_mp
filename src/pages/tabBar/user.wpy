@@ -1,0 +1,39 @@
+<template>
+  <view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class user extends wepy.page {
+  mixins = []
+  config = {
+    navigationBarTitleText: '欢迎使用',
+    enablePullDownRefresh: false,
+    navigationStyle: 'custom'
+  }
+  components = {}
+  data = {
+  }
+
+  computed = {}
+
+  onShow() {
+  }
+
+  onLoad(e) {
+  }
+
+  changeWallpaper() {
+  }
+
+  // ------------------------------------------------------------------------
+
+  methods = {
+  }
+}
+</script>
+
+<style lang="less" scoped>
+</style>

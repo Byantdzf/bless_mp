@@ -1,0 +1,188 @@
+<template>
+  <view class="partyList">
+    <view class="m_plst">
+      <view class="u_plst" wx:for="{{list}}" wx:key="index" @tap="goto('/pages/party/detail?party_id={{item.id}}')">
+        <!-- <view class="m_plst_tt f-fbc">
+          <view class="u_tt_tt bold font_24">#{{item.class.title || ''}}</view>
+          <view class="u_tt_time black_6 font_24">{{item.time}}</view>
+        </view> -->
+        <view class="m_plst_ct">
+          <image class="u_plst_img" src="{{item.pic}}" mode="aspectFill" lazy-load="false"></image>
+          <view class="u_tc">
+            <view class="u_tc_tt f-fc">
+              <!-- <image wx:if="{{item.is_top > 0}}" class="u_tc_tt_img" src="https://images.ufutx.com/202106/15/9f36d9ad0c5d0dea9f5fe6cfd21ec1a9.png" mode="scaleToFill" lazy-load="false"></image> -->
+              <view class="u_tc_tt_tt ellipsis_2 color333 font_32">{{item.title}}</view>
+            </view>
+            <!-- <view class="u_tc_add font_24 color999" wx:if="{{item.is_online == 1}}">线上活动</view>
+            <view class="u_tc_add font_24 color999" wx:else>{{item.address || ' '}}</view> -->
+            <view class="u_tc_bu f-fbc">
+							<view class="font_36 bold" wx:if="{{item.pay_type == 'free'}}" style="color:#F33B6C;">免费</view>
+              <view class="font_36 bold" wx:else style="color:#F33B6C;">￥{{item.price || '0'}}</view>
+            </view>
+          </view>
+        </view>
+		<view class="m_plst_bu f-fbc">
+			<view class="m_bus f-fc">
+				<image class="u_bus_img" src="{{item.merchant.share_icon}}" mode="aspectFill" lazy-load="false"></image>
+				<view class="color999 font_24">{{item.merchant.share_title}}</view>
+			</view>
+			<view class="u_plst_bu end f-fcc font_26 white" wx:if="{{item.is_deadline == 3}}">已结束</view>
+			<view class="u_plst_bu end f-fcc font_26 white" wx:elif="{{item.is_deadline == 2}}">已截止报名</view>
+			<view class="u_plst_bu sign f-fcc font_26 white" wx:elif="{{item.is_deadline == 1}}">已报名</view>
+			<view class="u_plst_bu f-fcc font_26 white" wx:else>立即报名</view>
+		</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class List extends wepy.component {
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      hideMessage: {
+        type: String,
+        default: false
+      }
+    }
+    data = {
+      token: ''
+    }
+    watch = {
+      list() {
+        try {
+          for (let item of this.list) {
+            let timeArr = item.start_time.split(' ', 1)[0].split('-')
+            if(timeArr[2].substr(0, 1) == '0') {
+              timeArr[2] = timeArr[2].slice(1)
+            }
+            item.time = `${timeArr[0]}年${timeArr[1].replace(/0/g, '')}月${timeArr[2]}日`
+            // item.start_time = item.start_time.split(':', 2).join(':')
+            // item.end_time = item.end_time.split(':', 2).join(':')
+            // item.time = `${item.start_time} 至 ${item.end_time}`
+            // if (item.start_time.split(' ')[0] == item.end_time.split(' ')[0]) {
+            //   item.time = item.start_time.split(' ')[0] + ' ' + item.start_time.split(' ')[1] + ' ~ ' + item.end_time.split(' ')[1]
+            //   this.$apply()
+            // }
+            // if (item.start_time.split(' ')[1] == '00:00' && item.end_time.split(' ')[1] == '00:00') {
+            //   item.time = item.start_time.split(' ')[0]
+            //   item.time = item.start_time.split(' ')[0] + ' ~ ' + item.end_time.split(' ')[0]
+            //   this.$apply()
+            // }
+          }
+        } catch (e) {}
+      }
+    }
+    async onLoad(e) {
+      this.token = wx.getStorageSync('token')
+    }
+//    computed = {
+//    }
+    methods = {
+      goto(url) {
+        if(!this.token) {
+          this.$emit('partyListLoginCut')
+          return
+        }
+        wx.navigateTo({url: url})
+      },
+    }
+  }
+</script>
+
+<style lang="less">
+  .partyList {
+    .m_plst {
+      padding: 30rpx;
+      background-color: #F5F5F5;
+      .u_plst {
+        padding: 30rpx 30rpx 20rpx;
+        background-color: white;
+        border-radius: 24rpx;
+        margin-bottom: 30rpx;
+        .m_plst_tt {
+          padding-bottom: 16rpx;
+          border-bottom: 2rpx solid #F5F5F5;
+          .u_tt_tt {
+            color: #F33B6C;
+            line-height: 34rpx;
+          }
+        }
+        .m_plst_ct {
+			display: flex;
+			align-items: stretch;
+          .u_plst_img {
+            width: 284rpx;
+            height: 160rpx;
+            border-radius: 16rpx;
+            margin-right: 24rpx;
+          }
+          .u_tc {
+            height: 146rpx;
+            flex: 1;
+			height: auto;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+            .u_tc_tt {
+              .u_tc_tt_img {
+                width: 58rpx;
+                height: 34rpx;
+                margin-right: 10rpx;
+              }
+              .u_tc_tt_tt {
+                line-height: 44rpx;
+                width: 300rpx;
+              }
+            }
+            .u_tc_add {
+              width: 370rpx;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+            .u_tc_bu {
+              
+            }
+          }
+        }
+	  .m_plst_bu {
+		  padding-top: 10rpx;
+		  .m_bus {
+			  .u_bus_img {
+				  width: 40rpx;
+				  height: 40rpx;
+				  border-radius: 50%;
+				  margin-right: 8rpx;
+			  }
+		  }
+		  .u_plst_bu {
+			padding: 15rpx 22rpx;
+			min-width: 160rpx;
+			border-radius: 60rpx;
+			line-height: 26rpx;
+			background-image: linear-gradient(to left,#FF85A5,#FF5380);
+		  }
+		  .u_plst_bu.sign {
+			background-image: none;
+			background-color: #FFF4F7;
+			color: #F33B6C;
+		  }
+		  .u_plst_bu.end {
+			background-image: none;
+			background-color: #F5F5F5;
+			color: #999999;
+		  }
+	  }
+      }
+    }
+  }
+</style>

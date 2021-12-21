@@ -1,0 +1,43 @@
+<wxs src="./proxy.wxs" module="proxywxs" />
+<view class="share-box" style='width:{{boxWidth/2}}px;height:{{(boxHeight)/2}}px;background:url("{{canvasData.url}}") bottom no-repeat; background-size: cover;margin-bottom: 56px'>
+	<view class="share-content">
+	    <view class="draw-item" wx:for="{{drawList}}" wx:key="{{index}}">
+	      <block wx:if="{{item.type == 'image'}}">
+	        <image src="{{item.url}}" style="left: {{item.left/2}}px; top: {{(item.top)/2}}px; width: {{item.width/2}}px; height: {{item.height/2}}px; border-radius:{{item.shape == 'square'?0:'50%'}}"></image>
+	      </block>
+	      <block wx:if="{{item.type == 'text'}}">
+	        <view class="text" style="left: {{item.left/2}}px; top: {{(item.top-30)/2}}px; font-size: {{item.fontSize/2}}px; color: {{item.color}}; line-height: {{item.lineHeight/2}}px; text-align: {{item.textAlign}}; font-weight: {{item.weight}}; width:{{item.maxWidth/2}}px; overflow: hidden;-webkit-line-clamp: {{item.maxLineNum}}">
+	          {{item.content}}
+	        </view>
+	      </block>
+	      <!-- <view class="top-item">
+	        <view class="info">
+	          <image src="{{proxywxs.userAvatar(userInfo.avatarUrl)}}" />
+	          <text class="username">{{userInfo.userName || '白山羊'}}</text>
+	          <text class="tips">分享了一张图片</text>
+	          <text class="album-name">{{albumInfo.albumName || '标题名称'}}</text>
+	        </view>
+	        <view class="qrcode">
+	          <image src="{{qrcodeSrc}}" />
+	          <text>长按识别小程序码浏览照片</text>
+	        </view>
+	      </view> -->
+	      
+	    </view>  
+	    <view class="share-btn">
+	      <button catchtap="saveImage">{{canvasData.btnText}}</button>
+	    </view>
+		<view class="m_del_icon">
+				 <image class="u_del_icon" src="https://image.fulllinkai.com/202112/01/8cbc03fee18931f135d04dc934c5ad1c.png" mode="aspectFill" bindtap="deleShow"></image>
+		</view>
+	</view>
+	 <canvas canvas-id='image' style='position:absolute;top:-10000rpx;width:{{canvasData.width}}px;height:{{canvasData.height}}px;'></canvas>
+  <!-- <view class="share-content">
+	<view class="share-btn">
+	   <button catchtap="saveImage">{{canvasData.btnText}}</button>
+	 </view>
+	 <view class="m_del_icon">
+		 <image class="u_del_icon" src="https://image.fulllinkai.com/202112/01/8cbc03fee18931f135d04dc934c5ad1c.png" mode="aspectFill" bindtap="deleShow"></image>
+	 </view>
+ </view> -->
+</view>

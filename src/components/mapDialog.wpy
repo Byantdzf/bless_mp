@@ -1,0 +1,140 @@
+<template>
+    <view class="mapDialog">
+        <view class="cu-modal {{mapShow?'show':''}}">
+            <view class="cu-dialog">
+                <view class="m_mapDialog f-fcc f-fdc color333">
+                    <view class="m_dia_tt">相遇地图</view>
+                    <view class="m_dia_stt font_24">只为遇见更好的你</view>
+                    <view class="m_dia_ct">福恋相遇地图功能需要获取您的位置，不授权将无法查看地图哦！</view>
+                    <button open-type="openSetting" @opensetting="openSetting_address" class="m_dia_bt f-fcc">立即授权</button>
+                    <image class="m_dia_img" mode="aspectFit" lazy-load src="https://images.ufutx.com/202105/26/07f9aa8d72eac33089b9efd1f64829c9.png"></image>
+                    <!-- <view class="m_off" catchtap="onModal">
+                        <view class="font_family icon-off white font_48"></view>
+                    </view> -->
+                </view>
+                <view></view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import {service} from '../config.js'
+import base from '../mixins/base'
+import http from '../mixins/http'
+export default class mapDialog extends wepy.page{
+    mixins = [base,http]
+    props = {
+      mapShow: {
+        type: Boolean,
+        default: false
+      }
+    }
+    hideModal() {
+        this.mapShow = false
+        this.$emit('mapDialogCut', {
+            mapShow: false
+        })
+        this.$apply()
+    }
+    methods = {
+        onModal() {
+            this.hideModal()
+        },
+        // 授权地理位置
+        openSetting_address(e) {
+            let that = this
+            this.$apply()
+            if (e.detail.authSetting['scope.userLocation']) {
+                // 如果打开了地理位置，就会为true
+                wepy.getLocation({
+                    altitude: true,
+                    type: 'gcj02',
+                    success: function (res) {
+                        that.hideModal()
+                        that.$Toast_success('授权成功!')
+                        wx.setStorageSync('myLong', res.longitude)
+                        wx.setStorageSync('myLat', res.latitude)
+                        that.$emit('mapUpdataMapCut',res)
+                        that.$apply()
+                    },
+                    fail: function () {
+                    },
+                    complete: function () {
+                    }
+                })
+            }
+        },
+    }
+}
+</script>
+<style lang="less">
+.mapDialog {
+    .underline {
+        text-decoration: underline;
+    }
+    .cu-dialog {
+        width: 600rpx !important;
+        height: 660rpx !important;
+        border-radius: 24rpx !important;
+        overflow: visible !important;
+        padding: 84rpx 40rpx 96rpx !important;
+        background-image: url("https://images.ufutx.com/202105/26/f3cde2f68494e6f36ef5c8a795f4d3f8.png") !important;
+        background-repeat: no-repeat;
+        background-size: cover;
+        .m_mapDialog {
+            .m_dia_tt {
+                font-size: 52rpx;
+                font-family: PingFangSC-Regular, PingFang SC;
+                color: #424654;
+                line-height: 74rpx;
+                padding-bottom: 24rpx;
+            }
+            .m_dia_stt {
+                font-size: 24rpx;
+                font-weight: 500;
+                color: #B2B2B4;
+                line-height: 34rpx;
+                padding-bottom: 82rpx;
+            }
+            .m_dia_ct {
+                font-size: 30rpx;
+                font-family: PingFangSC-Medium, PingFang SC;
+                font-weight: 500;
+                color: #333333;
+                line-height: 48rpx;
+                padding-bottom: 90rpx;
+            }
+            .m_dia_bt {
+                width: 400rpx;
+                height: 80rpx;
+                background: linear-gradient(270deg, #FF85A5 0%, #FF5380 100%);
+                border-radius: 50rpx;
+                font-size: 36rpx;
+                font-family: PingFangSC-Medium, PingFang SC;
+                font-weight: 500 !important;
+                color: #FFFFFF;
+                line-height: 50rpx;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .m_dia_img {
+                width: 348rpx;
+                height: 368rpx;
+                position: absolute;
+                top: -112rpx;
+                left: -78rpx;
+            }
+        }
+        .m_off {
+            position: absolute;
+            bottom: -140rpx;
+            transform: translateX(-50%);
+            left: 50%;
+            padding: 30rpx;
+            .icon-off {
+            }
+        }
+    }
+}
+</style>

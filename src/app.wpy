@@ -1,0 +1,536 @@
+<script>
+import wepy from "wepy";
+import "wepy-async-function";
+import { service } from "./config.js";
+import UpdateManager from "./mixins/UpdateManager";
+// import NIM from "./vendors/NIM_Web_NIM_miniapp_v8.3.5";
+import http from "./mixins/http";
+var ga = require("./ga.js");
+var GoogleAnalytics = ga.GoogleAnalytics;
+var HitBuilders = ga.HitBuilders;
+
+export default class extends wepy.app {
+  //   lifecycle: {
+  //     // 定义要添加生命周期到 app 或者 page 或者 component
+  //     // 值类型为：String 或者 Array 或者 Function
+  //     // 值为需要添加的生命周期一个或者多个函数名，或者返回生命周期的函数数组的方法
+  //     app: 'onSomeTime', // 给 App 添加一个 `onSomeTime` 生命周期函数
+  //     page: ['onTime1', 'onTime2'], // 给 Page 添加两个生命周期函数
+  //     component: function (lifecycles) {  // 删除 Component 最后一个生命周期函数
+  //     lifecycles.pop();
+  //     retrun lifecycles;
+  //   }
+  // }
+
+  config = {
+    requiredBackgroundModes: ["audio", "location"],
+    pages: [ "pages/tabBar/home", "pages/tabBar/user"],
+    permission: {
+      // 地理位置获取
+      "scope.userLocation": {
+        desc: "你的位置信息将用于小程序位置接口的效果展示",
+      },
+    },
+		// 分包
+    subPackages: [
+			// 基本信息
+			{
+			  'root': 'pages/users',
+			  'pages': [
+			    'myNews',
+					'chat'
+			  ]
+			}
+    ],
+    window: {
+      navigationBarTitleText: "祝福",
+      navigationBarTextStyle: "black",
+      navigationBarBackgroundColor: "#fff",
+      // navigationStyle: 'custom',
+      //        backgroundColorTop: '#f43934', // ios
+      //        backgroundColorBottom: '#f43934', // ios
+      backgroundColor: "#eaeaea",
+      backgroundTextStyle: "light",
+      enablePullDownRefresh: true,
+    },
+    tabBar: {
+      color: "#666666",
+      selectedColor: "#F33B6C",
+      backgroundColor: "#ffffff",
+      borderStyle: "black",
+      list: [
+        {
+          pagePath: "pages/tabBar/home",
+          selectedIconPath: "./images/tabbar/homeActive.png",
+          iconPath: "./images/tabbar/home.png",
+          text: "推荐",
+        },
+        {
+          pagePath: "pages/tabBar/user",
+          selectedIconPath: "./images/tabbar/myActive.png",
+          iconPath: "./images/tabbar/my.png",
+          text: "我的",
+        },
+      ],
+    },
+    networkTimeout: {
+      request: 10000,
+      downloadFile: 10000,
+    },
+    debug: true,
+    navigateToMiniProgramAppIdList: [
+      // 跳转小程序
+      // 'wxd2920948e02c5c76',
+      // 'wxa43b4cb4f447e846',
+      // 'wx2fcdf7fdab3dcca7'
+    ],
+  };
+
+  globalData = {
+    userInfo: null,
+    tourist: null,
+    cart: null,
+    tracker: null,
+    windowWidth: 0,
+    windowHeight: 0,
+    nim: null,
+    message: [],
+    statusBarHeight: null,
+    frozen_state: null,
+  };
+
+  constructor() {
+    super();
+    this.use("requestfix");
+  }
+
+  onLaunch(options) {
+    this.login();
+		
+  }
+  onShow(options) {}
+
+  openshareTicket(options) {}
+
+  login() {
+    return new Promise((resolve, reject) => {
+      let that = this;
+      // if (wx.getStorageSync('token')) {
+      //   this.token = wx.getStorageSync('token')
+      //   this.$apply()
+      //   wx.hideLoading()
+      //   return
+      // }
+      // wx.showLoading({
+      //   title: "加载中",
+      //   mask: true,
+      // });
+      
+      wepy.login({
+        success: (res) => {
+          console.log(res, 'login--------------')
+          wepy.getUserInfo({
+            success: (info) => {
+              console.log(info, 'info--------------------')
+              wx.request({
+                url: service.login,
+                data: {
+                  code: res.code,
+                  iv: info.iv,
+                  encryptedData: info.encryptedData
+                },
+                // header: {
+                //   'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+                // },
+                method: "get",
+                success: function (res) {
+                  
+                },
+                fail: function (res) {
+                  that.globalData.userInfo = "0";
+                  wx.switchTab({ url: "/pages/tabBar/home" });
+                },
+              });
+            }
+          })
+        },
+        fail: (res) => {
+          console.log("wepy.login.fail:", res);
+        },
+      });
+    });
+  }
+
+  pageLogin() {
+    return new Promise((resolve, reject) => {
+      let that = this;
+      // if (wx.getStorageSync('token')) {
+      //   this.token = wx.getStorageSync('token')
+      //   this.$apply()
+      //   wx.hideLoading()
+      //   return
+      // }
+      wx.showLoading({
+        title: "加载中",
+        mask: true,
+      });
+      wepy.login({
+        success: (res) => {
+          wx.request({
+            url: service.login,
+            data: { code: res.code },
+            // header: {
+            //   'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+            // },
+            method: "POST",
+            success: function (res) {
+              let data = res.data.data;
+              wx.removeStorageSync("blacklistCode");
+              if (res.data.code == 6) {
+                wx.redirectTo({ url: "/pages/users/blacklistDefault" });
+                return;
+              }
+              if (!data.token) {
+                wx.removeStorage("token");
+                wx.removeStorage("userInfo");
+                resolve(data);
+                return;
+              }
+              if (data.user.wyy_user) {
+                wx.setStorageSync("accid", data.user.wyy_user.accid);
+                wx.setStorageSync("wytoken", data.user.wyy_user.token);
+                that.globalData.nim = NIM.getInstance({
+                  debug: false,
+                  appKey: "9bc3ed1f7d8197b6b69f8f5b742824b1",
+                  account: data.user.wyy_user.accid,
+                  token: data.user.wyy_user.token,
+                  onconnect: that.onConnect,
+                  // onerror: that.onError,
+                  onwillreconnect: that.onWillReconnect,
+                  onroamingmsgs: that.onRoamingMsgs,
+                  onofflinemsgs: that.onOfflineMsgs,
+                  // 会话
+                  onmsg: that.onMsg,
+                  onsessions: that.onSessions,
+                  onupdatesession: that.onUpdateSession,
+                  // 未读数开关
+                  shouldCountNotifyUnread: that.shouldCountNotifyUnread,
+                });
+              }
+              that.token = data.token;
+              wx.setStorageSync("token", data.token);
+              wx.setStorageSync("openid", data.openid);
+              wx.setStorageSync("temp_member", data.user.temp_member);
+              let userInfo = {
+                nickName: data.user.nickname,
+                avatarUrl: data.user.avatar,
+                type: data.user.type,
+                id: data.user.id,
+                is_subscribe: data.user.is_subscribe,
+                rank_id: data.user.rank_id,
+              };
+              that.globalData.userInfo = userInfo;
+              wx.setStorageSync("userInfo", userInfo);
+              wx.setStorageSync("user_id", data.user.id);
+              wx.setStorageSync("type", data.user.type);
+              if (res.data.code == 7) {
+                that.globalData.frozen_state = data.frozen_state;
+                wx.redirectTo({ url: "/pages/users/freeze" });
+              }
+              resolve(data);
+              if (data.userinfo_perfect == 1) {
+                wx.removeStorageSync("basicDataCode");
+              }
+              if (data.user.hidden_profile != "NONE") {
+                wx.redirectTo({ url: "/pages/users/logoutDefault" });
+              }
+            },
+          });
+        },
+        fail: (res) => {
+          console.log("wepy.login.fail:", res);
+        },
+      });
+    });
+  }
+
+  onPullDownRefresh() {}
+
+  onConnect() {
+    console.log("连接成功");
+  }
+  /**
+   * 连接出错
+   */
+  // onError(error) {
+  //   console.log('连接出错', error)
+  //   this.globalData.nim.disconnect()
+  //   this.globalData.nim.connect()
+  // }
+  onWillReconnect(obj) {
+    // 此时说明 `SDK` 已经断开连接, 请开发者在界面上提示用户连接已断开, 而且正在重新建立连接
+    console.log("即将重连");
+
+    // console.log(obj.retryCount);
+    // console.log(obj.duration);
+  }
+
+  onRoamingMsgs(obj) {
+    console.log("收到漫游消息", obj);
+    // pushMsg(obj.msgs);
+  }
+  onOfflineMsgs(obj) {
+    console.log("收到离线消息", obj);
+    // pushMsg(obj.msgs);
+  }
+  onMsg(msg) {
+    var pages = getCurrentPages();
+    var currentPage = pages[pages.length - 1];
+    if (msg.scene == "team") {
+      return false;
+    }
+    console.log("收到消息", msg.scene, msg.type, msg);
+    if (
+      currentPage.route == "pages/tabBar/home" ||
+      currentPage.route == "pages/tabBar/dynamic" ||
+      currentPage.route == "pages/tabBar/news" ||
+      currentPage.route == "pages/tabBar/user"
+    ) {
+      currentPage.getNewCount();
+    }
+    if (
+      (currentPage.route == "pages/home/chitchat" &&
+        msg.from == currentPage.data.other_userId) ||
+      msg.from == currentPage.data.other_myuserId
+    ) {
+      currentPage.reception(msg);
+    } else {
+      console.log("刷新最近会话");
+      setTimeout(() => {
+        currentPage.onShow();
+      }, 500);
+    }
+  }
+
+  /**
+   * 会话更新：收到消息、发送消息、设置当前会话、重置会话未读数 触发
+   * {id:'p2p-zys2',lastMsg:{},scene,to,unread,updateTime}
+   * {id:'team-1389946935',lastMsg:{attach:{accounts,team},type,users},scene,to,from,type,unread,updateTime}
+   */
+  onUpdateSession(session) {
+    if (session.scene == "team") {
+      return false;
+    } else {
+      console.log("更新会话: ", session);
+    }
+
+    // try {
+    //     store.dispatch({
+    //       type: 'UnreadInfo_update',
+    //       payload: session
+    //     })
+    //   } catch(error) {
+    // }
+  }
+
+  /** 会话
+   * [ {id:"p2p-liuxuanlin",lastMsg:{from:'wujie',text:'222',to:"liuxuanlin"}} ]
+   */
+  onSessions(sessions) {
+    console.log("onSessions: ", sessions);
+    // store.dispatch({
+    //   type: 'SessionUnreadInfo_update',
+    //   payload: sessions
+    // })
+  }
+
+  /**
+   *  群消息通知是否加入未读数开关如果返回true，则计入未读数，否则不计入
+   */
+  shouldCountNotifyUnread(msg) {
+    // console.log(orderCounter++, 'shouldCountNotifyUnread')
+    if (msg.scene == "team") {
+      return false;
+    } else {
+      console.log("群消息加入未读" + msg);
+    }
+
+    return true;
+  }
+
+  // startWebSocket() { // 实时通信
+  //   let that = this
+  //   socket.connect((status, ws) => {
+  //     let Authorization = 'Bearer ' + wx.getStorageSync('token')
+  //     let userId = wx.getStorageSync('user_id')
+  //     let data = {
+  //       'channel': 'private-users.' + userId + '.notices',
+  //       'auth': {'headers': {'Authorization': Authorization}}
+  //     } // 需要发送数据
+  //     if (status) {
+  //       ws.emit('subscribe', data, res => {
+  //       })
+  //     }
+  //   })
+  //   wx.onSocketOpen(function (res) {
+  //     console.log('WebSocket连接已打开！')
+  //   })
+  //   wx.onSocketError(function (res) {
+  //     console.log('WebSocket连接打开失败，请检查！')
+  //   })
+  //   wx.onSocketClose(function (res) {
+  //     console.log('WebSocket 已关闭！')
+  //   })
+  //   wx.onSocketMessage(function (res) {
+  //     if (res.data.length > 4) {
+  //       let reg = /^[0-9]{1,2}/,
+  //         str2 = res.data.replace(reg, '')
+  //       if (JSON.parse(str2)[2]) {
+  //         that.socketNews(JSON.parse(str2)[2])
+  //       }
+  //     }
+  //   })
+  // }
+
+  // socketNews(data) {
+  //   if (JSON.stringify(data) != '{}' && data.new_notice_count + data.new_message_count != 0) {
+  //     let {new_message_count} = data
+  //     if (new_message_count > 0) {
+  //       wx.setTabBarBadge({
+  //         index: 2,
+  //         text: `${new_message_count}`
+  //       })
+  //     } else {
+  //       wx.removeTabBarBadge({
+  //         index: 2
+  //       })
+  //     }
+  //   }
+  //   wx.showToast({
+  //     title: '有人给你发消息啦！',
+  //     icon: 'none',
+  //     duration: 1800
+  //   })
+  //   this.vibrateLong()
+  // }
+
+  // 手机震动
+  vibrateLong() {
+    wx.vibrateLong({
+      success: () => {
+        console.log("0000");
+      },
+    });
+  }
+
+  // 获取状态栏的高度
+  getSystemInfo() {
+    let that = this;
+    wx.getSystemInfo({
+      success: function (res) {
+        that.globalData.statusBarHeight = res.statusBarHeight;
+      },
+    });
+  }
+
+  onShareAppMessage(title) {
+    return {
+      title: title,
+      success: function (res) {
+        // 转发成功
+        console.log(res.errMsg);
+      },
+      fail: function (res) {
+        // 转发失败
+        console.log(res.errMsg);
+      },
+    };
+  }
+
+  /* ============= 工具方法（app没法用mixins，就再写一遍了） ============= */
+  isObject(item) {
+    return typeof item === "object" && !this.isArray(item);
+  }
+
+  isArray(item) {
+    return Object.prototype.toString.apply(item) === "[object Array]";
+  }
+
+  isUndefined(item) {
+    return typeof item === "undefined";
+  }
+
+  // Google analytics
+  getTracker(name, text) {
+    let id = wx.getStorageSync("user_id");
+    if (!this.globalData.tracker) {
+      // 初始化GoogleAnalytics Tracker
+      this.globalData.tracker = GoogleAnalytics.getInstance(this)
+        .setAppName("福恋")
+        .setAppVersion("v5.2.61")
+        .newTracker("UA-98664364-7");
+    }
+    var t = this.globalData.tracker;
+    t.setScreenName(text);
+    t.send(new HitBuilders.ScreenViewBuilder().build());
+    t.send(
+      new HitBuilders.ExceptionBuilder()
+        .setDescription(wx.getStorageSync("message"))
+        .setFatal(false)
+        .build()
+    );
+    if (id) {
+      t.set("userId", id);
+    }
+  }
+
+  getEvent(name, text, label) {
+    console.log(name);
+    let id = wx.getStorageSync("user_id");
+    let t = this.globalData.tracker;
+    t.send(
+      new HitBuilders.EventBuilder()
+        .setCategory(name)
+        .setAction(text)
+        .setLabel(label) // 可选
+        .setValue(1)
+        .build()
+    ); // 可选
+    console.log("t", t);
+  }
+
+  /* ========================= 更新缓存信息 ======================== */
+
+  $updateGlobalData(name, obj) {
+    // 校验: globalData
+    if (!this.globalData) return;
+    // 校验: 操作字段
+    if (typeof name !== "string" || name === "") return {};
+    // 取已有信息
+    const info = this.globalData[name] || {};
+    // 更新缓存
+    if (obj && this.isObject(obj)) {
+      // Object合并第一层
+      this.globalData[name] = Object.assign({}, info, obj);
+    } else if (!this.isUndefined(obj)) {
+      // 其他非undefined数据直接覆盖
+      this.globalData[name] = obj;
+    }
+    this.$apply && this.$apply();
+    console.info(
+      `[${obj ? "UPDATE" : "GET"} GlobalData ${name}]:`,
+      this.globalData[name]
+    );
+    return this.globalData[name];
+  }
+}
+</script>
+
+<style lang="less">
+@import "./styles/weui/index.less";
+@import "./styles/custom/index.less";
+@import "./styles/custom/theme.less";
+@import "./colorui/icon.wxss";
+@import "./colorui/main.wxss";
+@import "./colorui/animation.wxss";
+</style>

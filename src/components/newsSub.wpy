@@ -1,0 +1,997 @@
+<template>
+<view style="height:100%;" catchtap="handleConceal">
+  <block wx:if="{{marriedNewsShow}}">
+    <view class="focus_on_box" style="top: {{CustomBar}}px;" hidden="{{focusOnhidden}}">
+      <view class="focus_on_cancel flo_l" @tap="hideFocusOn">
+        <image class="cancel" src="https://images.ufutx.com/202101/15/743092150d540bec32ab259dfbc7028e.png" mode="widthFix"></image>
+      </view>
+      <span class="font_26 flo_l">关注公众号，接收聊天消息提醒～</span>
+      <button class="cu-btn round focus_on_button flo_r" open-type="contact" send-message-path="" send-message-title="获取服务号二维码" send-message-img="https://images.ufutx.com/202101/15/d913c1a1159f1f86fd136fbc79a2a8e4.png" show-message-card="true">立即关注</button>
+    </view>
+    <view style="height: 80rpx;" hidden="{{focusOnhidden}}"></view>
+  </block>
+  <view class="cu-list menu-avatar">
+    <!-- 记录 -->
+    <view class="font_26 color-666 _approve" wx:if="{{marriedNewsShow}}" style="padding: 0 20rpx;margin-bottom: 20rpx;">
+      <block wx:for="{{listV2}}" wx:key="index">
+        <view class="_item text-center flo_l" style="padding:30rpx 0 20rpx;position:relative;" @tap="gotos({{index}}, {{item.path}})">
+          <image src="{{item.icon}}" class="icon" mode="aspectFit">
+            <view class="num" wx:if="{{item.cont}}">{{item.cont}}</view>
+          </image>
+          <view class="color-666 font_24 texts" style="margin-top: -20rpx;">{{item.title}}</view>
+        </view>
+      </block>
+    </view>
+    <!-- <view class="negativeEffect" catchtap="tofriendRequest" wx:if="{{marriedNewsShow}}">
+      <view class="mes">验证消息</view>
+      <view class="news">
+        <view class="news-mes" wx:if="{{friend_count}}">{{friend_count + "条新消息"}}</view>
+        <view class="news-red" wx:if="{{friend_count}}"></view>
+        <image style="width:12rpx;height:24rpx;" src="https://images.ufutx.com/202103/11/d491373f21f5a0c5810f2167f7c961f0.png"></image>
+      </view>
+    </view> -->
+    <view class="cu-item animation-slide-right" wx:if="{{token}}" style="animation-delay: 0.{{index}}s;" wx:for="{{listV3}}" wx:key="index" @tap="gotos({{index}}, {{item.path}})">
+      <view class="cu-avatar round lg" style="background-image:url({{item.icon}});background-size: cover;background-color: white;width: 120rpx;height: 120rpx;margin-left: -12rpx;margin-top: 4rpx"></view>
+      <view class="content">
+        <view class="text-grey">
+          <text class="text-cut color-333 name">{{item.title}}</text>
+        </view>
+        <view class="text-gray text-sm flex">
+          <text class="text-cut color-666 text">{{item.message.content || '暂无消息'}}</text>
+        </view>
+      </view>
+      <view class="action">
+        <view class="text-grey text-xs">{{item.message.last_time}}</view>
+        <view class="cu-tag round bg-red sm" wx:if="{{item.message.new_count || item.message.count}}">{{item.message.new_count || item.message.count}}</view>
+      </view>
+    </view>
+    <view class="container  {{!marriedNewsShow?'map_margon':''}}">
+      <view class="touch-item {{item.isTouchMove ? 'touch-move-active' : ''}}" data-index="{{index}}" bindtouchstart="touchstart" bindtouchmove="touchmove" wx:for="{{list}}" wx:key="index" @tap="goto({{index}}, {{item.path}})">
+        <view class="content">
+          <view catchtap="toUserDetail"  data-id="{{item.message.id}}" data-type="{{item.message.type}}" class="cu-avatar round lg flo_l" style="background-image:url({{item.icon}});"></view>
+          <view class="userMessageBox flo_l">
+            <view class="font_30 color-333 name ellipsis_1">{{item.title}}</view>
+            <view class="userMessage font_24 color-666 ellipsis_1">{{item.message.content}}</view>
+          </view>
+          <view class="unreadBox color-999">
+            <view class="lastTime font_22">{{item.message.last_time}}</view>
+            <view class="unreadNum" wx:if="{{item.message.new_count && item.message.new_count <= 99}}">{{item.message.new_count}}</view>
+            <view class="unreadNum_1" wx:if="{{item.message.new_count && item.message.new_count > 99}}">{{item.message.new_count}}</view>
+          </view>
+        </view>
+        <view class="del" @tap.stop="deleteFn({{item.message.magId}},{{index}})" data-index="{{index}}">删除</view>
+      </view>
+    </view>
+    <view class="m_nli f-fcc f-fdc" wx:if="{{!token}}">
+      <view class="font_40 bold">你还未登录</view>
+      <view class="n_bt f-fcc" bindtap="onSignIn">
+        <view class="font_32 white" style="font-weight: 600;">微信登录</view>
+      </view>
+      <view class="font_24 color999">登录后即可体验完整功能</view>
+    </view>
+    <button wx:if="{{token}}"  class="btn service" hover-class="btn_active" open-type="contact" bindcontact="handleContact" send-message-title="获取服务号二维码" send-message-img="https://images.ufutx.com/202101/15/d913c1a1159f1f86fd136fbc79a2a8e4.png" show-message-card="true">
+      <image src="https://images.ufutx.com/202004/08/404ba11c54ed1539e55c4b3e123a443a.png" mode="aspectFit"></image>
+    </button>
+  </view>
+</view>
+  <block wx:if="{{loading}}">
+    <view class="weui-loadmore">
+      <view class="weui-loading"></view>
+      <view class="weui-loadmore__tips" style="background: white">正在加载</view>
+    </view>
+  </block>
+  <loginTips :tokenShow.sync="tokenShow" @loginCut.user="loginCut"></loginTips>
+  <loginDialog :loginShow.sync="loginShow" @loginDialogCut.user="loginDialogCut" @loginDialogShow.user="loginDialogShow" @clickLogin.user="clickLogin" @mobileSuccess.user="mobileSuccess"></loginDialog>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  import user from '../mixins/user'
+  import Loading from './loading'
+  import {
+    service
+  } from '../config.js'
+  import cuCustom from './cu-custom'
+  import loginTips from './loginTips'
+  import loginDialog from './loginDialog'
+  // import NIM from '../vendors/NIM_Web_NIM_miniapp_v8.3.5'
+  const app = wepy.$instance
+  export default class news extends wepy.page {
+    mixins = [base, http, user]
+    config = {
+      navigationBarTitleText: '我的消息',
+      enablePullDownRefresh: true,
+      navigationBarBackgroundColor: '#fff',
+    //   navigationStyle: 'custom'
+    }
+    components = {
+      Loading,
+      cuCustom,
+      loginTips,
+      loginDialog
+    }
+    props = {
+      marriedNewsShow: {
+        type: Boolean,
+        default: true
+      },
+      page: {
+        type: Number,
+        default: 1
+      },
+    }
+    watch = {
+      page(e) {
+        
+      }
+    }
+    data = {
+      startX: 0, // 开始坐标
+      startY: 0,
+      focusOnhidden: true,
+      init: false,
+      loading: false,
+      noMore: false,
+      type: 0,
+      emotionType: '',
+      list: [],
+      slideButtons: [{text: '删除', type: 'warn'}],
+      listV2: [{
+        icon: 'https://images.ufutx.com/202106/19/a2a7445a8b70694056dd7795ef5ecc4e.png',
+        title: '系统通知',
+        message: {},
+        path: '/pages/users/myNews',
+        count: ''
+      },
+      {
+        icon: 'https://images.ufutx.com/202106/19/1d8c26aa4e48a965bab9eb000db8d054.png',
+        title: '好友申请',
+        message: {},
+        path: '/pages/users/friendRequest',
+        count: ''
+      },
+      {
+        icon: 'https://images.ufutx.com/202106/19/1715406efd38dfe258b23f632b9c16eb.png',
+        title: '访客/粉丝',
+        message: {},
+        // path: '/pages/users/friendlist?type=fans',
+        path: '/pages/users/visitorFriendlist?type=fans',
+        count: ''
+      },
+      {
+        icon: 'https://images.ufutx.com/202106/19/9571a0bdddf66ea097eecd5a4a601436.png',
+        title: '我看过谁',
+        message: {},
+        path: '/pages/users/review?type=review&title=我看过谁',
+        count: ''
+      },
+      ],
+      listV3: [{
+        icon: 'https://images.ufutx.com/202012/16/af93d3d25b4ab6a6ceb72766533caa7e.png',
+        title: '小恋助手',
+        message: {},
+        path: `/pages/home/chitchat?id=1&name=小恋助手&type=chat`
+      }],
+      typeList: [],
+      ListTouchStart: '',
+      ListTouchDirection: '',
+      token: wx.getStorageSync('token'),
+      modalName: '',
+      friend_count: '',
+      cont: '',
+      index:'',
+      tokenShow: false,
+      loginShow: false,
+      CustomBar: wepy.$instance.globalData.CustomBar,
+      follow_count: 0
+    }
+    onLoad(e) {
+      this.CustomBar = wepy.$instance.globalData.CustomBar
+      let token = wx.getStorageSync('token')
+      this.emotionType = wx.getStorageSync('type')
+      this.token =token
+      if (!token) {
+        // this.modalName = 'Modal'
+        // wx.redirectTo({url: '/pages/tabBar/welcome'})
+        return
+      }
+      this.initUserData()
+    }
+    onShows() {
+      app.globalData.nim.connect()
+      this.token = wx.getStorageSync('token')
+      this.emotionType = wx.getStorageSync('type')
+    }
+    initUserData() {
+      let data = {
+        type: 'single'
+      }
+      this.$get({
+        url: `${service.user}/v3`,
+        data
+      }, {
+        success: ({
+          code,
+          data
+        }) => {
+          if (data.is_subscribe != 1) {
+            this.focusOnhidden = false
+          }
+        }
+      })
+    }
+    onShareAppMessage(res) {
+      let that = this
+      let openid = wx.getStorageSync('openid')
+      let fromUserID = wx.getStorageSync('user_id')
+      let url = `/pages/tabBar/welcome?from_openid=${openid}&share_user_id=${that.id}&from_user_id=${fromUserID}`
+      return {
+        title: '向你推荐《福恋》',
+        path: url,
+        imageUrl: 'https://images.ufutx.com/202004/29/baac955e5878e0cb03c17eef0c92f473.jpeg',
+        success: function(res) {
+          wx.showToast({
+            title: '转发成功',
+            icon: 'success',
+            duration: 1500
+          })
+          var shareTickets = res.shareTickets
+          if (shareTickets.length == 0) {
+            return false
+          }
+        },
+        fail: function(res) {
+          // 转发失败
+        }
+      }
+    }
+    onPullDownRefresh() {
+      if (this.token) {
+        this.page = 1
+        // this.list = []
+        this.modalName = null
+        this.initPageData()
+        this.$apply()
+      }else {
+        wx.stopPullDownRefresh()
+      }
+    }
+    onReachBottom() {
+      if (this.token) {
+        this.modalName = null
+        this.initPageData()
+      }
+    }
+    getNewCount() {
+      this.$get({
+        url: `${service.host}/new/message/count`
+      }, {
+        success: ({
+          code,
+          data
+        }) => {
+          let {
+            new_count
+          } = data
+          if (new_count > 0) {
+            wx.setTabBarBadge({
+              index: 3,
+              text: `${new_count}`
+            })
+          } else {
+            wx.removeTabBarBadge({
+              index: 3
+            })
+          }
+        }
+      })
+    }
+    // 初始化页面数据
+    initPageData(e) {
+      this.page = e.page || this.page
+      if (this.type == 1) {
+        this.getLibraries()
+        return
+      }
+      this.$get({
+        url: `${service.host}/message/linkmen/v2`,
+        data: {
+          page: this.page
+        }
+      }, {
+        success: ({
+          code,
+          data
+        }) => {
+          this.$emit('newsSubCut')
+          this.init = true
+          this.listV2[2].cont = data.follow_count + data.preview_count
+          this.friend_count = data.friend_count
+          this.listV2[1].cont = data.friend_count
+          this.follow_count = data.follow_count
+          this.listV2[0].cont = data.system_count
+          this.cont = data.follow_count + data.friend_count + data.preview_count + data.system_count
+          let {
+            chat,
+            linkmen,
+            notice,
+            visit
+          } = data
+          this.listV2.forEach((item, index) => {
+            switch (index) {
+              case 0:
+                item.message = visit
+                break
+              case 1:
+                item.message = notice
+                break
+              case 2:
+                item.message = chat
+                break
+            }
+          })
+          this.listV2 = [...this.listV2]
+          this.modalName = null
+          if (!linkmen.data.length) {
+            this.noMore = true
+            this.list = [...this.list]
+            this.modalName = null
+            this.$apply()
+            return
+          }
+          if (linkmen.data.length == 0 && linkmen.last_page == 1) {
+            this.noMore = true
+            this.loading = false
+            return
+          }
+          if (data.current_page > data.last_page) {
+            this.noMore = true
+            this.loading = false
+            return
+          }
+          data = linkmen.data
+          if (this.isArray(data) && data.length === 0) {
+            this.noMore = true
+            this.loading = false
+            return
+          }
+          if (this.list.length === 0 || this.page === 1) {
+            // this.list = []
+            this.list = [...this.typeList]
+            if (data.length > 0) {
+              try {
+                for (let item of data) {
+                  this.list.push({
+                    icon: item.other_user.circle_avatar ? item.other_user.circle_avatar : item.other_user.avatar,
+                    title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                    message: {
+                      content_type: item.last_message ? item.last_message.content_type : '',
+                      content: item.last_message ? item.last_message.content : '',
+                      created_at: item.last_message ? item.last_message.created_at : '',
+                      id: item.other_user.id,
+                      type: item.other_user.type,
+                      last_time: item.last_message.last_time,
+                      new_count: item.new_count,
+                      magId: item.id,
+                      type: item.type
+                    },
+                    isTouchMove: false,
+                    path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.nickname ? item.other_user.nickname : item.other_user.name}&type=${item.other_user.type}`
+                  })
+                }
+              } catch (e) {}
+            }
+            this.loading = false
+            this.$apply()
+          } else {
+            let items = []
+            for (let item of linkmen.data) {
+              items.push({
+                icon: item.other_user.circle_avatar,
+                title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                message: {
+                  content_type: item.last_message ? item.last_message.content_type : '',
+                  content: item.last_message ? item.last_message.content : '',
+                  created_at: item.last_message ? item.last_message.created_at : '',
+                  id: item.other_user.id,
+                  type: item.other_user.type,
+                  last_time: item.last_message.last_time,
+                  new_count: item.new_count,
+                  magId: item.id,
+                  type: item.type
+                },
+                path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.name}&type=${item.other_user.type}`
+              })
+            }
+            // this.list = [...this.list, ...items]
+            this.modalName = null
+            // this.$apply()
+          }
+          this.noMore = true
+          this.modalName = null
+          this.$apply()
+        }
+      })
+    }
+    getLibraries(keyword) {
+      let _this = this
+      _this.loading = true
+      this.$get({
+        url: service.notices,
+        data: {
+          page: this.page,
+          type: 'single'
+        }
+      }, {
+        success: ({
+          code,
+          data
+        }) => {
+          _this.init = true
+          _this.noMore = false
+          _this.loading = false
+          if (data.length == 0 && data.last_page == 1) {
+            _this.loading = false
+            _this.noMore = true
+            // _this.list = []
+            return
+          }
+          if (data.current_page > data.last_page) {
+            _this.noMore = true
+            _this.loading = false
+            return
+          }
+          data = data.data
+          if (this.isArray(data) && data.length === 0) {
+            _this.noMore = true
+            _this.list = []
+            return
+          }
+          if (this.list.length === 0 || this.page === 1) {
+            // this.list = []
+            // this.list = [...this.typeList]
+            if (data.length > 0) {
+              for (let item of data) {
+                this.list.push({
+                  icon: item.other_user.circle_avatar ? item.other_user.circle_avatar : item.other_user.avatar,
+                  title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                  type: item.type,
+                  id: item.id,
+                  message: {
+                    content_type: item.type ? item.type : '',
+                    content: item.content ? item.content : '',
+                    created_at: item.created_at ? item.created_at : '',
+                    id: item.other_user.id,
+                    type: item.other_user.type,
+                    last_time: item.last_message.last_time,
+                    new_count: item.new_count,
+                    type: item.type
+                  },
+                  path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.name}&type=${item.other_user.type}`
+                })
+              }
+            }
+            this.loading = false
+            this.$apply()
+          } else {
+            let items = []
+            for (let item of data) {
+              items.push({
+                icon: item.other_user.circle_avatar ? item.other_user.circle_avatar : item.other_user.avatar,
+                title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                type: item.type,
+                id: item.id,
+                message: {
+                  content_type: item.type ? item.type : '',
+                  content: item.content ? item.content : '',
+                  created_at: item.created_at ? item.created_at : '',
+                  id: item.other_user.id,
+                  type: item.other_user.type,
+                  last_time: item.last_message.last_time,
+                  new_count: item.new_count,
+                  type: item.type
+                },
+                path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.name}&type=${item.other_user.type}`
+              })
+            }
+            this.list = [...this.list, ...items]
+            this.$apply()
+          }
+          // if (_this.list.length === 0 || _this.page === 1) {
+          //   _this.list = data
+          // } else {
+          //   data.map(function (item, index) {
+          //     _this.list.push(item)
+          //   })
+          // }
+          _this.noMore = true
+          _this.page += 1
+          //          _this.libs = data.data
+        },
+        fail: ({
+          code,
+          data
+        }) => {},
+        complete: () => {
+          this.loaded = false
+        }
+      })
+    }
+    angle(start, end) {
+      var _X = end.X - start.X
+      var _Y = end.Y - start.Y
+      return 360 * Math.atan(_Y / _X) / (2 * Math.PI)
+    }
+    deleteFriends(e) {
+      try {
+        this.list.forEach((item,index) => {
+          if(e == item.message.id) {
+            this.list.splice(index, 1)
+          }
+        })
+      } catch (e) {}
+    }
+    methods = {
+      touchstart (e) {
+        let vm = this
+        vm.list.forEach(function (v, i) {
+          if (v.isTouchMove) { v.isTouchMove = false }
+        })
+        vm.startX = e.changedTouches[0].clientX
+        vm.startY = e.changedTouches[0].clientY
+      },
+      touchmove (e) {
+        var that = this
+        that.index = e.currentTarget.dataset.index
+        var startX = that.startX
+        var startY = that.startY
+        var touchMoveX = e.changedTouches[0].clientX
+        var touchMoveY = e.changedTouches[0].clientY
+        var angle = that.angle({ X: startX, Y: startY }, { X: touchMoveX, Y: touchMoveY })
+
+        that.list.forEach(function (v, i) {
+          v.isTouchMove = false
+          if (Math.abs(angle) > 30) return
+          if (i == that.index) {
+            if (touchMoveX > startX) { v.isTouchMove = false } else { v.isTouchMove = true }
+          }
+        })
+      },
+      handleConceal(){
+        let that = this
+        that.list.forEach(function (v, i) {
+          if (i == that.index) {
+            v.isTouchMove = false
+            // if (touchMoveX > startX) { v.isTouchMove = false } else { v.isTouchMove = true }
+          }
+        })
+      },
+      toUserDetail(e) {
+        let vm = this
+        var id = e.currentTarget.dataset.id
+        var type = e.currentTarget.dataset.type
+        let url = ''
+        if (type == 'single') {
+          url = '/pages/home/information?id=' + id
+        } else {
+          url = '/pages/home/informationV2?id=' + id
+        }
+        wx.navigateTo({url: url})
+      },
+      hideFocusOn() {
+        this.focusOnhidden = true
+        this.$apply()
+      },
+      hideModal() {
+        this.modalName = ''
+        this.$apply()
+      },
+      handleContact(e) {
+      },
+      deleteFn(id, index) {
+        this.$delete({
+          url: `${service.host}/message/linkmen/${id}`
+        }, {
+          success: ({
+            code,
+            data
+          }) => {
+            this.list.splice(index, 1)
+          },
+          fail: ({
+            code,
+            data
+          }) => {},
+          complete: () => {}
+        })
+      },
+      tabClick(value) { // NavTab返回值
+        this.$showLoading('加载中...')
+        this.list = []
+        this.page = 1
+        this.type = value
+        this.$apply()
+        this.initPageData()
+      },
+      goto(index, path) {
+        if (!this.token) {
+          // this.modalName = 'Modal'
+          this.loginShow = true
+          this.$apply()
+          return
+        }
+        console.log(path)
+        console.log(this.list[index].icon)
+        wx.navigateTo({
+          url: path + '&icon=' + this.list[index].icon
+        })
+      },
+      gotos(index, path) {
+        if (!this.token) {
+          // this.modalName = 'Modal'
+          this.loginShow = true
+          this.$apply()
+          return
+        }
+        if(path == '/pages/users/visitorFriendlist?type=fans') {
+          path = `/pages/users/visitorFriendlist?type=fans&follow_count=${this.follow_count}`
+        }
+        wx.navigateTo({
+          url: path
+        })
+      },
+      tofriendRequest() {
+        if (!this.token) {
+          // this.modalName = 'Modal'
+          this.loginShow = true
+          this.$apply()
+          return
+        }
+        wx.navigateTo({
+          url: '/pages/users/friendRequest'
+        })
+      },
+      loginCut(e) {
+        this.$parent.$parent.getEvent(this.config.navigationBarTitleText, `点击底部登录`)
+        this.loginShow = e.loginShow
+      },
+      clickLogin(e) {
+        this.$parent.$parent.getEvent(this.config.navigationBarTitleText, `点击底部登录`)
+      },
+      mobileSuccess(e) {
+        this.$parent.$parent.getEvent(this.config.navigationBarTitleText, `微信私密（登录）`)
+      },
+      loginDialogCut(e) {
+        this.$parent.$parent.getEvent(this.config.navigationBarTitleText, `点击暂不登录`)
+        this.loginShow = e.loginShow
+      },
+      onSignIn() {
+        this.loginShow = true
+      },
+      loginDialogShow() {
+        let vm = this
+        wepy.login({
+          success: (res) => {
+            vm.$post({url: service.login, data: {code: res.code}}, {
+              success: ({code, data}) => {
+                if (data.token) {
+                  vm.token = data.token
+                  wx.setStorageSync('token', data.token)
+                  wx.setStorageSync('openid', data.openid)
+                  let userInfo = {
+                    nickName: data.user.nickName,
+                    avatarUrl: data.user.avatar,
+                    type: data.user.type
+                  }
+                  wx.setStorageSync('userInfo', userInfo)
+                  wx.setStorageSync('user_id', data.user.id)
+                  wx.setStorageSync('type', data.user.type)
+                  vm.onShow()
+                }
+                vm.page = 1
+                vm.$apply()
+              }
+            })
+            // vm.countDown();
+          },
+          fail: (res) => {
+            console.log('wepy.login.fail:', res)
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../styles/custom/fn.less";
+  @import "../styles/custom/reset.less";
+  page {
+    background: #ffffff;
+    height: 100%;
+    .bg-news {
+      background: white
+    }
+    ._line {
+      width: 100%;
+      height: 4rpx;
+      background: #F6F6F6;
+    }
+    .service {
+      position: fixed;
+      bottom: 12vh;
+      right: 5vw;
+      image {
+        width: 130rpx;
+        height: 130rpx;
+      }
+    }
+    .cu-list.menu-avatar>.cu-item .action {
+      width: auto;
+      margin-right: 20rpx;
+      text-align: center;
+    }
+  }
+  .focus_on_box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-right: 30rpx;
+    height: 80rpx;
+    line-height: 80rpx;
+    background: #FFF4F7;
+    color: #F33B6C;
+    z-index: 99;
+    overflow: hidden;
+    .focus_on_cancel {
+      width: 70rpx;
+      height: 80rpx;
+      position: relative;
+      .cancel {
+        position: absolute;
+        left: 30rpx;
+        top: 30rpx;
+        width: 20rpx;
+        height: 20rpx;
+      }
+    }
+    .focus_on_button {
+      width: 138rpx;
+      padding: initial;
+      font-weight: bold;
+      height: 54rpx;
+      font-size: 26rpx;
+      color: #F33B6C;
+      border: 1rpx solid #ff95b1;
+      margin-top: 12rpx;
+      border-radius: 30rpx;
+      background: initial;
+    }
+  } // -----------------------------
+  ._approve {
+    overflow: hidden;
+    // background: #f5f5f5;
+    ._text {
+      margin: 10rpx 40rpx;
+    }
+    ._item {
+      width: 25%;
+      background: #ffffff;
+    }
+    .texts {
+      height: 34rpx;
+      font-size: 24rpx;
+      font-family: PingFangSC-Regular, PingFang SC;
+      font-weight: 400;
+      color: #666666;
+      line-height: 34rpx;
+    }
+    ._texts {
+      margin: 24rpx 20rpx 10rpx 20rpx;
+      display: flex;
+      justify-content: space-around;
+      .bg-img {
+        width: 144rpx;
+        height: 144rpx;
+        border-radius: 20rpx;
+      }
+    }
+    .icon {
+      // margin-right: 12rpx;
+      width: 120rpx;
+      height: 120rpx;
+      position: relative;
+    }
+    .num {
+      position: absolute;
+      top: 12rpx;
+      right: 2rpx;
+      margin: auto;
+      width: 36rpx;
+      height: 36rpx;
+      line-height: 30rpx;
+      border-radius: 50%;
+      font-size: 22rpx;
+      color: #FFFFFF;
+      background: #F1013D;
+      border: 4rpx solid #FFFFFF;
+    }
+  } // --------消息验证-------------
+  .negativeEffect {
+    margin: 30rpx;
+    padding: 0 22rpx;
+    height: 80rpx;
+    background: #F5F5F5;
+    border-radius: 16rpx;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .mes {
+      height: 42rpx;
+      font-size: 30rpx;
+      font-family: PingFangSC-Medium, PingFang SC;
+      font-weight: 600;
+      color: #333333;
+      line-height: 42rpx;
+    }
+    .news {
+      display: flex;
+      align-items: center;
+      .news-mes {
+        height: 40rpx;
+        font-size: 28rpx;
+        font-family: PingFangSC-Regular, PingFang SC;
+        font-weight: 400;
+        color: #FF5380;
+        line-height: 40rpx;
+      }
+      .news-red {
+        width: 12rpx;
+        height: 12rpx;
+        background: #F1013D;
+        margin: 0 10rpx;
+        border-radius: 50%;
+      }
+    }
+  }
+  // ------------消息-----------
+  .content{
+    .name{
+      font-size: 32rpx;
+      font-weight: 500;
+      color: #333333;
+    }
+    .text{
+      height: 34rpx;
+      color: #666666;
+    }
+  }
+
+  // ------------测试-----------
+  .container {
+    .touch-item {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      overflow: hidden;
+      padding: 24rpx 0 24rpx 30rpx;
+    }
+    .content {
+      //display: flex;
+      width: 100%;
+      margin-right: 0;
+      -webkit-transition: all 0.4s;
+      transition: all 0.4s;
+      -webkit-transform: translateX(90px);
+      transform: translateX(90px);
+      margin-left: -90px;
+      overflow: hidden;
+      position: relative;
+      .userMessageBox{
+        margin-top: 2rpx;
+        margin-left: 16rpx;
+        .name{
+          width: 400rpx;
+          font-weight: 500;
+        }
+        .userMessage{
+          width: 524rpx;
+        }
+      }
+      .unreadBox{
+        position: absolute;
+        right: 30rpx;
+        top: 0;
+        overflow: hidden;
+        .lastTime{
+          margin-top: 10rpx;
+        }
+        .unreadNum, .unreadNum_1{
+          float: right;
+          width: 28rpx;
+          height: 28rpx;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 50%;
+          font-size: 20rpx;
+          background: #f1013D;
+          color: #fff;
+          margin-top: 12rpx;
+        }
+        .unreadNum_1{
+          width: 44rpx;
+          border-radius: 14rpx;
+        }
+      }
+    }
+  }
+  .m_nli {
+    padding-top: 110rpx;
+    .n_bt {
+      width: 336rpx;
+      height: 80rpx;
+      background: #FF5380;
+      border-radius: 100rpx;
+      margin: 34rpx 0 18rpx;
+    }
+  }
+  .del {
+    background-color:  #f1013D;
+    width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    -webkit-transform: translateX(90px);
+    transform: translateX(90px);
+    -webkit-transition: all 0.4s;
+    transition: all 0.4s;
+  }
+  .touch-move-active .content,
+  .touch-move-active .del {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+  .login_prompt_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+    .promptTitle{
+      padding: 40rpx 0;
+    }
+    .login_button{
+      width: 320rpx;
+      height: 68rpx;
+      line-height: 68rpx;
+      border-radius: 34rpx;
+      background: #ff5380;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 60rpx auto 0 auto;
+    }
+    .loginCancelIcon{
+      width: 48rpx;
+      height: 48rpx;
+      position: fixed;
+      margin-top: 40rpx;
+      margin-left: -24rpx;
+      z-index: 99;
+    }
+  }
+  .map_margon {
+      margin-bottom: calc((100rpx + env(safe-area-inset-bottom) / 2) + (env(safe-area-inset-bottom) / 2));
+  }
+</style>

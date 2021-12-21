@@ -1,0 +1,49 @@
+.share-box{
+  width: 100%;
+  height: 100%;
+}
+.share-content {
+  width: 100%;
+  height: 100%;
+}
+.draw-item {
+  overflow: hidden;
+}
+.draw-item image, .draw-item .text {
+  position: absolute;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+.share-btn {
+	width: 100%;
+}
+.share-btn button {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  font-weight: bold;
+  font-size: 32rpx;
+  text-align: center;
+  background: linear-gradient(225deg, #FF85A5 0%, #FF5380 100%);
+  border-radius: 20px;
+  color: white;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+.m_del_icon {
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	top: 3px;
+	right: 1px;
+	z-index: 9999;
+}
+.u_del_icon {
+	width: 100%;
+	height: 100%;
+}

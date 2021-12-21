@@ -1,0 +1,74 @@
+<template>
+    <view class="agreementDialog">
+        <view class="cu-modal {{agreementShow?'show':''}}">
+            <view class="cu-dialog">
+                <view class="m_agreement f-fcc f-fdc color333">
+                    <view class="font_32 f-fcc bold" style="padding-bottom: 32rpx;">欢迎使用福恋平台</view>
+                    <view class="font_28">1、为了帮助您浏览他人信息、发布个人信息、交流通讯，我们会收集您的部分必要信息；</view>
+                    <view class="font_28">2、为提供上述服务，我们可能会收集定位信息用于向您推荐合适的人，以及可能也会收集生日、性别、照片等个人信息，您有权拒绝或撤回授权；</view>
+                    <view class="font_28" style="padding-bottom: 32rpx;">3、可以访问、更正、删除您的个人信息，我们也提供关闭资料的方式。</view>
+                    <view>您可以通过阅读完整版<text class="red">《服务协议》</text>和<text class="red">《隐私政策》</text>了解详细信息。如您同意相关协议，请点击“同意”开始使用我们的产品和服务，我们尽全力保护您的个人信息安全。</view>
+                    <view></view>
+                    <view class="m_off" catchtap="onModal">
+                        <view class="font_family icon-off white font_48"></view>
+                    </view>
+                </view>
+                <view></view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import {service} from '../config.js'
+import base from '../mixins/base'
+import http from '../mixins/http'
+export default class agreementDialog extends wepy.page{
+    mixins = [base,http]
+    props = {
+      agreementShow: {
+        type: Boolean,
+        default: false
+      }
+    }
+    hideModal() {
+        this.agreementShow = false
+        this.$emit('agreementDialogCut', {
+            agreementShow: false
+        })
+        this.$apply()
+    }
+    methods = {
+        onModal() {
+            this.hideModal()
+        }
+    }
+}
+</script>
+<style lang="less">
+.agreementDialog {
+    .underline {
+        text-decoration: underline;
+    }
+    .cu-dialog {
+        width: 600rpx !important;
+        height: auto !important;
+        background: #FFFFFF !important;
+        border-radius: 24rpx !important;
+        overflow: visible !important;
+        padding: 48rpx 40rpx 80rpx !important;
+        .m_agreement {
+            text-align: left;
+        }
+        .m_off {
+            position: absolute;
+            bottom: -140rpx;
+            transform: translateX(-50%);
+            left: 50%;
+            padding: 30rpx;
+            .icon-off {
+            }
+        }
+    }
+}
+</style>

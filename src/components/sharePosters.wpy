@@ -1,0 +1,307 @@
+<template>
+  <view class="cu-modal top-modal {{modalName=='shareImageShow'?'show':''}}" catchtouchmove='true'>
+    <view class="cu-dialog"  style="background: none;width: 300px">
+  	<shareImage drawDataList="{{drawData}}" bind:shareLocalUrl="onShareLocalUrl"></shareImage>
+  </view>
+  </view>
+</template>
+<script>
+
+  import wepy from 'wepy'
+
+  export default class detailParty extends wepy.page {
+    config = {
+      usingComponents: {
+      	"shareImage": "./share_image/share_image",
+      }
+    }
+    props = {
+      drawDataList: {
+        type: Object,
+        default: {}
+      },
+      modalName: {
+        type: String,
+        default: ''
+      }
+    }
+    watch = {
+      drawDataList(e) {
+    	  this.drawData = e
+      }
+    }
+    data = {
+    	drawData: {}
+    }
+    onLoad() {
+    }
+	}
+</script>
+
+<style lang="less">
+  @import "../styles/custom/fn.less";
+
+  page{
+    background: #ffffff;
+    ._bc-party{
+      ._bc-image{
+        width: 100%;
+        text-align: center;
+        background: white;
+        background-size: cover;
+        padding: 30rpx;
+        image{
+          width: 690rpx;
+          height: 388rpx;
+          border-radius: 12rpx;
+        }
+      }
+      ._bc-center{
+        padding: 2rpx 30rpx 22rpx 32rpx;
+        .mainFee{
+          margin: 8rpx 0 34rpx;
+        }
+        ._bc-time{
+          width: 100%;
+          image{
+            width: 24rpx;
+            height: 24rpx;
+            margin-right: 12rpx;
+          }
+        }
+        .m_coll {
+          .u_coll_img {
+            width: 28rpx;
+            height: 28rpx;
+            margin-right: 4rpx;
+            margin-bottom: 2rpx;
+          }
+          view.sel {
+            color: #F5B400;
+          }
+        }
+      }
+      ._bc-address{
+        margin-bottom: 20rpx;
+        padding: 0 32rpx;
+        line-height: 40rpx;
+        image{
+          width: 24rpx;
+          height: auto;
+          margin-top: 6rpx;
+          margin-right: 12rpx;
+        }
+        // .cityIcon{
+
+        // }
+        .u_you_img{
+          width: 12rpx;
+          height: 24rpx;
+          margin: 0;
+          margin-left: 14rpx;
+        }
+      }
+      .number{
+        border-top: 12rpx solid #f6f6f6;
+      }
+      ._title{
+        padding-bottom: 12rpx;
+        position: relative;
+      }
+      .text-wrapper {
+        padding: 8rpx 22rpx 18rpx 32rpx;
+      }
+      ._detail{
+        margin: 0rpx 32rpx;
+        padding: 0 0 20rpx 0;
+      }
+      ._bc-wx{
+        /*border-bottom: 12rpx solid #f6f6f6;*/
+        ._wx-title{
+          padding: 22rpx 22rpx 22rpx 0;
+          margin-left: 32rpx;
+          border-bottom: 2rpx solid #dedede;
+          image{
+            width: 32rpx;
+            height: 32rpx;
+            margin-top: 6rpx;
+          }
+        }
+      }
+      ._wx-info{
+        padding: 30rpx 22rpx 20rpx 32rpx;
+      }
+      ._wx-more{
+        padding: 30rpx;
+        image{
+          width: 30rpx;
+          height: 30rpx;
+        }
+        .detail_icon{
+          width: 64vw;
+          height: auto;
+        }
+        .detail_text{
+          color: #474746;
+          letter-spacing: 6rpx;
+          margin-bottom: 42rpx;
+          .icon{
+            width: 28rpx;vertical-align: middle;margin-left: 4rpx
+          }
+        }
+      }
+      ._bc-Tab{
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        height: auto;
+        padding: 20rpx 30rpx 60rpx;
+        width: 100%;
+        // padding-bottom: constant(safe-area-inset-bottom);
+        // padding-bottom: env(safe-area-inset-bottom);
+        // background-image: linear-gradient(to top,rgba(255,255,255,1),rgba(255,255,255,0));
+		background: #FFFFFF;
+		border-top: solid 2rpx #F5F5F5;
+        ._bc-item{
+          /*background: red;*/
+          /*margin-left: 10%;*/
+          /*padding: 12rpx;*/
+          /*margin-top: 6rpx;*/
+          image{
+            width: 36rpx;
+            height: 36rpx;
+          }
+        }
+        ._bc-btn{
+          width: 376rpx;
+          height: 68rpx;
+          color: white;
+          border-radius: 100rpx;
+          line-height: 68rpx;
+        }
+      }
+      .m_hen {
+        padding: 0 30rpx;
+        >view {
+          width: 100%;
+          height: 2rpx;
+          background-color: #F5F5F5;
+        }
+      }
+    }
+
+    .notificationStyle {
+      width: 200rpx;
+      height: 60rpx;
+      line-height: 60rpx;
+      background-color: #F5F5F5;
+      border-radius: 42rpx;
+      overflow: hidden;
+      ._wx_member{
+        overflow: hidden;
+        margin-left: 12rpx;
+        ._text{max-width: 120rpx;margin-right: 4rpx;}
+        image{
+          width: 42rpx;
+          height: 42rpx;
+          border-radius: 50%;
+          margin-right: 10rpx;
+          border: 1rpx solid #ffffff;
+        }
+      }
+    }
+
+    .D-dialog {
+      .close{
+        width: 100%;
+        height: 100%;
+        margin-top: 2rpx;
+        .closeBtn{
+          width: 28rpx;
+          height: 28rpx;
+        }
+      }
+      .padding-xl{
+        border-top-right-radius: 22rpx;
+        border-top-left-radius: 22rpx;
+        overflow: hidden;
+      }
+      .D-dialog-box{
+        padding: 30rpx 40rpx;
+        border-top-right-radius: 22rpx;
+        border-top-left-radius: 22rpx;
+        .D_pop-up{
+          height: 160rpx;
+          overflow: hidden;
+          margin-top: 12rpx;
+          .poster {
+            width: 284rpx;
+            height: 100%;
+            border-radius: 16rpx;
+            margin-right: 20rpx;
+          }
+          .theme{
+            width: 50vw;
+            margin-bottom: 12rpx;
+          }
+        }
+      }
+      .specification{
+        padding-left: 30rpx;
+        flex-wrap: wrap;
+        .item{
+          padding: 10rpx 30rpx;
+          background: #F5F5F5;
+          border-radius: 10rpx;
+          margin-right: 30rpx;
+          margin-top: 20rpx;
+          color: #666666;
+        }
+      }
+      .specificationBtn{
+        padding: 50rpx 0 60rpx;
+      }
+      .itemActive{
+        color: #ffffff !important;
+        background: #FF5380 !important;
+      }
+    }
+  }
+  .btn-box{
+    width: 32%;
+    background: #D92553;
+    border-radius: 6rpx;
+    padding: 8rpx;
+    margin: 32rpx auto;
+    margin-bottom: -12rpx;
+  }
+  .service{
+    image{
+      width: 36rpx;
+      height: 36rpx;
+    }
+  }
+  .btn-det {
+    background-image: linear-gradient(to left,#FF85A5,#FF5380);
+    width: 480rpx;
+    height: 80rpx;
+    color: white;
+    text-align: center;
+    border-radius: 100rpx;
+  }
+  .u_pur_bu {
+    background-image: linear-gradient(to left,#FF85A5,#FF5380);
+    width: 480rpx;
+    height: 80rpx;
+    color: white;
+    text-align: center;
+    border-radius: 100rpx;
+    opacity: .6;
+  }
+  .u_pur_bu.sel {
+    opacity: 1;
+  }
+  .m_shareTt {
+	  margin-left: 6rpx;
+  }
+</style>

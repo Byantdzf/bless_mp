@@ -1,0 +1,91 @@
+<template>
+  <!-- <view class="scrollBox text-center"  wx:if="{{showBackTopBtn}}"  catchtap="BackTop">
+    <image src='http://images.ufutx.com/201903/06/35ead1df56f8a2c7bc69778f58d0fde3.png'  mode="aspectFit"  style="width: 48rpx;height: 68rpx;margin-top: 8rpx;"></image>
+    <view style="margin-top: -22rpx;font-size: 22rpx;">置顶</view>
+  </view> -->
+  <view class="m_returnTop {{showBackTopBtn?'show':'hide'}}">
+    <image class="u_returnTop_img"  catchtap="BackTop" src="https://images.ufutx.com/202106/23/f0d10551dc5d3399cc7f15805cf04f4f.png" mode="scaleToFill" lazy-load="false"></image>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class pageScroll extends wepy.component {
+    data = {
+      showBackTopBtn: false // 显示置顶
+    }
+    methods = {
+      BackTop() {
+        this.showBackTopBtn = false
+        wx.pageScrollTo({
+          scrollTop: 0,
+          duration: 400
+        })
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+    events = {
+      'showBackTopBtn': (param) => {
+        this.showBackTopBtn = param
+        this.$apply()
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+@import "../styles/custom/fn.less";
+.scrollBox{
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: white;
+  border: 4rpx solid #eeeeee;
+  box-shadow: 1rpx 1rpx 18rpx #cbcbcb;
+  position: fixed;
+  bottom: 12%;
+  right: 8%;
+  z-index: 9999;
+}
+.show{
+  opacity:1;
+  // animation: opacity 800ms ease-in;
+  // animation-fill-mode: forwards;
+}
+.m_returnTop {
+  position: fixed;
+  right: 12rpx;
+  bottom: 120rpx;
+  z-index: 9999;
+  -webkit-transition: opacity 1s;
+  transition: opacity 1s;
+  .u_returnTop_img {
+    width: 92rpx;
+    height: 92rpx;
+    border-radius: 50%;
+    box-shadow: 0 0 12rpx 6rpx rgba(0, 0, 0, .06);
+  }
+}
+@keyframes opacity{
+  0%{opacity: 0}
+  100%{
+    opacity: 1;
+  }
+}
+.hide{
+  opacity:0;
+  // animation: opacity2 800ms ease-in;
+  // animation-fill-mode: forwards;
+}
+@keyframes opacity2{
+  0%{opacity:1}
+  50%{opacity:.8;}
+  100%{
+    opacity:0;
+    display: none;
+  }
+}
+</style>

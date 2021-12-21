@@ -1,0 +1,165 @@
+<template>
+  <view class="cu-bar search _tab__content bc_BoxTab ">
+    <view class="search-form round m_search_sea">
+      <!-- <text class="cuIcon-search"></text> -->
+      <view class="m_sea f-fcc">
+        <image class="u_sea_img" src="https://images.ufutx.com/202106/19/c607aaf49440b0df3308d6e048fd9ad7.png" mode="aspectFit" lazy-load="false"></image>
+      </view>
+      <input type="text" class="m_sea_input"  placeholder="{{title}}" bindfocus="TabSearchBindfocus" bindinput="inputTyping" confirm-type="search" value="{{inputVal}}" focus="{{inputShowed}}" @confirm="confirmTyping" ></input>
+      <image wx:if="{{inputVal.length > 0}}" bindtap="searchEmpty" class="m_search_icon_add" src="https://images.ufutx.com/202106/30/03404c702dc077428d7af781f98e15a3.png" mode="aspectFit" lazy-load="false"></image>
+    </view>
+    <!--<view class="action">-->
+    <!--<button class="cu-btn bg-white shadow round " style="">搜索</button>-->
+    <!--</view>-->
+  </view>
+  <view style="height: {{bc_height}}"></view>
+  <!--<view class="weui-tab__content bc_BoxTab">-->
+    <!--<view class="weui-search-bar"  style="background-color: {{BColor}} !important;">-->
+      <!--<view class="weui-search-bar__form">-->
+        <!--<view class="weui-search-bar__box">-->
+          <!--&lt;!&ndash;<image src="http://images.ufutx.com/201905/28/828547386e36c11a03b10e41fae92374.png" class="weui-icon-search_in-box" mode="widthFix" style="width: 28rpx;"></image>&ndash;&gt;-->
+          <!--<icon class="weui-icon-search_in-box" type="search" size="14"></icon>-->
+          <!--<input type="text" class="weui-search-bar__input" placeholder="{{title}}" confirm-type="search" value="{{inputVal}}" focus="{{inputShowed}}" @confirm="inputTyping" />-->
+          <!--<view class="weui-icon-clear" wx:if="{{inputVal.length > 0}}" bindtap="clearInput">-->
+            <!--<icon type="clear" size="14"></icon>-->
+          <!--</view>-->
+        <!--</view>-->
+        <!--<label class="weui-search-bar__label" hidden="{{inputShowed}}" bindtap="showInput">-->
+          <!--&lt;!&ndash;<image src="http://images.ufutx.com/201905/28/828547386e36c11a03b10e41fae92374.png" class="weui-icon-search" mode="widthFix" style="width: 28rpx;"></image>&ndash;&gt;-->
+          <!--<icon class="weui-icon-search" type="search" size="14"></icon>-->
+          <!--<view class="weui-search-bar__text">{{title}}</view>-->
+        <!--</label>-->
+      <!--</view>-->
+      <!--<view class="weui-search-bar__cancel-btn font_32 color-333" hidden="{{!inputShowed}}" bindtap="hideInput">取消</view>-->
+    <!--</view>-->
+    <!--<slot></slot>-->
+  <!--</view>-->
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  import {getElement_WH} from '../utils/fn'
+
+  export default class tabSearch extends wepy.component {
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      clear: {
+        type: String,
+        default: false
+      },
+      disabled: {
+        type: String,
+        default: false
+      },
+      title: {
+        type: String,
+        default: '搜索'
+      },
+      BColor: {
+        type: String,
+        default: '#d92553'
+      }
+    }
+    data = {
+      inputShowed: false,
+      inputVal: '',
+      token: '',
+      bc_height: ''
+    }
+    onLoad() {
+      this.token = wx.getStorageSync('token')
+      getElement_WH('.bc_BoxTab').then((value) => {
+        this.bc_height = value.height + 'px'
+        this.$apply()
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+
+    methods = {
+      TabSearchBindfocus() {
+        if(!this.token) {
+          this.$emit('TabSearchLoginCut')
+          return
+        }
+      },
+      showInput() {
+        if (this.disabled) return
+        this.inputShowed = true
+        this.$apply()
+      },
+      hideInput() {
+        this.inputVal = ''
+        this.inputShowed = false
+        this.$emit('search', this.inputVal)
+        this.$apply()
+      },
+      clearInput() {
+        this.inputVal = ''
+        this.$apply()
+        this.$emit('search', this.inputVal)
+      },
+      confirmTyping(e) {
+        this.$showLoading('搜索中...')
+        this.$apply()
+        this.$emit('search', this.inputVal)
+      },
+      inputTyping(e) {
+        this.inputVal = e.detail.value
+        this.$apply()
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      },
+      searchEmpty() {
+        this.inputVal = ''
+        this.$emit('search',this.inputVal)
+        this.$apply()
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../styles/custom/fn.less";
+  ._tab__content{
+    width: 100%;
+    position: fixed;
+    left: 0%;
+    z-index: 9999;
+    background: white;
+    /*background-image: url("https://images.ufutx.com/202005/18/6414327d32bfc37345dafec4410854b5.png");*/
+    /*background-size: cover;*/
+    /*background-repeat: no-repeat;*/
+  }
+  .m_search_sea {
+    height: 72rpx !important;
+    border-radius: 100rpx !important;
+    background-color: #f5f5f5 !important;
+    .m_sea {
+      width: 60rpx;
+      height: 100%;
+      padding-left: 8rpx;
+      .u_sea_img {
+        width: 28rpx;
+        height: 28rpx;
+      }
+    }
+    .m_sea_input {
+      height: 100% !important;
+      border-radius: 100rpx !important;
+      font-size: 28rpx;
+    }
+    .m_search_icon_add {
+      width: 28rpx;
+      height: 28rpx;
+      margin: 0 20rpx;
+    }
+  }
+</style>

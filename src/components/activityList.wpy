@@ -1,0 +1,100 @@
+<template>
+  <view class="activityList">
+        <view class="m_coll">
+            <view class="m_coll_lst f-fc" wx:for="{{collectionList}}" wx:key="index" @tap="goto('/pages/party/detail?party_id={{item.id}}')">
+                <image class="u_lst_img" src="{{item.poster}}" mode="aspectFill" lazy-load="true"></image>
+                <view class="m_lst_ct f-fdc f-fbc">
+                    <view class="fong_30 color_333 bold u_ct_tt">{{item.theme}}</view>
+                    <view class="f-fc">
+                        <image class="u_add_img" src="https://images.ufutx.com/202106/16/c61ba4a35b73b92b12a885a0437e00ed.png" mode="aspectFit" lazy-load="true"></image>
+                        <view class="font_24 black_6 u_ct_addr" style="line-height: 24rpx;" wx:if="{{item.is_online == 1}}">线上活动</view>
+                        <view class="font_24 black_6 u_ct_addr" style="line-height: 24rpx;" wx:else>{{item.address || ' '}}</view>
+                    </view>
+                    <view class="f-fc">
+                        <image class="u_tim_img" src="https://images.ufutx.com/202106/16/55ef10fcb7a3898b7648898f42d865f8.png" mode="aspectFit" lazy-load="true"></image>
+                        <view class="font_24 black_6" style="line-height: 28rpx;">{{item.time}}</view>
+                    </view>
+                </view>
+            </view>
+        </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class activityList extends wepy.component {
+    mixins = [base, http]
+    props = {
+      collectionList: {
+        type: Object,
+        default: []
+      }
+    }
+    data = {
+    }
+    watch = {
+      
+    }
+    async onLoad(e) {
+    //   this.token = wx.getStorageSync('token')
+    }
+    methods = {
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  .activityList {
+    .m_coll {
+          padding: 30rpx 30rpx 0;
+          display: inline-block;
+          .m_coll_lst {
+              height: 135rpx;
+              margin-bottom: 52rpx;
+              .u_lst_img {
+                width: 240rpx;
+                height: 100%;
+                border-radius: 8rpx;
+                margin-right: 20rpx;
+              }
+              .m_lst_ct {
+                  flex: 1;
+                  height: 135rpx;
+                  border-bottom: 2rpx solid #F5F5F5;
+                  padding: 25rpx 0;
+                  box-sizing: content-box;
+                  align-items: flex-start;
+                  .u_ct_tt {
+                    width: 400rpx;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    margin-bottom: 14rpx;
+                  }
+                  .u_add_img {
+                      width: 22rpx;
+                      height: 26rpx;
+                      margin-right: 4rpx;
+                  }
+                  .u_ct_addr {
+                    width: 380rpx;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                  }
+                  .u_tim_img {
+                      width: 22rpx;
+                      height: 22rpx;
+                      margin-right: 4rpx;
+                  }
+              }
+          }
+      }
+  }
+</style>

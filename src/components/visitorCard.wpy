@@ -1,0 +1,144 @@
+<template>
+    <view class="visitorCard">
+        <view class="m_vc_lst f-fc">
+            <view class="u_vc_lst" wx:for="{{listData}}" wx:key="index" @tap="gotofriends({{item}}, {{index}})"  @longpress="deleteImage({{index}}, {{item}})">
+                <view class="u_vclst_img {{index>=3 && user.rank_id == 0?'blur':''}}" style="background-image: url({{item.avatar}});"></view>
+                <view class="u_vclst_ct">
+                    <view class="u_vclst_name white bold font_24 ellipsis_1">{{item.nickname}}</view>
+                    <view class="m_vclst_age white f-fc">
+                        <view class="u_vclst_age font_20">{{item.age || ''}}</view>
+                        <view class="u_vclst_add f-fc">
+                            <view  class="font_family icon-location"></view>
+                            <view class=" font_20">{{item.city || ''}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import message from './message'
+import base from '../mixins/base'
+import {service} from '../config.js'
+import http from '../mixins/http'
+export default class visitorCard extends wepy.component {
+    mixins = [base, http]
+      props = {
+        listData: {
+          type: Array,
+          default: '',
+          twoWay: true
+        },
+        user: {
+          type: Array,
+          default: '',
+          twoWay: true
+        },
+        currentTab: {
+          type: Number,
+          default: '',
+          twoWay: true
+        },
+      };
+      data = {
+      };
+      components = {};
+      onLoad() {
+      }
+      watch = {
+        listData(e) {
+            console.log('listData-----------',e)
+        }
+      }
+      methods = {
+        gotofriends(item, index) {
+            console.log(index)
+            if (index >= 3 && this.user.rank_id == 0) {
+                this.$emit('clickGoto', {
+                    item: item,
+                    index: index
+                })
+                return
+            }
+            this.$gotoFriendPage(item.type, item.id)
+            // if (item.other_user.type == 'single') {
+            //     url = '/pages/home/information?id=' + item.other_user.id
+            // } else {
+            //     url = '/pages/home/informationV2?id=' + item.other_user.id
+            // }
+            // wx.navigateTo({url: url})
+        },
+		deleteImage(index, item) {
+			console.log(item)
+			this.$emit('longpressCard', {
+			    item: item,
+			    index: index
+			})
+			this.$apply()
+		}
+      };
+    }
+</script>
+
+<style lang="less">
+    .visitorCard {
+        .m_vc_lst {
+            padding: 30rpx 30rpx 60rpx;
+            flex-wrap: wrap;
+            align-content: stretch;
+            .u_vc_lst:nth-child(3n+2) {
+                margin-left: 22rpx;
+                margin-right: 22rpx;
+            }
+            .u_vc_lst {
+                width: 215rpx;
+                height: 215rpx;
+                border-radius: 16rpx;
+                overflow: hidden;
+                margin-bottom: 30rpx;
+                position: relative;
+                .u_vclst_img {
+                    width: 100%;
+                    height: 100%;
+                    background-size: cover;
+                    background-position: center;
+                }
+                .u_vclst_img.blur {
+                    -webkit-filter: blur(8px);
+                    -moz-filter: blur(8px);
+                    -ms-filter: blur(8px);
+                    filter: blur(8px);
+                    overflow: hidden;
+                }
+                .u_vclst_ct {
+                    position: absolute;
+                    padding: 6rpx 0 0 12rpx;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 78rpx;
+                    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0.4) 100%);
+                    z-index: 99;
+                    .u_vclst_name {
+                        line-height: 28rpx;
+                        width: 190rpx;
+                    }
+                    .u_vclst_add {
+                        width: 150rpx;
+                        overflow: hidden;
+                        text-overflow:ellipsis;
+                        white-space: nowrap;
+                        padding-left: 10rpx;
+                        .icon-location {
+                            padding-right: 2rpx;
+                            font-size: 18rpx;
+                        }
+                    }
+                }
+            }
+        }
+    }
+</style>

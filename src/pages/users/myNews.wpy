@@ -1,0 +1,599 @@
+<template>
+<!--  <NavBar rgba="#ffffff" bag="#ffffff" :title.sync="title"></NavBar>-->
+  <Loading :init.sync="init"></Loading>
+  <NavBarV3 rgba="#ffffff" bag="#ffffff" visitorFriendlist="visitorFans" :handleIndex.sync="currentTab" :tabList.sync="headerText" :showRedDot.sync="follow_count"></NavBarV3>
+  <view style="background:white;height:{{windowHeight}}px;">
+    <swiper style="height:100%" current="{{currentTab}}" duration="300" bindchange="switchTab">
+      <!--  访客 -->
+      <swiper-item wx:key="id" style="-webkit-overflow-scrolling:touch">
+        <scroll-view scroll-top="{{visTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{visTriggered}}" bindrefresherpulling="onPullingsService" bindrefresherrefresh="onRefreshsService" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="300" bindscrolltolower="serviceScroll" bindscroll="visToupper">
+          <visitorCard :listData.sync="visList" :user.sync="user" :currentTab.sync="currentTab"></visitorCard>
+          <view class="text-center">
+            <view class="font_28 m_empty">
+              <image src="https://images.ufutx.com/202106/18/c0a2445b889165f29c14ff13a5eaa752.png" mode="aspectFit"></image>
+              <view class="font_28 color999 text-center">暂无内容~</view>
+            </view>
+          </view>
+          <view wx:if="{{visFansScrolls}}" style="padding-bottom: 20rpx;" class="text-center">没有更多数据了</view>
+        </scroll-view>
+      </swiper-item>
+      <!-- 粉丝 -->
+      <swiper-item wx:key="id" style="-webkit-overflow-scrolling:touch">
+        <scroll-view scroll-top="{{nulTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggered}}" bindrefresherpulling="onPulling" bindrefresherrefresh="onRefresh" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="300" bindscrolltolower="handleScroll" bindscroll="nulToupper">
+          <!-- <nulVisitorCard :listData.sync="list" :user.sync="user" :currentTab.sync="currentTab"></nulVisitorCard> -->
+          <view class="text-center">
+            <view class="font_28 m_empty">
+              <image src="https://images.ufutx.com/202106/18/c0a2445b889165f29c14ff13a5eaa752.png" mode="aspectFit"></image>
+              <view class="font_28 color999 text-center">暂无内容~</view>
+            </view>
+          </view>
+          <view wx:if="{{fansScrolls}}" style="padding-bottom: 20rpx;" class="text-center">没有更多数据了</view>
+        </scroll-view>
+      </swiper-item>
+    </swiper>
+	</view>
+	<view class="cu-modal {{modalName=='confirm'?'show':''}}">
+	    <view class="open_confirm_box">
+			<view class="u_confirm_tt font_40 color-333 bold">来访记录</view>
+			<view class="confirm_prompt font_32 color-333">确定删除他的来访记录</view>
+			<image class="cancelIcon" src="https://images.ufutx.com/202103/12/4281e92bc8b727bae08099a3015225b1.png" mode="widthFix" @tap="hideModal"></image>
+			<image class="determineIcon" src="https://images.ufutx.com/202103/12/91fea69fdff1cfeaac369ddd5dd591f0.png" mode="widthFix" @tap="saveDetele"></image>
+			<view style="height: 36rpx"></view>
+	    </view>
+	</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { service } from '../../config.js'
+  import http from '../../mixins/http'
+  import base from '../../mixins/base'
+  import user from '../../mixins/user'
+  import NavBarV3 from '../../components/NavBarV3'
+  import Loading from '../../components/loading'
+  import visitorCard from '../../components/visitorCard'
+
+export default class myNews extends wepy.page {
+    mixins = [base, http, user]
+    config = {
+      navigationBarTitleText: '好友',
+      enablePullDownRefresh: false,
+      navigationStyle: 'custom'
+    }
+    components = {NavBarV3, Loading, visitorCard}
+    data = {
+      currentTab: 0,
+      headerText: ['祝福', '收到祝福'],
+      loaded: false,
+      init: false,
+      title: '',
+      mylibs: [],
+      list: [],
+      visList: [],
+      user: [],
+      activeIndex: 0,
+      sliderOffset: 0,
+      sliderLeft: 0,
+      sliderWidth: 180,
+      screenWidth: 360,
+      page: 1,
+      visPage: 1,
+      noMore: false,
+      loading: false,
+      inputShowed: false,
+      inputVal: '',
+      type: '',
+      default: false,
+      windowHeight: 700,
+      triggered: false,
+      fansScrolls: false,
+      nulHideMessage: true,
+      visTriggered: false,
+      visFansScrolls: false,
+      visHideMessage: true,
+      nulFloorstatus: false,
+      visFloorstatus: false,
+      nulTopHandle: -1,
+      visTopHandle: -1,
+      modalName: '',
+      age: '',
+      city: '',
+      photos: '',
+      follow_count: 0,
+	  confirmIndex: 0,
+	  confirmItem: {}
+    }
+
+    computed = {}
+
+    onLoad(e) {
+      // let type = e.type,
+      let that = this
+      // that.type = e.type
+      // if(e.follow_count > 0) {
+      //   that.follow_count = 1
+      // }else {
+      //   that.follow_count = 0
+      // }
+      // let menuButtonObject = wx.getMenuButtonBoundingClientRect()
+      // wx.getSystemInfo({
+      //   success: res => {
+      //     console.log('getSystemInfo-------------------------',res)
+      //     let statusBarHeight = res.statusBarHeight,
+      //       navTop = menuButtonObject.top, // 胶囊按钮与顶部的距离
+      //       navHeight = statusBarHeight + menuButtonObject.height + (menuButtonObject.top - statusBarHeight) * 2 // 导航高度
+      //     that.windowHeight = res.windowHeight - (navHeight + 4)
+      //     that.$apply()
+      //   },
+      //   fail(err) {
+      //     that.$apply()
+      //   }
+      // })
+      // that.user = wx.getStorageSync('userInfo')
+      // that.getLibraries()
+      that.getVisList()
+      // that.$apply()
+    }
+
+    onShow() {
+      this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+    }
+
+    nulToupper(e){
+      clearTimeout(this._st)
+      this._st = setTimeout(() => {
+        console.log(e)
+        if (e.detail.scrollTop > 380) {
+          this.nulFloorstatus = true
+        } else {
+          this.nulFloorstatus = false
+        }
+        this.$apply()
+      }, 200)
+    }
+
+    visToupper(e){
+      clearTimeout(this._st)
+      this._st = setTimeout(() => {
+        console.log(e)
+        if (e.detail.scrollTop > 380) {
+          this.visFloorstatus = true
+        } else {
+          this.visFloorstatus = false
+        }
+        this.$apply()
+      }, 200)
+    }
+
+    initUserData() {
+      this.$get({url: `${service.user}/v3`}, {
+          success: ({code, data}) => {
+              this.user = data
+              this.$apply()
+          }
+      })
+    }
+
+    getLibraries(keyword) {
+      let that = this
+      console.log('currentTab',that.currentTab)
+      let url = service.followers
+      // let url = that.currentTab == 0?service.followers:`${service.user}/preview/histroies`
+      that.$showLoading('加载中')
+      that.loading = true
+      this.$get({
+        url: url,
+        data: {
+          page: this.page,
+          keyword: this.inputVal,
+          type: 'single',
+          size: 20
+        }
+      }, {
+        success: ({code, data}) => {
+          that.triggered = false
+          try {
+            if(that.page > 1 && data.data.length == 0) {
+              that.fansScrolls = true
+            }
+            if(that.page == 1 && data.data.length == 0) {
+              that.nulHideMessage = true
+            }
+            // console.log(data)
+            if( that.page == 1 && that.list.length != 0) return
+            that.list = [...that.list,...data.data]
+            that.list.forEach((item, index) => {
+              item.age = item.year
+              if(that.user.rank_id == 0 && index >= 3) {
+                  item.nickname = `${item.nickname.substring(0,1)}***`
+              }
+            })
+          } catch (e) {}
+          that.$apply()
+          wx.hideLoading()
+        },
+        fail: ({code, data}) => {
+        },
+        complete: () => {
+          this.loaded = false
+        }
+      })
+    }
+
+    getVisList(keyword) {
+      let that = this
+      that.$showLoading('加载中')
+      that.loading = true
+      this.$get({
+        url: `${service.user}/official/bottle/list`,
+        data: {
+          page: this.visPage,
+          keyword: this.inputVal,
+          type: 'single',
+          size: 20
+        }
+      }, {
+        success: ({code, data}) => {
+          let modifyArr = []
+          that.visTriggered = false
+          if(that.visPage > 1 && data.data.length == 0) {
+            that.visFansScrolls = true
+            return
+          }
+          if(that.visPage == 1 && data.data.length == 0) {
+            that.visHideMessage = true
+            return
+          }
+          // console.log(data)
+          if( that.visPage == 1 && that.visList.length != 0) return
+          try {
+            data.data.forEach(item => {
+              modifyArr.push({
+                nickname: item.other_user.nickname,
+                age: item.other_user.year,
+                city: item.other_user.city,
+                avatar: item.other_user.avatar,
+                type: item.other_user.type,
+                id: item.other_user.id,
+              })
+            })
+            that.visList = [...that.visList,...modifyArr]
+            that.visList.forEach((item, index) => {
+              if(that.user.rank_id == 0 && index >= 3) {
+                  item.nickname = `${item.nickname.substring(0,1)}***`
+              }
+            })
+          } catch (e) {}
+          that.$apply()
+          wx.hideLoading()
+        },
+        fail: ({code, data}) => {
+        },
+        complete: () => {
+          this.loaded = false
+        }
+      })
+    }
+
+    handleScroll() {
+      if (this.fansScrolls) return
+      this.page += 1
+      // this.getLibraries()
+    }
+
+    serviceScroll() {
+      if (this.visFansScrolls) return
+      this.visPage += 1
+      this.getVisList()
+    }
+
+    gotofriends(item, index) {
+      this.modalName = 'Modal'
+      this.age = item.age + '岁'
+      this.city = item.city
+      this.photos = item.avatar
+      this.$apply()
+    }
+
+    methods = {
+      gotoFriendPage(item) {
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.id
+        } else {
+          url = '/pages/home/informationV2?id=' + item.id
+        }
+        wx.navigateTo({url: url})
+      },
+      showInput() {
+        this.inputShowed = true
+      },
+      hideInput() {
+        this.inputVal = ''
+        this.inputShowed = false
+      },
+      clearInput() {
+        this.inputVal = ''
+      },
+      inputTyping(e) {
+        this.inputVal = e.detail.value
+        console.log(this.inputVal)
+        this.page = 1
+        this.getLibraries(this.inputVal)
+      },
+      tabClick(e) {
+        this.sliderOffset = e.currentTarget.offsetLeft
+        this.activeIndex = e.currentTarget.id
+        this.getLibraries()
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      },
+      onRefresh() {
+        this.fansScrolls = false
+        this.nulHideMessage = false
+        this.page = 1
+        this.list = []
+        // this.getLibraries()
+      },
+      onPulling(e) {
+        this.triggered = true
+      },
+      onRefreshsService() {
+        this.visFansScrolls = false
+        this.visHideMessage = false
+        this.visPage = 1
+        this.visList = []
+        this.getVisList()
+      },
+      onPullingsService(e) {
+        this.visTriggered = true
+      },
+      hideModal () {
+        this.modalName = ''
+        this.$apply()
+      },
+      handleVip() {
+        this.modalName = ''
+        this.$apply()
+        wx.navigateTo({
+          url: '/pages/users/upgradeVIP'
+        })
+      },
+      nulToReturnTop(e) {
+        this.nulTopHandle = Math.random()
+        this.nulFloorstatus = false
+        this.$apply()
+      },
+      visToReturnTop(e) {
+        this.visTopHandle = Math.random()
+        this.visFloorstatus = false
+        this.$apply()
+      },
+      switchTab(e) {
+        console.log(e)
+        if (e.detail.source === 'touch') {
+          this.currentTab = e.detail.current
+        }
+        this.$apply()
+      },
+	  saveDetele() {
+		this.visList.splice(this.confirmIndex, 1)
+		this.modalName = ''
+		this.$delete({
+		  url: `${service.host}/delete/preview/history`,
+		  headers: {
+		    'content-type': 'application/x-www-form-urlencoded'
+		  },
+		  data: {
+		    user_id: this.confirmItem.id
+		  }
+		}, {
+		success: ({code, data}) => {
+			this.$showToast('删除成功')
+		},
+		fail: ({code, data}) => {
+		},
+		complete: () => {
+			this.loaded = false
+		}
+		})
+		this.$apply()
+	  }
+    }
+    events = {
+      "foundEventV2": (value) => {
+        // this.fansScrolls = false
+        // this.page = 1
+        // this.list = []
+        // this.getLibraries()
+        // this.$apply()
+      },
+      "foundEvent": (value) => {
+        // this.fansScrolls = false
+        // this.page = 1
+        // this.list = []
+        // this.getLibraries()
+        // this.$apply()
+      },
+      "clickGoto": (e) => {
+        console.log(e)
+        this.gotofriends(e.item,e.index)
+        this.$apply()
+      },
+		"longpressCard": (e) => {
+			if(this.currentTab == 1) return
+			this.modalName = 'confirm'
+			this.confirmIndex = e.index
+			this.confirmItem = e.item
+			this.$apply()
+		},
+    }
+  }
+
+</script>
+
+<style lang="less">
+page {
+  height: 100%;
+  background-color: white !important;
+}
+.m_unl_bu {
+  width: 100%;
+  position: fixed;
+  bottom: 60rpx;
+  left: 0;
+  z-index: 0;
+  .u_unl_img {
+    width: 616rpx;
+    height: 120rpx;
+  }
+}
+.cu-dialog{
+    width: 600rpx;
+    height: 660rpx;
+    border-radius: 30rpx;
+    .main{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-flow: column;
+        .header{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-flow: column;
+            .header-img{
+                width: 180rpx;
+                height: 180rpx;
+                border-radius: 50%;
+                background-size: cover;
+                background-position: center;
+                vertical-align: middle;
+                filter:blur(4px) contrast(.8);
+                overflow: hidden;
+            }
+            .city{
+                height: 40rpx;
+                font-size: 28rpx;
+                font-family: PingFangSC-Regular, PingFang SC;
+                font-weight: 400;
+                color: #333333;
+                line-height: 40rpx;
+                margin-top: 16rpx;
+            }
+        }
+        .text{
+            height: 44rpx;
+            font-size: 32rpx;
+            font-weight: 600;
+            color: #333333;
+            line-height: 44rpx;
+            text-align: center;
+            margin-top: 84rpx;
+        }
+        .img{
+            width: 418rpx;
+            height: 120rpx;
+            margin-top: 74rpx;
+            background-size: cover;
+            background-position: center;
+            vertical-align: middle;
+        }
+    }
+}
+.cu-dialog {
+    overflow: initial;
+}
+.actions {
+    position: absolute;
+    bottom: -100rpx;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 48rpx;
+    height: 48rpx;
+}
+.listDefault{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    width: 300rpx;
+    height: 300rpx;
+    background-size: cover;
+    background-position: center;
+    vertical-align: middle;
+}
+.m_empty {
+  padding-top: 180rpx;
+  image {
+    width: 440rpx;
+    height: 360rpx;
+  }
+}
+.m_returnTop {
+  position: fixed;
+  right: 36rpx;
+  bottom: 220rpx;
+  -webkit-transition: opacity 1s;
+  transition: opacity 1s;
+  .u_returnTop_img {
+    width: 92rpx;
+    height: 92rpx;
+    border-radius: 50%;
+    box-shadow: 0 0 12rpx 6rpx rgba(0, 0, 0, .06);
+  }
+}
+.m_returnTop.show {
+  opacity: 1;
+}
+.m_returnTop.hide {
+  opacity: 0;
+}
+.open_confirm_box {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: auto;
+	margin-right: auto;
+	width: 600rpx;
+	max-width: 100%;
+	background-color: #ffffff;
+	border-radius: 24rpx;
+	.u_confirm_tt {
+		padding: 40rpx 0 50rpx;
+	}
+	.confirm_prompt{
+	    // padding: 68rpx 90rpx;
+		padding-bottom: 50rpx;
+	    line-height: 40rpx;
+	}
+	.cancelIcon{
+	    width: 192rpx;
+	    height: 68rpx;
+	    margin-right: 64rpx;
+	}
+	.determineIcon{
+	    width: 192rpx;
+	    height: 68rpx;
+	}
+	.m_bu {
+	  padding: 0rpx 74rpx 38rpx;
+	  .u_hide_bu,
+	  .u_pur_bu {
+	    width: 192rpx;
+	    height: 68rpx;
+	    border: 2rpx solid #D8D8D8;
+	    border-radius: 100rpx;
+	  }
+	  .u_pur_bu {
+	    background-color: #FF5380;
+	    color: white;
+	    border: 2rpx solid #FF5380;
+	  }
+	}
+}
+</style>

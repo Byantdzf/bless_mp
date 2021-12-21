@@ -1,0 +1,288 @@
+<template>
+    <view class="recommendDialog">
+        <view class="cu-modal {{recommendShow?'show':''}}">
+            <view class="m_modal_box animation-slide-top">
+                <view class="m_modal">
+                    <view class="font_40 color333 bold f-fcc">我也要上推荐</view>
+                    <view class="font_24 color999 text_left">满足以下要求，申请后通过审核，即可在{{id==1?'置顶推荐展示；提升曝光度，可以获得更多推荐，也更容易脱单哦！':'专区推荐展示，还可进入群聊，更容易脱单哦！'}}</view>
+                    <view class="font_28 color333 text_left">
+                        <view>1、完整填写个人资料；</view>
+                        <view>2、生活照6张以上；</view>
+                        <view>3、兴趣爱好超过50字；</view>
+                        <view>4、自我描述和择偶标准均超过200字；</view>
+                        <view>5、完成真人认证和学历认证；</view>
+                    </view>
+                    <view class="operation_box">
+                        <view class="basis_data f-fbc u_list border_bottom" wx:if="{{recommendData.state.info != 1}}">
+                            <view class="f-fc font_30 color333">
+                                <image class="u_icom" src="https://images.ufutx.com/202105/14/aed70ef1c706a196d513bc37ecfae628.png" mode="aspectFill" lazy-load="true"></image>
+                                <view class="weight_500">完善个人资料</view>
+                            </view>
+                            <view wx:if="{{recommendData.state.info == 2}}" class="u_bu etc f-fcc font_26 weight_500 white" @tap="goto('审核中')">审核中</view>
+                            <view wx:else class="u_bu f-fcc font_26 weight_500 white {{recommendData.state.info == 1?'sel':''}}" @tap="goto('/pages/users/unmarriV2?progressShow=false', '去完善')">{{recommendData.state.info == 1?'已完善':'去完善'}}</view>
+                        </view>
+                        <view class="realName_data f-fbc u_list border_bottom" wx:if="{{recommendData.state.is_real_approved != 1}}">
+                            <view class="f-fc font_30 color333">
+                                <image class="u_icom" src="https://images.ufutx.com/202105/14/f1adcb93599bd779b3ccfad8ea1f2d19.png" mode="aspectFill" lazy-load="true"></image>
+                                <view class="weight_500">完成真人认证</view>
+                            </view>
+                            <view wx:if="{{recommendData.state.is_real_approved == 2}}" class="u_bu etc f-fcc font_26 weight_500 white" @tap="goto('审核中')">审核中</view>
+                            <view wx:else class="u_bu f-fcc font_26 weight_500 white {{recommendData.state.is_real_approved == 1?'sel':''}}" @tap="goto('/pages/users/realName', '去真人认证')">{{recommendData.state.is_real_approved == 1?'已认证':'去认证'}}</view>
+                        </view>
+                        <view class="realName_data f-fbc u_list" wx:if="{{(recommendData.state.is_educate_approved != 1 && id == 1) || (recommendData.state.is_educate_approved != 1 && id == 6)}}">
+                            <view class="f-fc font_30 color333">
+                                <image class="u_icom" src="https://images.ufutx.com/202105/14/e44ac243bbbd2e5a6d1f5c1d2e650222.png" mode="aspectFill" lazy-load="true"></image>
+                                <view class="weight_500">完成学历认证</view>
+                            </view>
+                            <view wx:if="{{recommendData.state.is_educate_approved == 2}}" class="u_bu etc f-fcc font_26 weight_500 white" @tap="goto('审核中')">审核中</view>
+                            <view wx:else class="u_bu f-fcc font_26 weight_500 white {{recommendData.state.is_educate_approved == 1?'sel':''}}" @tap="goto('/pages/users/degreeCertificate', '去学历认证')">{{recommendData.state.is_educate_approved == 1?'已认证':'去认证'}}</view>
+                        </view>
+                    </view>
+                    <view class="font_26 color999">资料越详细，优先入选{{title}}！</view>
+                    <view bindtap="onModal" class="font_family icon-off white font_48"></view>
+                </view>
+            </view>
+        </view>
+        <view class="cu-modal {{intentionShow?'show':''}}">
+            <view class="intention_confirm_box animation-slide-top">
+            <view class="intentionContent font_32 color-333">是否确定申请“{{title}}”？</view>
+            <view class="intentionOperation">
+                <image @tap.stop="onIntention" class="operationButton" src="https://images.ufutx.com/202103/17/4281e92bc8b727bae08099a3015225b1.png" mode="widthFix"></image>
+                <image @tap.stop="recommend" class="operationButton" src="https://images.ufutx.com/202103/17/91fea69fdff1cfeaac369ddd5dd591f0.png" mode="widthFix"></image>
+            </view>
+            <view style="height: 38rpx"></view>
+            </view>
+        </view>
+        <view class="cu-modal {{inreviewShow?'show':''}}">
+            <view class="intention_confirm_box animation-slide-top">
+            <view class="intentionContent_1 font_34 color-333 bold">你的资料正在审核中</view>
+            <view class="font_32 color-333" style="padding-bottom: 60rpx">如有紧急，请拨打<span style="color: #f33b6c;">4000401707</span></view>
+            <view class="intentionOperation">
+                <image @tap.stop="onInreview" class="operationButton" src="https://images.ufutx.com/202103/17/4281e92bc8b727bae08099a3015225b1.png" mode="widthFix"></image>
+                <image @tap.stop="clickPhone" class="operationButton" src="https://images.ufutx.com/202104/15/91fea69fdff1cfeaac369ddd5dd591f0.png" mode="widthFix"></image>
+            </view>
+            <view style="height: 38rpx"></view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import {service} from '../config.js'
+import base from '../mixins/base'
+import http from '../mixins/http'
+export default class recommendDialog extends wepy.page {
+  mixins = [base, http]
+  components = {
+
+  }
+  props = {
+    recommendShow: {
+      type: Boolean,
+      default: false
+    },
+    intentionShow: {
+      type: Boolean,
+      default: false
+    },
+    inreviewShow: {
+      type: Boolean,
+      default: false
+    },
+    recommendData: {
+      type: Object,
+      default: {}
+    },
+    id: {
+      type: Number,
+      default: 1
+    },
+    title: {
+      type: String,
+      default: '置顶推荐'
+    }
+  }
+  data = {
+    agreementShow: false
+  }
+  hideModal() {
+    this.recommendShow = false
+    this.$emit('recommendCut', {
+      recommendShow: false
+    })
+    this.$apply()
+  }
+  intentionModal() {
+    this.intentionShow = false
+    this.$emit('intentionCut', {
+      intentionShow: false
+    })
+    this.$apply()
+  }
+  inreviewModal() {
+    this.inreviewShow = false
+    this.$apply()
+  }
+  methods = {
+    onModal() {
+      this.$emit('squareCut_4')
+      this.hideModal()
+    },
+    onIntention() {
+      this.$emit('squareCut_5')
+      this.intentionModal()
+    },
+    onInreview() {
+      this.inreviewModal()
+    },
+    goto(url, name) {
+      if (name == '去完善') {
+        console.log(name, '7979')
+        this.$emit('squareCut_2')
+      } else if (name == '去真人认证') {
+        this.$emit('squareCut')
+      } else if (name == '去学历认证') {
+        this.$emit('squareCut_1')
+      }
+      if (url == '审核中') {
+        this.inreviewShow = true
+        return
+      }
+      this.hideModal()
+      this.$apply()
+      this.$goto(url)
+    },
+    recommend() {
+      let vm = this,
+        url = `${service.host}` + '/area/user'
+      vm.$apply()
+      console.log('singleSquare---------------------------------', vm.singleShow)
+      vm.$showLoading('加载中')
+      this.$emit('squareCut_3')
+      vm.$post({
+        url: url,
+        data: {
+          area_id: vm.id
+        }
+      }, {
+        success: ({code, data}) => {
+          wx.hideLoading()
+          vm.$emit('intentionCut', {
+            intentionShow: false,
+            hasApplyArea: 0
+          })
+          setTimeout(() => {
+            vm.$showToast('申请提交成功,系统将在1-3天内审核')
+            vm.$apply()
+          }, 500)
+          vm.$apply()
+        }
+      })
+    },
+    clickPhone() {
+      wx.makePhoneCall({
+        phoneNumber: '4000401707'
+      })
+    }
+  }
+}
+</script>
+<style lang="less">
+.recommendDialog {
+    .underline {
+        text-decoration: underline;
+    }
+    .m_modal_box {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: auto;
+        margin-right: auto;
+        width: 600rpx;
+        overflow: hidden;
+        .m_modal {
+            position: relative;
+            border-radius: 30rpx;
+            background: #FFFFFF !important;
+            margin-bottom: 100rpx;
+            padding: 36rpx 30rpx 30rpx;
+            .text_left {
+                text-align: left;
+                margin-top: 20rpx;
+            }
+            .operation_box {
+                padding: 0 30rpx;
+                background-color: #F8F8F8;
+                border-radius: 16rpx;
+                .u_list {
+                    margin: 30rpx 0;
+                    height: 100rpx;
+                    .u_bu {
+                        width: 120rpx;
+                        height: 60rpx;
+                        border-radius: 100rpx;
+                        background: #FF5380;
+                    }
+                    .u_bu.sel {
+                        background-color: #C2C2C2;
+
+                    }
+                    .u_bu.etc {
+                        background-color: #FFBB00;
+                    }
+                    .font_family {
+                        margin-right: 12rpx;
+                    }
+                    .u_icom {
+                        width: 36rpx;
+                        height: 36rpx;
+                        margin-right: 12rpx;
+                        margin-top: 2rpx;
+                    }
+                }
+                .u_list.border_bottom {
+                    border-bottom: 2rpx solid #EEEEEE;
+                }
+            }
+        }
+    }
+    .intention_confirm_box{
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: auto;
+        margin-right: auto;
+        width: 600rpx;
+        max-width: 100%;
+        background-color: #ffffff;
+        border-radius: 24rpx;
+        overflow: hidden;
+        .intentionContent{
+            padding: 58rpx 56rpx 64rpx 56rpx;
+        }
+        .intentionContent_1{
+            padding: 58rpx 56rpx 44rpx 56rpx;
+        }
+        .intentionOperation{
+            margin: 0 78rpx;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            .operationButton{
+            width: 192rpx;
+            height: 68rpx;
+            }
+        }
+    }
+    .icon-off {
+        position: absolute;
+        bottom: -140rpx;
+        transform: translateX(-50%);
+        left: 50%;
+        padding: 30rpx;
+    }
+    .weight_500 {
+        font-weight: 500;
+    }
+}
+</style>

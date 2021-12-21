@@ -1,0 +1,119 @@
+<template>
+  <view class="textarea" style="{{tabSearch?'padding: 0;':''}}">
+    <textarea
+      class="areas"
+      style="{{tabSearch?'text-align: left;min-height: 40rpx;font-size: 28rpx;border-bottom: #F2F2F2 solid 2rpx;line-height: 72rpx;':''}}"
+      placeholder="{{placeholderText}}"
+      placeholder-style="placeholder_class"
+      minlength="{{min}}"
+      maxlength="{{max}}"
+      rows="6"
+      bindinput="inputs"
+      value="{{value}}"
+    >
+    </textarea>
+    <!-- <view wx:if="{{!tabSearch}}" class="currentWordNumber font_24">{{currentWordNumber}}/{{max}}</view> -->
+  </view>
+</template>
+<script>
+import wepy from "wepy";
+import http from "../mixins/http";
+import { service } from "../config.js";
+import base from "../mixins/base";
+export default class textarea extends wepy.component {
+  mixins = [base, http];
+  components = {};
+  props = {
+    placeholderText: {
+      type: String,
+      default: '说出你的性格特点、兴趣爱好、自我评论、家庭情况等'
+    },
+    value: {
+      type: String,
+      default: ''
+    },
+    //最多字数
+    max: {
+      type: Number,
+      default: 800
+    },
+    //最少字数
+    min: {
+      type: Number,
+      default: 15
+    },
+    tabSearch: {
+      type: Boolean,
+      default: false
+    },
+  };
+  watch = {
+    value(e) {
+      if (!e) return this.currentWordNumber = 0
+      var len = parseInt(e.length);
+      console.log(len)
+      if (len <= this.min){
+        this.texts = "至少还需要"
+        this.textss = "字"
+        this.num = this.min-len
+      }else if (len > this.min){
+        this.texts = " "
+        this.textss = " "
+        this.num = ''
+      }
+      this.currentWordNumber = len
+      this.$apply()
+      if (len > this.max) return this.currentWordNumber = this.max
+    }
+  }
+  data = {
+    texts: "至少需要15个字",
+    currentWordNumber:0
+  }
+  methods = {
+    inputs(e) {
+      var len = parseInt(e.detail.value.length);
+      console.log(len)
+      if(len >= this.max) {
+        wx.showToast({
+          title: '内容不能超过300字',
+          icon: 'none',
+          duration: 1500
+        })
+        return
+      }
+      this.value = e.detail.value;
+      this.$emit('textareaValue', e.detail.value)
+    }
+  };
+  events = {};
+}
+</script>
+<style lang="less">
+textarea {
+  width: 80%;
+  caret-color:#8962ff;
+}
+.textarea {
+  padding: 20rpx 24rpx;
+  box-sizing: border-box;
+  border-radius: 32rpx;
+  .areas {
+    width: 100%;
+    min-height: 240rpx;
+    font-size: 30rpx;
+    line-height: 40rpx;
+    color: #333333;
+		text-align: justify;
+    text-align-last: left;
+  }
+  .placeholder_class {
+    font-size: 28rpx;
+    line-height: 40rpx;
+  }
+  .currentWordNumber {
+    text-align: right;
+    color: #C2C2C2;
+  }
+}
+</style>

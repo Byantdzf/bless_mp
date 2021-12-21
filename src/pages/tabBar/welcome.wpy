@@ -1,0 +1,141 @@
+<template>
+  <view class="box {{hide?'hide':''}}">
+
+    <!--&lt;!&ndash;    <image src="https://images.ufutx.com/201908/16/7d151aa8067ab044838add608e7395fd.jpeg" mode="aspectFill" class="image"></image>&ndash;&gt; 老的-->
+    <!--    <image src="https://images.ufutx.com/202012/31/c334e36f2a3d2e21d4a551f7c57f280f.png" mode="aspectFill" class="image"></image>-->
+    <image src="https://images.ufutx.com/202101/26/ead4ea282e7a37d03191a3f810f80dda.png" mode="aspectFill" class="image"></image>
+<!--    <view @tap="goto('/pages/users/registerV2')" class="next" wx:if="{{hideBtn}}"></view>-->
+    <!--    <view class="wrapper" @tap="jump">-->
+    <!--      <view class="font_24 flo_l text-center time">{{time}}s</view>-->
+    <!--      <view class="font_24 flo_l">跳过</view>-->
+    <!--    </view>-->
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import base from '../../mixins/base'
+import {service} from '../../config.js'
+import http from '../../mixins/http'
+import ShareMessage from '../../mixins/ShareMessage'
+var util = require('../../utils/util')
+let app = wepy.$instance
+// let store = app.store
+
+export default class welcome extends wepy.page {
+  mixins = [base, http, ShareMessage]
+  config = {
+    navigationBarTitleText: '欢迎使用',
+    enablePullDownRefresh: false,
+    navigationStyle: 'custom'
+  }
+  components = {}
+  data = {
+    hide: false,
+    hideBtn: false,
+    time: 10,
+    token: '',
+    setIntervalFn: '',
+    startImage: '',
+    type: ''
+  }
+
+  computed = {}
+
+  onShow() {
+    wx.switchTab({ url: "/pages/tabBar/home" });
+  }
+
+  onLoad(e) {
+  }
+
+  changeWallpaper() {
+  }
+
+  // ------------------------------------------------------------------------
+
+  methods = {
+  }
+}
+</script>
+
+<style lang="less" scoped>
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/reset.less";
+
+page {
+  background: #ffffff;
+  .box {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    /*background: url('http://images.ufutx.com/201901/09/3d0d453feb5ad6b5625ece9670fd7d31.png') no-repeat contain;*/
+    .wrapper {
+      width: 154rpx;
+      height: 60rpx;
+      background: rgba(99, 97, 101, 0.6);
+      position: absolute;
+      right: 30rpx;
+      bottom: 30rpx;
+      border-radius: 32rpx;
+      /*border: 1rpx solid #b6b6b6;*/
+      color: white;
+      .time {
+        width: 42rpx;
+        margin-left: 22rpx;
+        height: 32rpx;
+        line-height: 32rpx;
+        margin-top: 14rpx;
+        margin-right: 12rpx;
+        border-right: 2px solid #b6b6b6;
+      }
+
+      view {
+        line-height: 60rpx;
+      }
+    }
+
+    .image {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .image-btn {
+      width: 100vw;
+      height: 12vh;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+    }
+
+    .next {
+      width: 100vw;
+      height: 8vh;
+      /*background: red;*/
+      position: absolute;
+      left: 0;
+      bottom: 26vh;
+    }
+  }
+
+  .hide {
+    animation: opacity2 800ms ease-in;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes opacity2 {
+    0% {
+      opacity: 1
+    }
+    50% {
+      opacity: .8;
+    }
+    100% {
+      opacity: 0;
+      display: none;
+    }
+  }
+}
+</style>

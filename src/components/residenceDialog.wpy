@@ -1,0 +1,260 @@
+<template>
+	<view class="residenceDialog">
+        <view class="cu-modal bottom-modal {{residenceShow?'show':''}}" catchtap="onModal">
+            <view class="cu-dialog">
+                <view class="m_dialog">
+                    <view class="font_32 bold color333 f-fcc">请选择目前居住地</view>
+                    <selectCity :multiIndex.sync="multiIndex">
+                        <view slot="Input" class="f-fcc">
+                            <view class="m_cus m_ct f-fcc {{selectType == 'custom'?'sel':''}}">
+                                <view class="f-fcc">
+                                    <!-- <view class="font_family black_6 icon-location font_32 {{selectType == 'custom'?'sel':''}}"></view> -->
+                                    <image class="u_cus_img" src="{{selectType == 'custom'?'https://images.ufutx.com/202105/13/9ac1cc6f1753832da16ce19e44f812b6.png':'https://images.ufutx.com/202105/13/687179ce81755d46d25038bd49acf203.png'}}" mode="scaleToFill" lazy-load="true"></image>
+                                    <view class="font_32 black_6 {{selectType == 'custom'?'sel':''}}">{{selectType == 'custom'?address.province+'  '+address.city:'自定义选择'}}</view>
+                                </view>
+                            </view>
+                        </view>
+                    </selectCity>
+                    <view class="f-fcc">
+                        <view class="m_aut m_ct f-fcc {{selectType == 'automatic'?'sel':''}}" @tap="getCenterLocation('address')">
+                            <view class="font_family black_6 icon-locate font_32 {{selectType == 'automatic'?'sel':''}}"></view>
+                            <view class="font_32 black_6 {{selectType == 'automatic'?'sel':''}}">{{selectType == 'automatic'?address.province+'  '+address.city:'获取地理位置'}}</view>
+                        </view>
+                    </view>
+                    <view class="f-fcc font_32 color999">取消</view>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import http from '../mixins/http'
+import { service } from '../config.js'
+import base from '../mixins/base'
+import selectCity from './selectCity'
+export default class residenceDialog extends wepy.page{
+    mixins = [base,http]
+    components = {selectCity}
+    props = {
+      residenceShow: {
+        type: Boolean,
+        default: false
+      }
+    }
+    data = {
+        address: { // 居住地
+            country: '', province: '', city: ''
+        },
+        addressType: 'address',
+        multiIndex: [0, 18, 2],
+        selectType: ''
+    }
+    getAddress(lat, lng) {
+      let vm = this
+      let data = {
+        local_latitude: lat,
+        local_longitude: lng
+      }
+        vm.$showLoading('定位中...')
+      vm.$get({url: `${service.host}/location/to/address`, data}, {
+        success: ({code, data}) => {
+            console.log(data)
+            vm[vm.addressType] = {
+                country: data.nation,
+                province: data.province,
+                city: data.city
+            }
+            
+            vm.selectType = 'automatic'
+            this.multiCity()
+            this.$emit('residenceCity', this.address)
+            vm.$apply()
+            wx.hideLoading()
+        }
+      })
+    }
+    multiCity() {
+        this.provinces.forEach((item,index) => {
+            if(item.name == this.address.country){
+                this.multiIndex[0] = index
+                this.$invoke('selectCity', 'MultiPickerColumnChange',{detail:{
+                    value: index,
+                    column: 0
+                }});
+                item.son.forEach((res,indexA)=>{
+                    if(res.name == this.address.province){
+                        this.$invoke('selectCity', 'MultiPickerColumnChange',{detail:{
+                            value: indexA,
+                            column: 1
+                        }});
+                        this.multiIndex[1] = indexA
+                        res.son.forEach((data,indexB)=>{
+                            if(data.name == this.address.city){
+                                this.$invoke('selectCity', 'MultiPickerColumnChange',{detail:{
+                                    value: indexB,
+                                    column: 2
+                                }});
+                                this.multiIndex[2] = indexB
+                            }
+                        })
+                    }
+                })
+            }
+        });
+    }
+    modalCity() {
+        this.residenceShow = false
+        this.$emit('dialogCut', {
+            residenceShow: false
+        })
+    }
+    methods = {
+        getCenterLocation(type) {
+            let vm = this
+            // if (!vm.hide) {
+            //     vm.$invoke('modal', 'showModal')
+            // }
+            vm.addressType = type
+            wx.getSystemInfo({
+                success: (res) => {
+                    console.log(res , 'GPS定位')
+                    var isopendingwei = res.locationEnabled
+                    console.log(res.locationEnabled)
+                    if (isopendingwei == false) {
+                    console.log('请先开启手机GPS定位,然后重新刷新')
+                        wx.showToast({
+                            title: '请打开GPS定位获取地理位置',
+                            icon: 'none',
+                            duration: 2000
+                        })
+                    } else {
+                    
+                        wx.getSetting({
+                            success: (res) => {
+                                var statu = res.authSetting;
+                                if (!statu['scope.userLocation']) {
+                                    wx.showModal({
+                                        title: '是否授权当前位置',
+                                        content: '需要获取您的地理位置，请确认授权',
+                                        confirmColor: '#f16765',
+                                        success: res => {
+                                            if (res.confirm) {
+                                                wx.openSetting({
+                                                    success: data => {
+                                                        if (data.authSetting["scope.userLocation"]) {
+                                                            wx.getLocation({
+                                                                type: 'gcj02',
+                                                                success: function (res) {
+                                                                    console.log(res)
+                                                                    vm.getAddress(res.latitude, res.longitude)
+                                                                    wx.setStorageSync('myLong', res.longitude)
+                                                                    // wx.setStorageSync('myLat', res.user.id)
+                                                                    vm.$apply()
+                                                                },
+                                                                fail: function () {
+                                                                    vm.hide = false
+                                                                    vm.$apply()
+                                                                }
+                                                            })
+                                                        }
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    })
+                                }else {
+                                    wx.getLocation({
+                                        type: 'gcj02',
+                                        success: function (res) {
+                                            console.log(res)
+                                            vm.getAddress(res.latitude, res.longitude)
+                                            wx.setStorageSync('myLong', res.longitude)
+                                            // wx.setStorageSync('myLat', res.user.id)
+                                        },
+                                        fail: function () {
+                                            vm.hide = false
+                                            vm.$apply()
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    }
+                }
+            })
+        },
+        onModal() {
+            this.modalCity()
+        }
+    }
+    events = {
+      'selectCity': (value, index) => {
+        this.addressType = 'address'
+        this[this.addressType] = {
+          country: value[0], province: value[1], city: value[2]
+        }
+        this.selectType = 'custom'
+        this.$emit('residenceCity', this.address)
+        this.$apply()
+      },
+      'provinces': (value) => {
+          this.provinces = value
+      },
+    }
+}
+</script>
+<style lang="less">
+.residenceDialog {
+    .cu-modal {
+        .cu-dialog {
+            border-radius: 16rpx 16rpx 0 0;
+        }
+        .m_dialog {
+            height: 478rpx !important;
+            padding: 30rpx;
+            border-radius: 32rpx;
+            .m_ct {
+                width: 400rpx;
+                height: 72rpx;
+                border-radius: 16rpx;
+                border: 2rpx solid #999999;
+                box-sizing: border-box;
+            }
+            .m_ct.sel {
+                background: rgba(255, 83, 128, 0.06);
+                border: 2rpx solid #FF5380;
+                box-sizing: border-box;
+                .font_32.sel {
+                    color: #FF5380;
+                    // padding-left: 4rpx;
+                }
+                .font_family.sel {
+                    color: #FF5380;
+                }
+            }
+            .icon-location{
+                margin-top: 4rpx;
+                margin-right: 4rpx;
+                line-height: 32rpx;
+            }
+            .icon-locate{
+                margin-top: 2rpx;
+                margin-right: 8rpx;
+                line-height: 32rpx;
+            }
+            .m_cus {
+                margin: 56rpx 0 40rpx;
+                .u_cus_img {
+                    width: 24rpx;
+                    height: 32rpx;
+                    margin-right: 6rpx;
+                }
+            }
+            .m_aut {
+                margin-bottom: 40rpx;
+            }
+        }
+    }
+}
+</style>

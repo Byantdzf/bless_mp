@@ -1,0 +1,147 @@
+<template>
+	<cuCustom bgColor="bg-gradual-pink" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">徒弟</view></cuCustom>
+	<view class="cu-chat">
+	  <view class="cu-item self">
+	    <view class="main">
+	      <view class="content bg-green shadow">
+	        <text>喵喵喵！喵喵喵！喵喵喵！喵喵！喵喵！！喵！喵喵喵！</text>
+	      </view>
+	    </view>
+	    <view class="cu-avatar radius" style="background-image:url(https://image.fulllinkai.com/202112/15/f8a9e410ec73d151ef5a6c67b8ce714f.png);"></view>
+	    <view class="date">2018年3月23日 13:23</view>
+	  </view>
+	  <view class="cu-info round">对方撤回一条消息!</view>
+	  <view class="cu-item">
+	    <view class="cu-avatar radius" style="background-image:url(https://image.fulllinkai.com/202112/15/ebd7ffdfbb3b63efa2533a5255224cd5.jpeg);"></view>
+	    <view class="main">
+	      <view class="content shadow">
+	        <text>喵喵喵！喵喵喵！</text>
+	      </view>
+	    </view>
+	    <view class="date "> 13:23</view>
+	  </view>
+	  <view class="cu-info">
+	    <text class="cuIcon-roundclosefill text-red "></text> 对方拒绝了你的消息
+	  </view>
+	  <view  class="cu-info">
+	    对方开启了好友验证，你还不是他(她)的好友。请先发送好友验证请求，对方验证通过后，才能聊天。
+	    <text class="text-blue">发送好友验证</text>
+	  </view>
+	  <view class="cu-item self">
+	    <view class="main">
+	      <image src="https://img2.baidu.com/it/u=2498285511,1190639525&fm=26&fmt=auto" class="radius" mode="widthFix"></image>
+	    </view>
+	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big107000.jpg);"></view>
+	    <view class="date"> 13:23</view>
+	  </view>
+	  <!-- <view class="cu-item self">
+	    <view class="main">
+	      <view class="action text-bold text-grey">
+	        3"
+	      </view>
+	      <view class="content shadow">
+	        <text class="cuIcon-sound text-xxl padding-right-xl"> </text>
+	      </view>
+	    </view>
+	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big107000.jpg);"></view>
+	    <view class="date">13:23</view>
+	  </view>
+	  <view class="cu-item self">
+	    <view class="main">
+	      <view class="action">
+	        <text class="cuIcon-locationfill text-orange text-xxl"></text>
+	      </view>
+	      <view class="content shadow">
+	        喵星球，喵喵市
+	      </view>
+	    </view>
+	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big107000.jpg);"></view>
+	    <view class="date">13:23</view>
+	  </view>
+	  <view class="cu-item">
+	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big143004.jpg);"></view>
+	    <view class="main">
+	      <view class="content shadow">
+	       @#$^&**
+	      </view>      
+	      <view class="action text-grey">
+	        <text class="cuIcon-warnfill text-red text-xxl"></text> <text class="text-sm margin-left-sm">翻译错误</text> 
+	      </view>
+	    </view>
+	    <view class="date">13:23</view>
+	  </view> -->
+	</view>
+	
+	<view class="cu-bar foot input {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
+	  <view class="action">
+	    <text class="cuIcon-sound text-grey"></text>
+	  </view>
+	  <input class="solid-bottom" bindfocus="InputFocus" bindblur="InputBlur" adjust-position="{{false}}" focus="{{false}}" maxlength="300" cursor-spacing="10"></input>
+	  <view class="action">
+	    <text class="cuIcon-emojifill text-grey"></text>
+	  </view>
+	  <button class="cu-btn bg-green shadow">发送</button>
+	</view>
+</template>
+
+<script>
+import wepy from "wepy";
+import { service } from "../../config.js";
+import http from "../../mixins/http";
+import base from "../../mixins/base";
+import user from "../../mixins/user";
+import cuCustom from "../../components/cu-custom";
+// import { getsubscription } from "../../utils/fn";
+
+let date = new Date();
+export default class chat extends wepy.page {
+  mixins = [base, http, user];
+  config = {
+    navigationBarTitleText: "首页推荐",
+    onReachBottomDistance: 10,
+    navigationStyle: "custom",
+    enablePullDownRefresh: false,
+  };
+  components = { cuCustom };
+  watch = {};
+  data = {
+    modalName: "",
+    placeholderText: "",
+    max: 800,
+    value: "",
+  };
+  computed = {};
+  async onLoad(e) {
+    wx.hideTabBar({});
+  }
+  onShow() {}
+  // 分享
+  onShareAppMessage(res) {}
+  methods = {
+    hideModal() {
+      this.modalName = "";
+    },
+		displayModal(e) {
+			this.modalName = e
+		},
+		goToUrlId(e) {
+			this.$goto(e)
+		}
+  };
+  events = {
+    textareaValue: (e) => {
+      console.log(e, "text------------------------");
+      this.$apply();
+    },
+  };
+}
+</script>
+
+<style lang="less">
+page {
+  padding-bottom: 100rpx;
+}
+.cu-avatar {
+	border-radius: 50%;
+}
+</style>

@@ -1,0 +1,101 @@
+<template>
+    <view class="tabber">
+        <view class="cu-bar tabbar Df-tabbar bg-white foot">
+            <view class="action" wx:for="{{parentTitle}}" wx:key="index" @tap="redirectTo('{{item.Active}}')">
+                <view class="cuIcon-cu-image">
+                    <!-- <image src="{{active == item.Active?item.iconActive:item.icon}}"></image> -->
+                    <image wx:if="{{active == item.Active}}" src="../images/tabbar/{{item.icon}}Active.png"></image>
+                    <image wx:else src="../images/tabbar/{{item.icon}}.png"></image>
+                    <view class="cu-tag badge" wx:if="{{item.Active == 'news' && friend_count != 0}}" style="background-color: #FF5380;top: -4px;">{{friend_count}}</view>
+                </view>
+                <view class="{{active == item.Active?'color-theme':'text-gray'}}">{{item.title}}</view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import {service} from '../config.js'
+import base from '../mixins/base'
+import http from '../mixins/http'
+export default class NavBar extends wepy.component {
+    mixins = [base, http]
+    components = {}
+    props = {
+        active: {
+            type: String,
+            default: ''
+        },
+        remainAmount: {
+            type: Number,
+            default: 0
+        },
+    }
+    data = {
+        parentTitle: [
+            {   
+                Active: 'home',
+                icon: 'home',
+                title: '单身'
+            },
+            {   
+                Active: 'activities',
+                icon: 'attention',
+                title: '发现'
+            },
+            {   
+                Active: 'map',
+                icon: 'mapIcon',
+                title: '相遇地图'
+            },
+            {   
+                Active: 'news',
+                icon: 'message',
+                title: '消息'
+            },
+            {   
+                Active: 'user',
+                icon: 'my',
+                title: '我的'
+            },
+        ],
+        friend_count: ''
+    }
+    async onLoad() {
+        console.log('active-------------',this.active)
+    }
+    getNewCount() {
+      this.$get({
+        url: `${service.host}/new/message/count`
+      }, {
+        success: ({
+          code,
+          data
+        }) => {
+          let {
+            friend_count
+          } = data
+          this.friend_count = friend_count
+          this.$apply()
+        }
+      })
+    }
+    methods = {
+        redirectTo(e) {
+            if(e == this.active) return
+            this.$redirectTo(`/pages/marriedPage/${e}`)
+        }
+    }
+}
+</script>
+<style lang="less">
+.tabber {
+    .Df-tabbar{
+        position: fixed;
+        width: 100vw;
+        bottom: 0rpx;
+        z-index: 9999;
+        border-top: 2rpx solid #d0d0d0;
+    }
+}
+</style>

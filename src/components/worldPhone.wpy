@@ -1,0 +1,151 @@
+<template>
+  <view class="worldPhone">
+	  <view class="m_name f-fc">
+		  <view class="font_28 color333 bold">联系人：</view>
+		  <view class="m_inp">
+			  <input value="{{name}}" bindinput="bindinputName" type="text" placeholder="请输入您的姓名"/>
+		  </view>
+	  </view>
+	  <view class="m_phone f-fc">
+		  <view class="font_28 color333 bold">手机号：</view>
+		  <view class="m_inp f-fc">
+			  <view class="m_woPho"  wx:if='{{!showChooseArea}}'>
+					<block wx:for="{{arerList}}" wx:key="index">
+						<view class="font_28 {{item.nation_code == AreaValue?'color-theme':'color333'}}" style="text-align: left;padding: 12rpx 10rpx;" @tap="selectedArea({{item}})">{{item.nation_code}} {{item.nation_name}}</view>
+					</block>
+			  </view>
+			  <view class="m_wo f-fc"  @tap.stop="showWorldPhone">
+				  <view>{{AreaValue}}</view>
+				  <image class="u_coll_img" wx:if='{{showChooseArea}}' src="https://image.fulllinkai.com/202111/29/f1e9aff7554cb0207f045b9d15388f61.png"  mode="aspectFill"></image>
+				  <image class="u_coll_img" wx:else src="https://image.fulllinkai.com/202111/29/526faa3d99616f1faba1cde44c7ee204.png"  mode="aspectFill"></image>
+			  </view>
+			  <input value="{{phone}}" bindinput="bindinputPhone" type="number" placeholder="请输入您的手机号"/>
+		  </view>
+	  </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import { service } from '../config.js'
+  import base from '../mixins/base'
+  import http from '../mixins/http'
+  import user from '../mixins/user'
+  export default class worldPhone extends wepy.page {
+	mixins = [base, http, user]
+    props = {
+      drawDataList: {
+        type: Object,
+        default: {}
+      },
+      modalName: {
+        type: String,
+        default: ''
+      }
+    }
+    watch = {
+      drawDataList(e) {
+    	  this.drawData = e
+      }
+    }
+    data = {
+    	drawData: {},
+		showChooseArea: true,
+		 AreaValue: '+86',
+		 arerList: [],
+		 name: '',
+		 phone: ''
+    }
+	onLoad() {
+		this.getAreaCode()
+		if(wx.getStorageSync('worlPhoneName')) {
+			this.name = wx.getStorageSync('worlPhoneName')
+			this.$emit('inputName', this.name)
+		}
+		if(wx.getStorageSync('worlPhonePhone')) {
+			this.phone = wx.getStorageSync('worlPhonePhone')
+			this.$emit('inputPhone', {phone: this.phone,AreaValue: this.AreaValue})
+		}
+	}
+	// 获取国家区号
+	getAreaCode() {
+	  const vm = this
+	  this.$get({
+	    url: `${service.host}/get/nation/mobile/area/code`
+	  }, {
+	    success: ({code, data}) => {
+			vm.arerList = data.list
+			console.log(vm.arerList, '-----------------------------------')
+			this.$apply()
+		}
+		})
+	}
+	methods = {
+		// 选择国家区号
+		selectedArea(e) {
+		  this.AreaValue = e.nation_code
+		  this.showChooseArea = !this.showChooseArea
+		  this.$emit('inputPhone', {phone: this.phone,AreaValue: this.AreaValue})
+		},
+		showWorldPhone() {
+			console.log(this.name)
+			// if(this.showChooseArea) {
+				this.showChooseArea = !this.showChooseArea
+			// }
+		},
+		bindinputName(e) {
+			this.name = e.detail.value
+			wx.setStorageSync('worlPhoneName', this.name)
+			this.$emit('inputName', this.name)
+		},
+		bindinputPhone(e) {
+			this.phone = e.detail.value
+			wx.setStorageSync('worlPhonePhone', this.phone)
+			this.$emit('inputPhone', {phone: this.phone,AreaValue: this.AreaValue})
+		}
+	}
+	}
+</script>
+
+<style lang="less">
+	.worldPhone {
+		background-color: white;
+		.m_name,
+		.m_phone {
+			padding: 0 30rpx 0 40rpx;
+			padding-top: 18rpx;
+			.m_inp {
+				flex: 1;
+				border-bottom: 2px solid #F5F5F5;
+				margin-left: 16rpx;
+				position: relative;
+				input {
+					font-size: 28rpx;
+					line-height: 40rpx;
+					padding: 16rpx 0;
+					box-sizing: content-box;
+					text-align: left;
+				}
+				.m_wo {
+					.u_coll_img {
+						height: 12rpx;
+						width: 20rpx;
+						margin: 0rpx 50rpx 0 8rpx;
+					}
+				}
+				.m_woPho {
+					position: absolute;
+					left: 0;
+					bottom: 88rpx;
+					width: 76%;
+					height: 332rpx;
+					background: #fff;
+					border: 2rpx solid #f5f5f5;
+					border-radius: 8rpx;
+					z-index: 2222;
+					overflow-x: hidden;
+					overflow-y: scroll;
+				}
+			}
+		}
+	}
+</style>

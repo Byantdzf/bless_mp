@@ -1,0 +1,214 @@
+<template>
+    <view class="loginDialog">
+        <view class="cu-modal {{loginShow?'show':''}}" style="z-index: 9999;" catchtap="onModal">
+            <view class="cu-dialog">
+                <view class="m_dialog f-fcc f-fdc">
+                    <view class="m_dialog_img">
+                        <image class="u_dialog_img" src="https://images.ufutx.com/202105/12/eeadaef5123837de5109b25e93fdeae6.png" mode="widthFix" ></image>
+                    </view>
+                    <view class="u_tt font_40 color333 bold">登录福恋，获得更精准的推荐</view>
+                    <view class="font_24 color999">登录即表明您同意福恋的<text class="underline"  @tap.stop="gotoApp('https://love.ufutx.com/h5/#/serviceAgreementV2')">用户协议</text>与<text class="underline"  @tap.stop="gotoApp('https://love.ufutx.com/h5/#/PrivacyAgreementV2')">隐私政策</text></view>
+                    <button class="m_bu f-fcc" open-type="getPhoneNumber" bindtap="clickLogin" bindgetphonenumber="getPhoneNumber">
+                        <view class="u_sas"></view>
+                        <view class="u_bu_tt font_32 white bold">微信登录</view>
+                        <view class="u_bu_tips font_20 f-fcc bold">私密</view>
+                    </button>
+                    <view class="font_28 color999" wx:if="{{!mapFather}}" catchtap="onModal">暂不登录</view>
+                </view>
+            </view>
+        </view>
+    </view>
+    <agreementDialog :agreementShow.sync="agreementShow" @agreementDialogCut.user="agreementDialogCut"></agreementDialog>
+</template>
+<script>
+import wepy from 'wepy'
+import {service} from '../config.js'
+import base from '../mixins/base'
+import http from '../mixins/http'
+import agreementDialog from './agreementDialog'
+export default class loginDialog extends wepy.page {
+  mixins = [base, http]
+  components = {
+    agreementDialog
+  }
+  props = {
+    loginShow: {
+      type: Boolean,
+      default: false,
+      twoWay: true
+    },
+    mapFather: {
+      type: Boolean,
+      default: false
+    }
+  }
+  watch = {
+    mapFather(e) {
+      
+    }
+  }
+  data = {
+    agreementShow: false,
+    code: ''
+  }
+  watch = {
+      // 监听截取框宽高变化
+    loginShow(e) {
+      let that = this
+      if (e) {
+        wx.login({
+          success: (res) => {
+            that.code = res.code
+                    // wx.setStorageSync('code', code)
+          }
+        })
+      }
+    }
+  }
+  hideModal() {
+    this.loginShow = false
+    this.$emit('loginDialogCut', {
+      loginShow: false
+    })
+    this.$apply()
+  }
+  methods = {
+    clickLogin() {
+      this.$emit('clickLogin')
+    },
+    getPhoneNumber(e) {
+      let vm = this
+      if (e.detail.iv) {
+        let data = {
+          code: vm.code,
+          iv: e.detail.iv,
+          from_openid: wx.getStorageSync('user_id'),
+          encryptedData: e.detail.encryptedData
+        }
+        vm.$showLoading('加载中...')
+        vm.$post({url: `${service.host}/wechat/mobile/v2`, data}, {
+          success: ({code, data}) => {
+            vm.$emit('mobileSuccess')
+            let {phoneNumber, unionid, openid} = data
+            wx.setStorageSync('openid', data.openid)
+            vm.$post({url: `${service.host}/wechat/phone/binding`,
+              data: {
+                mobile: phoneNumber,
+                unionid,
+                openid
+              }}, {
+                success: ({code, data}) => {
+                  vm.hideModal()
+                  if (data.status == 1) {
+                    wx.setStorageSync('demand', 1)
+                    wx.setStorageSync('dynamicList', 1)
+                    vm.$emit('loginDialogShow', {
+                      loginShow: false
+                    })
+                    vm.$broadcast('loginDialogShow',{
+                      loginShow: false
+                    })
+                  } else {
+                    // wx.setStorageSync('holidayActivity', 1)
+                    wx.reLaunch({url: `/pages/userInfo/basicData?phoneNumber=${phoneNumber}&unionid=${unionid}&openid=${openid}`})
+                    // wx.navigateTo({
+                    //   url: `/pages/userInfo/basicData?phoneNumber=${phoneNumber}&unionid=${unionid}&openid=${openid}`
+                    // })
+                  }
+                  vm.$apply()
+                }
+              })
+          },
+          fail: ({code, data}) => {
+          }
+
+        })
+      }
+    },
+    onModal() {
+      if (!this.mapFather) {
+        this.hideModal()
+      }
+    },
+    onAgreement() {
+      this.agreementShow = true
+    },
+    agreementDialogCut() {
+      this.agreementShow = false
+      this.$apply()
+    },
+    gotoApp(url) {
+      wx.navigateTo({url: '/pages/books/bookDetail?url=' + encodeURIComponent(url)})
+    }
+  }
+}
+</script>
+<style lang="less">
+.loginDialog {
+    .underline {
+        text-decoration: underline;
+    }
+    .cu-dialog {
+        width: 600rpx !important;
+        padding: 72rpx 0 68rpx !important;
+        border-radius: 32rpx !important;
+        background: #FFFFFF !important;
+        overflow: hidden  !important;
+        .m_dialog {
+            border-radius: 32rpx;
+            .m_dialog_img {
+                margin-bottom: 64rpx;
+                margin-right: 16rpx;
+                .u_dialog_img {
+                    width: 232rpx;
+                    height: 110rpx;
+                }
+            }
+            .u_tt {
+                margin-bottom: 16rpx;
+            }
+            .m_bu {
+                width: 336rpx;
+                height: 80rpx;
+                background: #FF5380;
+                border-radius: 100rpx;
+                margin: 80rpx 0 32rpx;
+                .u_bu_tt {
+                    // position: relative;
+                    line-height: 32rpx;
+                    padding: 0 4rpx;
+                }
+                .u_sas {
+                    width: 64rpx;
+                }
+                .u_bu_tips {
+                    width: 64rpx;
+                    height: 32rpx;
+                    padding-top: 4rpx;
+                    color: #FF5380;
+                    line-height: 20rpx;
+                    background-color: white;
+                    border-radius: 100rpx 100rpx 100rpx 0;
+                    margin-bottom: 5rpx;
+                }
+                // .u_bu_tt:after {
+                //     content:"私密";
+                //     width: 64rpx;
+                //     height: 32rpx;
+                //     position: absolute;
+                //     transform: translateY(-50%);
+                //     top: 50%;
+                //     right: -68rpx;
+                //     color: #FF5380;
+                //     background-color: white;
+                //     white-space: nowrap;
+                //     font-size: 20rpx;
+                //     line-height: 32rpx;
+                //     border-radius: 100rpx 100rpx 100rpx 0;
+                //     margin-bottom:
+                // }
+            }
+        }
+    }
+}
+</style>

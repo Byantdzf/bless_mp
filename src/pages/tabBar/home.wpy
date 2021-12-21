@@ -1,0 +1,514 @@
+<template>
+  <view class="home">
+    <view class="m_bag_img">
+      <image
+        class="bag_img"
+        src="https://image.fulllinkai.com/202112/18/8b3c0da0e82ee745c9d60f55ccd46d16.png"
+        mode="aspectFill"
+      ></image>
+			<view class="m_tTips f-fcc">
+				<view class="u_tTips f-fcc f-wrap">
+					<view class="font_30 white bold">写下您的暖心祝福，传递美好</view>
+				</view>
+			</view>
+      <view class="m_bu f-fbc">
+        <view class="making_bto font_32 bold" @tap="sendOut">制作祝福贺卡</view>
+        <view class="Wish_box" @tap="goToUrlId('/pages/users/myNews')">
+          <image class="Wish_box_icon" src="https://image.fulllinkai.com/202112/18/b651ec61b60ba8b446b7c46c08739f94.png" mode="aspectFill"></image>
+          <view class="font_26 color-333">祝福箱</view>
+        </view>
+      </view>
+    </view>
+		<!-- 捞祝福 -->
+    <view class="cu-modal {{modalName=='obtainModal'?'show':''}}" @tap.stop="hideModal">
+      <view class="perfect_data_box animation-slide-top" catchtap>
+        <view class="u_complaint font_28 color666" @tap="complaint">投诉</view>
+        <view class="m_ble_con">
+          <view class="m_ble_user f-fc">
+						<image
+						  class="u_user_img"
+						  src="{{obtainData[obtainIndex].avatar}}"
+						  mode="widthFix"
+						></image>
+						<view class="m_ble_tt">
+							<view>{{obtainData[obtainIndex].name}}</view>
+							<view>给你发了一个祝福！！！</view>
+						</view>
+					</view>
+          <view class="m_texTarea">
+            <texTarea
+              :placeholderText.sync="placeholderText"
+              :max.sync="max"
+              :value.sync="value"
+							@textareaValue.user="textareaValue"
+            ></texTarea>
+          </view>
+          <view class="m_ble_bu f-fbc">
+            <view class="u_bu_le f-fcc bold" @tap="againGat">再捞一个祝福</view>
+            <view class="u_bu_ri bold f-fcc" @tap="hideModal">回复Ta</view>
+          </view>
+        </view>
+      </view>
+    </view>
+<!--    &lt;!&ndash; 发送祝福 &ndash;&gt;-->
+<!--    <view class="cu-modal {{modalName=='sendOutModal'?'show':''}}" bindtap="hideModal">-->
+<!--      <view class="perfect_data_box animation-slide-top" catchtap>-->
+<!--        <view class="m_send_con">-->
+<!--          <view class="font_32 color333 bold text-left">给远方的陌生人发个祝福吧！</view>-->
+<!--          <view class="m_texTarea">-->
+<!--            <senTexTarea-->
+<!--              :placeholderText.sync="placeholderText"-->
+<!--              :max.sync="max"-->
+<!--              :value.sync="senValue"-->
+<!--              @textareaValue.user="senTextareaValue"-->
+<!--            ></senTexTarea>-->
+<!--          </view>-->
+<!--          <view class="m_ble_bu f-fcc">-->
+<!--            <view class="u_ble_bu bold fong_30 f-fcc" @tap="sendOut">发送祝福</view>-->
+<!--          </view>-->
+<!--        </view>-->
+<!--      </view>-->
+<!--    </view>-->
+		<!-- 发送祝福 -->
+		<view class="cu-modal {{modalName=='sendOutModal'?'show':''}}">
+		  <view class="blessing_box">
+        <view class="cancelPlaceholder" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="widthFix"></image>
+        </view>
+		    <view class="m_send_con">
+		      <view class="m_texTarea">
+		        <senTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue"></senTexTarea>
+		      </view>
+		    </view>
+        <view class="m_share_bu">
+<!--          <view class="u_share_bu bold font_20_30 f-fcc" @tap="shareQrcode">分享至朋友圈</view>-->
+          <view>
+            <block wx:if="{{senValue}}">
+              <button class="font_30 u_share_bu_s" open-type="share" @tap.stop="hideModal">
+                <view class="bold font_30 f-fcc">分享给好友</view>
+              </button>
+            </block>
+            <block wx:else>
+              <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="hiddenSendOut">分享给好友</view>
+            </block>
+          </view>
+        </view>
+		  </view>
+		</view>
+    <view class="cu-modal {{modalName=='shareModal'?'show':''}}">
+      <view class="share_code_box">
+        <view class="cancelShare" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/0fb3ec31f29628d09d18135a826154fe.png" mode="widthFix"></image>
+        </view>
+      </view>
+    </view>
+		<!-- 投诉 -->
+		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">
+		  <view class="perfect_data_box animation-slide-top" catchtap>
+		    <view class="m_comp_con">
+		      <view class="m_comp_tt font_32 color333 bold">举报{{obtainData[obtainIndex].name}}</view>
+					<view class="m_comp">
+						<view class="font_30 color333 bold text-left">举报类型</view>
+						<view class="m_comp_type f-fc f-wrap">
+							<block  wx:for="{{compType}}" wx:key="index">
+								<view class="u_comp_type f-fcc font_28 {{typeIndex == index?'sel':''}}" @tap="choiceType({{index}})">{{item}}</view>
+							</block>
+						</view>
+					</view>
+		      <view class="m_texTarea">
+		        <compTexTarea
+		          :placeholderText.sync="compPlaceholderText"
+		          :max.sync="max"
+		          :value.sync="compValue"
+							@textareaValue.user="compTextareaValue"
+		        ></compTexTarea>
+		      </view>
+		      <view class="m_ble_bu f-fcc">
+		        <view class="u_ble_bu bold fong_30 f-fcc" @tap="Submit">提交</view>
+		      </view>
+		    </view>
+		  </view>
+		</view>
+  </view>
+</template>
+
+<script>
+import wepy from "wepy";
+// import { service } from "../../config.js";
+import http from "../../mixins/http";
+import base from "../../mixins/base";
+import user from "../../mixins/user";
+import texTarea from "../../components/textarea";
+// import { getsubscription } from "../../utils/fn";
+
+let date = new Date();
+export default class home extends wepy.page {
+  mixins = [base, http, user];
+  config = {
+    navigationBarTitleText: "首页推荐",
+    onReachBottomDistance: 10,
+    navigationStyle: "custom",
+    enablePullDownRefresh: false,
+  };
+  components = { texTarea, senTexTarea: texTarea, compTexTarea: texTarea };
+  watch = {};
+  data = {
+    modalName: "",
+    placeholderText: "写下你的暖心祝福",
+		compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
+    max: 800,
+    value: "",
+		senValue: "",
+		compValue: '',
+		compType: ['政治敏感', '色情低俗', '广告软文', '内容引起不适'],
+		obtainData: [
+			{
+				name: '郭老师',
+				content: '这个玩意现在特别的花里胡哨啊',
+				avatar: 'https://image.fulllinkai.com/202112/15/ebd7ffdfbb3b63efa2533a5255224cd5.jpeg'
+			},
+			{
+				name: '畅先生',
+				content: '真实做了孽，小时候吃了上顿没下顿，好不容易长大啦，看个视频又看了上集没下集',
+				avatar: 'https://image.fulllinkai.com/202112/15/2772e4e2b59d435c1cbfbc692b97476b.jpeg'
+			},
+			{
+				name: '微微一笑',
+				content: '笑死我了，我和我搭档仔细研究了图，觉得没问题了，决定明天发给老板，有问题明天改',
+				avatar: 'https://image.fulllinkai.com/202112/15/1b0c3507db8efca43d0177bfc7b7175a.jpeg'
+			},
+			{
+				name: '小恒',
+				content: '我好纳闷为什么我上学时候一天在班里坐10个小时 下课了还能玩上好久电脑 怎么我现在一天上8个小时班回家之后连玩电脑的时间都没了',
+				avatar: 'https://image.fulllinkai.com/202112/15/0055e87a6bbf1e5bd5cc3f6db21a7bba.jpeg'
+			},
+			{
+				name: '冰美式',
+				content: '我以为我去最后一个知道的？原来我不是最后',
+				avatar: 'https://image.fulllinkai.com/202112/15/1d96bf4b7859c179c84009b7d6d82c2b.png'
+			}
+		],
+		obtainIndex: 0,
+		typeIndex: null
+  };
+  computed = {};
+  async onLoad(e) {
+		this.value = this.obtainData[this.obtainIndex].content
+    wx.hideTabBar({});
+  }
+  onShow() {}
+  // 分享
+  onShareAppMessage(res) {}
+  methods = {
+		textareaValue(e) {
+			this.value = e
+		},
+		senTextareaValue(e) {
+			this.senValue = e
+		},
+		compTextareaValue(e) {
+			this.compValue = e
+		},
+    hideModal() {
+		  console.log('11111111')
+      this.modalName = "";
+      this.$apply()
+    },
+		displayModal(e) {
+			this.modalName = e
+		},
+		goToUrlId(e) {
+			this.$goto(e)
+		},
+		againGat() {
+			const that = this
+			that.modalName = "";
+			setTimeout(() => {
+				that.obtainIndex += 1
+				that.value = this.obtainData[this.obtainIndex].content
+				that.modalName = "obtainModal";
+				that.$apply()
+			}, 500)
+		},
+		hiddenSendOut() {
+			if(this.senValue == '') {
+				this.$showToast('说点什么吧')
+				return
+			}
+			this.modalName = ''
+		},
+    sendOut(){
+      this.modalName = 'sendOutModal'
+    },
+    shareQrcode() {
+      if(this.senValue == '') {
+        this.$showToast('说点什么吧')
+        return
+      }
+		  this.modalName = 'shareModal'
+    },
+		complaint() {
+			this.modalName = 'complaintModal'
+		},
+		choiceType(index) {
+			this.typeIndex = index
+		},
+		Submit() {
+			this.modalName = ''
+		}
+  };
+  events = {
+  };
+}
+</script>
+
+<style lang="less">
+@import "../../styles/weui/base/fn.wxss";
+@import "../../styles/custom/fn.less";
+page {
+  width: 100vw;
+  height: 100vh;
+	.m_bag_img {
+		width: 100%;
+		height: 100%;
+		background-color: white;
+	}
+  .home {
+    width: 100%;
+    height: 100%;
+    .bag_img {
+      width: 100%;
+      height: 1624rpx;
+    }
+    .m_bu {
+			width: 100%;
+			position: fixed;
+			bottom: 0;
+			left: 0;
+      padding: 0 70rpx 60rpx;
+      .making_bto{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #994d2c;
+        width: 484rpx;
+        height: 92rpx;
+        background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
+        border-radius: 60rpx;
+      }
+      .Wish_box{
+        margin-top: -24rpx;
+        .Wish_box_icon{
+          width: 80rpx;
+          height: 80rpx;
+          display: block;
+          margin-bottom: 6rpx;
+        }
+      }
+      .u_bu {
+        width: 136rpx;
+        height: 176rpx;
+				.u_bu_img {
+					width: 100%;
+					height: 100%;
+				}
+      }
+    }
+  }
+	.m_tTips {
+		width: 100%;
+		position: fixed;
+		top: 222rpx;
+		left: 0;
+		.u_tTips {
+			width: 592rpx;
+			height: 100rpx;
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 8rpx;
+		}
+	}
+  .m_ble_con {
+    padding: 64rpx 40rpx 50rpx;
+		.m_ble_user {
+			.u_user_img {
+				width: 120rpx;
+				height: 120rpx;
+				border-radius: 50%;
+			}
+		}
+		.m_texTarea {
+			background-color: #ffffff;
+			margin-bottom: 70rpx;
+			margin-top: 50rpx;
+		}
+		.m_ble_tt {
+			text-align: left;
+			padding-left: 30rpx;
+		}
+    .m_ble_bu {
+      padding: 0 4rpx;
+      .u_bu_le {
+        width: 240rpx;
+        height: 72rpx;
+        border-radius: 40rpx;
+        border: 2rpx solid #FFCE84;
+				color: #FBB040;
+      }
+			.u_bu_ri {
+				width: 240rpx;
+				height: 72rpx;
+				background: linear-gradient(90deg, #FFCE84 0%, #FBB040 100%);
+				border-radius: 40rpx;
+				color: #994D2C;
+			}
+    }
+  }
+  .blessing_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    background: url("https://image.fulllinkai.com/202112/18/593f90d8566c12c29464858016a510d4.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 616rpx;
+    height: 740rpx;
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 0;
+      margin-top: -30rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+  }
+  .share_code_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    background: url("https://image.fulllinkai.com/202112/18/75a1ff776f757593f7120d7487e26727.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 600rpx;
+    height: 1080rpx;
+    .cancelShare{
+      position: absolute;
+      right: 0;
+      .cancelIcon{
+        width: 60rpx;
+        height: 60rpx;
+        display: block;
+      }
+    }
+  }
+	.m_send_con {
+		padding: 100rpx 90rpx 50rpx;
+		.m_texTarea {
+			background-color: #ffffff;
+			margin-bottom: 36rpx;
+			margin-top: 50rpx;
+		}
+		.u_ble_bu {
+			width: 400rpx;
+			height: 72rpx;
+			background: linear-gradient(90deg, #FFCE84 0%, #FBB040 100%);
+			border-radius: 36rpx;
+			color: #994D2C;
+		}
+	}
+  .m_share_bu{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    bottom: 0;
+    margin-bottom: -120rpx;
+    .u_share_bu, .u_share_bu_s{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 240rpx;
+      height: 82rpx;
+      background: #F5F5F5;
+      border-radius: 40rpx;
+      color: #333333;
+    }
+    .u_share_bu_s{
+      //margin-left: 40rpx;
+      color: #994D2C;
+      background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
+    }
+  }
+	.m_comp_con {
+		padding: 30rpx 0rpx 50rpx;
+		.m_comp_tt {
+			padding: 0 30rpx;
+		}
+		.m_comp {
+			padding: 0 10rpx 0 30rpx;
+			margin-top: 30rpx;
+			.m_comp_type {
+				.u_comp_type {
+					margin-top: 24rpx;
+					line-height: 40rpx;
+					background: #F8F8F8;
+					border-radius: 34rpx;
+					padding: 10rpx 24rpx;
+					margin-right: 20rpx;
+					color: #666666;
+				}
+				.u_comp_type.sel {
+					color: #FBB040;
+					background: #FFF8F2;
+				}
+			}
+		}
+		.m_texTarea {
+			margin: 50rpx 30rpx 40rpx;
+			background-color: #f5f5f5;
+		}
+		.u_ble_bu {
+			width: 400rpx;
+			height: 72rpx;
+			background: linear-gradient(90deg, #FFCE84 0%, #FBB040 100%);
+			border-radius: 36rpx;
+			color: #994D2C;
+		}
+	}
+  .perfect_data_box {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+		.u_complaint {
+			width: 60rpx;
+			height: 60rpx;
+			position: absolute;
+			z-index: 22;
+			top: 16rpx;
+			right: 30rpx;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+  }
+}
+</style>

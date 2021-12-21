@@ -1,0 +1,254 @@
+<template>
+  <view class="cu-custom" style="height:{{CustomBar}}px;z-index: 1">
+    <view class="cu-bar fixed {{bgImage!=''?'none-bg text-white bg-img':''}} {{bgColor}}"
+          style="height:{{CustomBar}}px;padding-top:{{StatusBar}}px;{{bgImage?'background-image:url(' + bgImage+')':''}}">
+      <view class="action" bindtap="BackPage" wx:if="{{isBack}}">
+        <text class="cuIcon-back"></text>
+        <!--<block wx:if="{{prevPage}}">-->
+          <slot name="backText"></slot>
+        <!--</block>-->
+        <!--<block wx:else>-->
+          <!--<view>主页</view>-->
+        <!--</block>-->
+      </view>
+      <view class="action border-custom" wx:if="{{isCustom}}"
+            style="width:{{Custom.width}}px;height:{{Custom.height}}px;margin-left:calc(750rpx - {{Custom.right}}px)">
+        <text class="cuIcon-back" bindtap="BackPage"></text>
+        <text class="cuIcon-homefill" bindtap="toHome"></text>
+      </view>
+      <view class="content" wx:if="{{!tabNewsShow}}" style="top:{{StatusBar}}px">
+        <slot name="content"></slot>
+      </view>
+      <view class="m_search f-fc" wx:if="{{tabNewsShow}}"  @tap="goto('/pages/users/friendSearch')">
+        <image class="m_search_icon" src="https://images.ufutx.com/202106/19/c607aaf49440b0df3308d6e048fd9ad7.png" mode="aspectFit" lazy-load="false"></image>
+        <input focus="{{true}}" type="text" placeholder="搜索昵称" confirm-type="search" bindinput="inputTyping" value="{{searchValue}}"></input>
+        <image wx:if="{{searchValue.length > 0}}" bindtap="searchEmpty" class="m_search_icon_add" src="https://images.ufutx.com/202106/30/03404c702dc077428d7af781f98e15a3.png" mode="aspectFit" lazy-load="false"></image>
+      </view>
+      <slot name="right"></slot>
+    </view>
+  </view>
+  <view class="cu-modal {{modalName=='Modal'?'show':''}}">
+    <view class="cu-dialog">
+      <view class="cu-bar bg-white justify-end">
+        <view class="content">提示</view>
+        <view class="action" bindtap="hideModal">
+          <text class="cuIcon-close text-red"></text>
+        </view>
+      </view>
+      <view class="padding-xl">
+        <view>暂无上级页面可返回，请点击右边 <text class="cuIcon-homefill" bindtap="toHome"></text> 返回主页</view>
+      </view>
+    </view>
+  </view>
+  <loginDialog :loginShow.sync="loginShow"></loginDialog>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  //  import { service } from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  import loginDialog from './loginDialog'
+  //  import ShareMessage from '../mixins/ShareMessage'
+  export default class cuCustom extends wepy.component {
+    mixins = [base, http]
+    components = {
+      loginDialog
+    }
+    props = {
+      bgColor: {
+        type: String,
+        default: ''
+      },
+      isCustom: {
+        type: [Boolean, String],
+        default: false
+      },
+      isBack: {
+        type: [Boolean, String],
+        default: false
+      },
+      tabNewsShow: {
+        type: [Boolean, String],
+        default: false
+      },
+      bgImage: {
+        type: String,
+        default: ''
+      },
+      handleIndex: {
+        type: [Number, String],
+        default: ''
+      },
+      tex: {
+        type: [String, Number],
+        default: ''
+      },
+      imgs: {
+        type: Array,
+        default: ''
+      },
+      hottopic: {
+        type: Array,
+        default: []
+      }
+    }
+    data = {
+      loginShow: false,
+      StatusBar: wepy.$instance.globalData.StatusBar,
+      CustomBar: wepy.$instance.globalData.CustomBar,
+      Custom: wepy.$instance.globalData.Custom,
+      modalName: '', // 是否弹框
+      prevPage: '',  // 是否有上个页面
+      token: '',
+      searchValue: ''
+    }
+
+    onLoad() {
+      console.log(this.handleIndex)
+      let pages = getCurrentPages()
+      this.token = wx.getStorageSync('token')
+      let prevPage = pages[pages.length - 2]  // 上一个页面
+      this.prevPage = prevPage
+      try {
+        var systemInfo = wx.getSystemInfoSync()
+        this.computeNavigateBarHeight(systemInfo)
+      } catch (e) {
+        // 获取系统信息失败
+        this.setData({
+          windowHeight: 812,
+          totalTopHeight: 68,
+          statusBarHeight: 20,
+          titleBarHeight: 48
+        })
+      }
+      this.$apply()
+    }
+    computeNavigateBarHeight(systemInfo) {
+      let menuButtonObject = wx.getMenuButtonBoundingClientRect()
+      let totalTopHeight = systemInfo.statusBarHeight + menuButtonObject.height + (menuButtonObject.top - systemInfo.statusBarHeight) * 2 // 导航高度
+
+      let windowHeight = systemInfo.windowHeight,
+        statusBarHeight = systemInfo.statusBarHeight
+      this.windowHeight = windowHeight
+      this.CustomBar = totalTopHeight
+      this.StatusBar = statusBarHeight
+      this.titleBarHeight = totalTopHeight - statusBarHeight + 4
+      this.$apply()
+    }
+
+    onShow() {
+    }
+
+    methods = {
+      hideModal() {
+        this.modalName = ''
+        this.$apply()
+      },
+      BackPage() {
+        let page = getCurrentPages()
+        let prevPages = page[page.length - 1]
+        if (this.handleIndex == 1) {
+          if (this.tex != '' || this.imgs != '') {
+            prevPages.handle()
+          } else {
+            wx.setStorageSync('draft', {
+              texs: '',
+              imags: []
+            })
+            wx.navigateBack({
+              delta: 1
+            })
+          }
+        } else {
+          if (this.prevPage) {
+            wx.navigateBack({
+              delta: 1
+            })
+          } else {
+            this.modalName = 'Modal'
+            this.$apply()
+          }
+        }
+      },
+      toHome () {
+        wx.reLaunch({
+          url: '/pages/tabBar/welcome'
+        })
+      },
+      goto(url, text) {
+        if(this.tabNewsShow && this.isBack) return
+        if (!this.token) {
+          console.log(url)
+          this.loginShow = true
+          this.$apply()
+          return
+        }
+        if (url) {
+          this.modalName = ''
+          this.$apply()
+          wx.navigateTo({
+            url: url
+          })
+          return
+        }
+        this.$apply()
+      },
+      inputTyping(e) {
+        this.searchValue = e.detail.value
+        this.$emit('customInput',e)
+        this.$apply()
+      },
+      searchEmpty() {
+        let e = {
+          detail: {
+            value: ''
+          }
+        }
+        this.searchValue = ''
+        this.$emit('customInput',e)
+        this.$apply()
+      }
+    }
+    events = {
+      'loginDialogCut': (e) => {
+        console.log(e)
+        // this.$parent.$parent.getEvent(this.config.navigationBarTitleText, `点击暂不登录`)
+        this.loginShow = e.loginShow
+        this.$apply()
+      },
+      'mobileSuccess': (e) => {
+        console.log(e)
+        // this.$parent.$parent.getEvent(this.config.navigationBarTitleText, `微信私密（登录）`)
+      },
+      'loginDialogShow': (e) => {
+        let vm = this
+        wepy.$instance.pageLogin().then((data) => {
+          vm.token = data.token
+          vm.onShow()
+        })
+      },
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+.m_search {
+  width: 446rpx;
+  height: 64rpx;
+  background-color: #F8F8F8;
+  border-radius: 100rpx;
+  padding: 0 22rpx;
+  margin-left: 30rpx;
+  .m_search_icon {
+    width: 28rpx;
+    height: 28rpx;
+    margin-right: 8rpx;
+  }
+  .m_search_icon_add {
+    width: 28rpx;
+    height: 28rpx;
+    margin-left: 60rpx;
+  }
+}
+</style>

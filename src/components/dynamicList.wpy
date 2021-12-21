@@ -1,0 +1,523 @@
+<template>
+  <view class="dynamicList">
+      <view class="cu-card dynamic no-card" style="margin-top:2px;">
+        <view class="cu-item shadow" wx:for="{{dataList}}" wx:key="index" wx:for-index='index'>
+            <view class="cu-list menu-avatar">
+                <view class="cu-item">
+                    <view bindtap="toUserDetail" data-id="{{item.user_id}}" class="cu-avatar round lg head" wx:if="{{item.user.avatar}}" style="{{'background-image:url(' + item.user.avatar + ');'}}"></view>
+                    <view class="cu-avatar round lg head" wx:else style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big10006.jpg);"></view>
+                    <view class="content flex-sub" @tap="toFeedDetail({{item.id}})" style="left: 126rpx;">
+                    <view class="userName" style="font-weight:500;">
+                        <view>{{item.user.nickname || '未设置名称'}}</view>
+                        <view>{{item.created_at}}</view>
+                    </view>
+                    <view class="text-gray text-sm flex justi">
+                        <view class="age {{item.user.sex == 1?'sex1':''}}">
+                            <image wx:if="{{item.user.sex == 1}}" lazy-load="true" class="img" src="https://images.ufutx.com/202101/27/1fc8381ccac933612936bb617a5ae906.png" alt="" />
+                            <image wx:else lazy-load="true" class="img" src="https://images.ufutx.com/202101/27/f17913a8fc57de75dc0046db6c317b35.png" alt="" /> 
+                            <view wx:if="{{item.user.age == null}}">0</view><view wx:else>{{item.user.age}}</view>
+                        </view>
+                        <view class="audit" wx:if="{{item.is_audited == 0}}">审核中</view>
+                        <view class="audit" wx:if="{{item.is_audited == -1}}">审核失败</view>
+                    </view>
+                    </view>
+                </view>
+            </view>
+            <view style="padding-left:30rpx;padding-right:30rpx;">
+            <view style="padding-left:96rpx;" @tap="toFeedDetail({{item.id}})">
+                <view class="text-main heit1 {{!item.readmore.status? 'text-content' : ''}}">{{item.content}}</view>
+                <view class="fullText" wx:if="{{item.readmore.auto}}" catchtap="toggle" data-index="{{index}}">{{item.readmore.tip}}</view>
+                <view wx:if="{{item.photos.length > 0}}" class="grid flex-sub col-3 {{item.photos.length > 1?'grid-square':''}}">
+                    <view class="bg-img {{item.photos.length == 1?'only-img':''}}" wx:for="{{item.photos}}" catchtap="ViewImage" data-list="{{item.original_photos}}" data-index="{{index}}" wx:for-item="items" wx:key="index" wx:for-index="index">
+                        <image src="{{items}}" class="image_100" mode="aspectFill" lazy-load="false"></image>
+                    </view>
+                </view>
+
+                <view class="liveTv" wx:if="{{item.play_url}}">
+                <view style="display: {{ _index == index ? 'none' : 'block' }};" class="liveImg bg-img only-img" data-index="{{index}}" data-img_url="{{item.play_url}}" catchtap="gotoTv" mode="widthFix" style="{{'background-image:url(' + item.cover_url + ');'}};width: 520rpx;height: 290rpx;border-radius:15rpx;">
+                    <image lazy-load="true" id="ceshiImg" class="playImg" src="https://images.ufutx.com/202103/06/8c94ccedcd19252ebf788f422fbdd22d.png"></image>
+                    <video id="video{{index}}" wx:if="{{_index == index}}" autoplay="{{_index == index ? true : false}}" src="{{item.play_url}}" direction="0" controls="{{true}}" bindfullscreenchange="leaveVideo" class='videoCenter' style="width: 520rpx;height: 290rpx;"></video>
+                </view>
+                </view>
+
+                <view class="text-blue text-sm flex  justify-between margin-top-sm" wx:if="{{item.topic != null || item.topic == ''}}">
+                <view class="tags" catchtap="gotoHotTopic({{item.topic.id}})">
+                    <image lazy-load="true" class="img" src="https://images.ufutx.com/202102/04/dc3043df7d265ae0b2401e589405a239.png" alt="" /> {{item.topic.name}}
+                </view>
+                </view>
+                <view wx:if="{{item.address != null || item.address == ''}}" class="text-gray location margin-top-sm">
+                <image lazy-load="true" class="img" src="https://images.ufutx.com/202102/04/817a393539ee854226eef79defef2fc4.png" alt="" />
+                <view class="address">{{item.address}}</view>
+                </view>
+            </view>
+            </view>
+            <view class="text-gray text-df flexs" style="align-items:center;">
+            <view class="icon margin-right" data-id="{{item.id}}" @tap="toFeedDetail({{item.id}})">
+                <image lazy-load="true" class="img" src="https://images.ufutx.com/202102/04/ab432de170b4e8ca1a1a59e34af9aa25.png"></image> {{item.momentCommentCount}}
+            </view>
+            <view class="icon margin-right" style="{{item.isLkerMoment?'padding-left: 38rpx;':''}}" bindtap="likeFeed" data-typ="1" data-id="{{item.id}}">
+                <image wx:if="{{!item.isLkerMoment}}" lazy-load="true" class="img2" src="https://images.ufutx.com/202106/10/a97c7c76f3aaf7065e7f7a5fe2abc081.png"></image>
+                <image wx:else class="img2_gif" src="{{item.id == likeId?gifurl:'https://images.ufutx.com/202106/07/b227f3ecf9cbd080fb814450b667b5ce.gif'}}"></image> {{item.momentLikerCount}}
+                <!-- <image wx:if="{{item.isLkerMoment == false}}" lazy-load="true" class="img2" src="https://images.ufutx.com/202102/04/3e6885d8c4dd9376f0bff3b58f1b34a4.png"></image>
+                <image wx:else lazy-load="true" class="img2" src="https://images.ufutx.com/202102/04/830a788fed267b416dc7b9bad67f5013.png"></image> {{item.momentLikerCount}} -->
+            </view>
+            <view style="margin-right:-14rpx;width:35rpx;color:#666666;" class="cuIcon-moreandroid" bindtap="showModal" data-ycid="{{item.id}}" data-id="{{item.user_id}}" data-target="bottomModal" data-index="{{index}}" data-del="{{item.id}}"></view>
+            </view>
+        </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base'
+  import {service} from '../config.js'
+  import http from '../mixins/http'
+
+  export default class dynamicList extends wepy.component {
+    mixins = [base, http]
+    props = {
+      dataList: {
+        type: Array,
+        default: []
+      },
+      _index: {
+        type: Number,
+        default: -1
+      },
+      likeId: {
+        type: String,
+        default: ''
+      },
+      gifurl: {
+        type: String,
+        default: ''
+      },
+      del: {
+        type: String,
+        default: '',
+        twoWay: true
+      },
+      modalName: {
+        type: String,
+        default: '',
+        twoWay: true
+      },
+    }
+    components = {
+    }
+    data = {
+        token: '',
+        admin: wx.getStorageSync('admin'),
+    }
+    watch = {
+        dataList() {}
+    }
+
+    textAll() {
+        let vm = this
+        setTimeout(() => {
+            vm.dataList.forEach((item, index) => {
+                if(item.content.length > 75) {
+                    item.readmore = {
+                        status: false,
+                        auto: true,
+                        tip: '全文'
+                    }
+                }
+            })
+            vm.$apply()
+        }, 200)
+    }
+
+    onLoad() {
+        this.token = wx.getStorageSync('token')
+        this.$apply()
+    }
+    methods = {
+        toFeedDetail(id) {
+            if (!this.token) {
+                this.loginShow = true
+                this.$apply()
+                return
+            }
+            this.$goto(`/pages/dynamic/feedDetail?id=${id}`)
+        },
+        toUserDetail(e) {
+            let vm = this
+            // if (!vm.token) {
+            //   this.modalName = 'Modal'
+            //   return
+            // }
+            var id = e.currentTarget.dataset.id
+            vm.$goto(`/pages/home/information?id=${id}`)
+        },
+        toggle(e) {
+            var that = this
+            var index = e.currentTarget.dataset.index
+            console.log(that.dataList)
+            let status = that.dataList[index].readmore.status
+            that.dataList[index].readmore.status = !status
+            that.dataList[index].readmore.tip = status ? '全文' : '收起'
+            // if (this.currentTab == 0) {
+            // } else if (this.currentTab == 1) {
+            //   let status = that.list2[index].readmore.status
+            //   that.list2[index].readmore.status = !status
+            //   that.list2[index].readmore.tip = status ? '全文' : '收起'
+            // }
+        },
+        likeFeed(e) {
+            if (!this.token) {
+                this.loginShow = true
+                this.$apply()
+                return
+            }
+            var id = e.currentTarget.dataset.id
+            var typ = e.currentTarget.dataset.typ
+            var nowTime = new Date()
+            let vm = this,
+                url = `${service.like}` + '/' + id
+            vm.likeId = id
+            vm.$apply()
+            vm.$showLoading('加载中')
+            vm.$post({
+                url: url,
+                headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+                }
+            }, {
+                success: ({
+                code,
+                data
+                }) => {
+                    vm.dataList.forEach(ele => {
+                        if (ele.id == id) {
+                            vm.gifurl = vm.gifurl + '?' + nowTime
+                            ele.momentLikerCount = ele.momentLikerCount + (ele.isLkerMoment == true ? -1 : 1)
+                            ele.isLkerMoment = !ele.isLkerMoment
+                        } else {
+                            vm.gifurl = vm.gifurl
+                        }
+                    })
+                    vm.$apply()
+                    wx.hideLoading()
+                }
+            })
+        },
+        showModal(e) {
+            if (!this.token) {
+                this.loginShow = true
+                this.$apply()
+                return
+            }
+            let id = e.currentTarget.dataset.id
+            this.id = id
+            this.ycid = e.currentTarget.dataset.ycid
+            this.index = e.currentTarget.dataset.index
+            this.modalName = 'delete'
+            this.del = e.currentTarget.dataset.del
+            this.$apply()
+        },
+        ViewImage(e) {
+            console.log(e)
+            var index = e.currentTarget.dataset.index
+            wepy.previewImage({
+                urls: e.currentTarget.dataset.list,
+                current: e.currentTarget.dataset.list[index]
+            })
+        },
+        gotoHotTopic(e) {
+            if (!this.token) {
+                this.loginShow = true
+                this.$apply()
+                return
+            }
+            this.$goto(`/pages/dynamic/hotTopic?id=${e}`)
+        },
+        gotoTv(e) {
+            var _indexs = e.currentTarget.dataset.index
+            // 停止正在播放的视频
+            this._index = _indexs
+            this.videoContext = wx.createVideoContext('video' + this._index, this)
+            this.videoContext.stop()
+            this.videoContext.requestFullScreen()
+            setTimeout(function() {
+            // 将点击视频进行播放
+            this.videoContext = wx.createVideoContext('video' + _indexs, this)
+            this.videoContext.play()
+            }, 500)
+        },
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+.dynamicList {
+    .cu-card .grid.grid-square {
+        margin-bottom: 0;
+    }
+    .cu-card.dynamic>.cu-item .only-img {
+        width: 400rpx;
+        height: 400rpx;
+        border-radius: 20rpx;
+    }
+    .cu-list.menu-avatar>.cu-item .content.flex-sub{
+        left: 126rpx;
+        width: calc(100% - 75rpx - 60rpx - 20rpx);
+    }
+    .cu-list.menu-avatar>.cu-item{
+        height: 106rpx;
+        .head{
+            width:80rpx;
+            height:80rpx;
+        }
+    }
+    .age {
+        width: 76rpx;
+        height: 32rpx;
+        line-height: 32rpx;
+        background: #fff4f7;
+        border-radius: 50rpx;
+        color: #f33b6c;
+        font-size: 22rpx;
+        border: 2rpx solid #ff95b1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .img {
+            width: 22rpx;
+            height: 22rpx;
+            margin-right: 4rpx;
+        }
+    }
+    .age.sex1 {
+        background: #edfaff;
+        border: 2rpx solid #63A5FF;
+        color: #4191FD;
+    }
+    .userName {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8rpx;
+        align-items: center;
+        view:nth-of-type(1) {
+            width: auto;
+            max-width: 50%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            height: 40rpx;
+            font-size: 30rpx;
+            font-weight: 600;
+            color: #333333;
+            line-height: 40rpx;
+        }
+        view:nth-of-type(2) {
+            width: auto;
+            height: 34rpx;
+            font-size: 24rpx;
+            font-weight: 400;
+            color: #999999;
+            line-height: 34rpx;
+        }
+    }
+    .flexs {
+        display: flex;
+        justify-content: flex-end;
+        margin: 0 30rpx;
+        margin-top: 20rpx;
+        padding-bottom: 20rpx;
+        border-bottom: 2rpx solid #f5f5f5;
+    }
+    .icon {
+        display: inline-flex;
+        align-items: center;
+        height: 30rpx;
+        line-height: 30rpx;
+        font-size: 24rpx;
+        font-weight: 400;
+        color: #666666;
+        position: relative;
+        width: 60rpx;
+        .img {
+            width: 30rpx;
+            height: 30rpx;
+            margin-right: 8rpx;
+        }
+        .img2 {
+            width: 32rpx;
+            height: 32rpx;
+            margin-right: 6rpx;
+            margin-top: -8rpx;
+        }
+        .img2_gif {
+            position: absolute;
+            left: -14rpx;
+            top: -26rpx;
+            width: 64rpx;
+            height: 62rpx;
+            margin-right: 6rpx;
+        }
+    }
+    .text-content {
+        overflow: hidden;
+        margin-bottom: 15rpx;
+        white-space: pre-line;
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    .fullText {
+        width: 100%;
+        height: 42rpx;
+        font-size: 30rpx;
+        font-weight: 400;
+        color: #f33b6c;
+        line-height: 42rpx;
+        margin-bottom: 10rpx;
+    }
+    .tags {
+        width: auto;
+        height: 50rpx;
+        line-height: 50rpx;
+        background: #fff1f5;
+        border-radius: 26rpx;
+        font-size: 24rpx;
+        font-weight: 400;
+        color: #f33b6c;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-right: 16rpx;
+        .img {
+            width: 32rpx;
+            height: 32rpx;
+            margin-right: 10rpx;
+            margin-left: 8rpx;
+        }
+    }
+    .location {
+        display: flex;
+        align-items: center;
+        height: 34rpx;
+        font-size: 24rpx;
+        font-weight: 400;
+        color: #666666;
+        line-height: 34rpx;
+        .address {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .img {
+            width: 20rpx;
+            height: 24rpx;
+            margin-right: 4rpx;
+        }
+    }
+    // -------------图片播放----------------------
+    .liveImg{
+    position: relative;
+    border-radius: 10rpx;
+    #ceshiImg{
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        width: 72rpx;
+        height: 72rpx;
+    }
+    }
+    .nofold {
+    display: block;
+    text-overflow: unset;
+    -webkit-line-clamp: unset;
+    max-height: unset;
+    }
+    .margin-right{
+    margin-right: 50rpx;
+    }
+    .perfect_data_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+    .cancelPlaceholder{
+        width: 60rpx;
+        height: 60rpx;
+        position: absolute;
+        z-index: 22;
+        top: 0;
+        right: 0;
+        .cancelIcon{
+        width: 26rpx;
+        height: 26rpx;
+        display: block;
+        margin: 20rpx auto 0 auto;
+        }
+    }
+    .perfect_data_top{
+        width: 100%;
+        height: 362rpx;
+        display: block;
+    }
+    .operation_box{
+        margin: 0 30rpx;
+        background: #f8f8f8;
+        border-radius: 16rpx;
+        .basis_data, .realName_data{
+        margin: 0 30rpx;
+        padding: 20rpx 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .completeIcon{
+            width: 120rpx;
+            height: 60rpx;
+        }
+        }
+        .basis_data{
+        border-bottom: 2rpx solid #eeeeee;
+        }
+    }
+    }
+    .intention_confirm_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+    .intentionContent{
+        padding: 58rpx 56rpx 64rpx 56rpx;
+    }
+    .intentionContent_1{
+        padding: 58rpx 56rpx 44rpx 56rpx;
+    }
+    .intentionOperation{
+        margin: 0 78rpx;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .operationButton{
+        width: 192rpx;
+        height: 68rpx;
+        }
+    }
+    }
+}
+</style>

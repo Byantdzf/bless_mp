@@ -1,0 +1,156 @@
+<template>
+  <view class="screenSub">
+    <view class="doommview">
+        <block wx:for="{{doommList}}" wx:key="id">
+            <view class="aon" style="animation: first {{item.time}}s linear forwards;top:{{item.top}}%;">
+                <view class="m_scr f-fc">
+                    <image class="u_scr_img" src="" mode="aspectFill" lazy-load="false"></image>
+                    <view class="font_22 white" style="line-height: 22rpx;">{{item.text}}</view>
+                </view>
+            </view>
+        </block>
+    </view>
+    <view class="button">
+        <button bindtap="bindbt">弹一个弹幕</button>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base.js'
+  export default class screenSub extends wepy.component {
+    mixins = [base]
+    props = {
+      doommData: {
+        type: Array,
+        default: []
+      }
+    }
+
+    computed = {
+    }
+    data = {
+        doommList: [],
+        i: 0,
+        ids: 0,
+        cycle: null
+    }
+    onLoad() {
+        let that = this;
+        that.cycle= setInterval(function () {
+            let arr = that.doommData
+            if(arr[that.ids]==undefined){
+                that.ids = 0
+                // 1.循环一次，清除计时器
+                // that.doommList = []
+                // clearInterval(that.cycle)
+
+                // 2.无限循环弹幕
+                that.doommList.push(that.consTructor(arr[that.ids], 0, 10, that.getRandomColor()));
+                that.doommList.push(that.consTructor(arr[that.ids+1], 28, 10, that.getRandomColor()));
+                if(that.doommList.length>7){   //删除运行过后的dom
+                    that.doommList.splice(0, 1)
+                }
+                that.ids++
+            }else{
+                that.doommList.push(that.consTructor(arr[that.ids], 0, 10, that.getRandomColor()));
+                that.doommList.push(that.consTructor(arr[that.ids+1], 28, 10, that.getRandomColor()));
+                if(that.doommList.length>7){  
+                    that.doommList.splice(0, 1)
+                }
+                that.ids++
+            }
+            console.log(that.doommData)
+            that.$apply()
+        }, 1000)
+    }
+    //内容，顶部距离，运行时间，颜色（参数可自定义增加）
+    consTructor(text, top, time, color) {
+        let data = {
+            text,
+            top,
+            time,
+            color,
+            display: true,
+            id: this.i++
+        }
+        return data
+    }
+    getRandomColor() {
+        let rgb = [],
+        that = this
+        for (let i = 0; i < 3; ++i) {
+            let color = Math.floor(Math.random() * 256).toString(16)
+            color = color.length == 1 ? '0' + color : color
+            rgb.push(color)
+        }
+        return '#' + rgb.join('')
+    }
+    onHide(){
+        clearInterval(this.cycle)
+        this.ids=0;
+        this.doommList=[]
+    }
+    onUnload(){
+        clearInterval(this.cycle)
+        this.ids = 0;
+        this.doommList = []
+    }
+    methods = {
+        bindbt(){
+            console.log(this.doommList)
+            this.doommData.splice(this.ids, 0,"这是我的弹幕")
+            // this.doommList.push(this.consTructor("这是我的弹幕",Math.ceil(Math.random()*100),8,this.getRandomColor()));
+            // this.doommData = this.doommList
+            this.$apply()
+        }
+    }
+  }
+</script>
+
+<style lang="less">
+.screenSub{
+    width: 100%;
+    height: 400rpx;
+    position: absolute;
+    top: 30rpx;
+    left: 0;
+    .aon{
+        position: absolute;
+        white-space:nowrap;/* 防止向下换行*/
+        animation-timing-function: linear;
+        animation-fill-mode: none;
+    }
+    .doommview{
+        z-index: 3;
+        height: 80%;
+        width: 100%;
+        position: absolute;
+        .aon {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 100rpx;
+            .m_scr {
+                padding: 4rpx;
+                padding-right: 20rpx;
+                .u_scr_img {
+                    width: 36rpx;
+                    height: 35rpx;
+                    background-color: white;
+                    border-radius: 50%;
+                    margin-right: 8rpx;
+                }
+            }
+        }
+    }
+
+    @keyframes first{
+        from{left: 100%; }
+        to{left: -100%;}
+    }
+    .button {
+        position: absolute;
+        z-index: 999;
+    }
+}
+</style>

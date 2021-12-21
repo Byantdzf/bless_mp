@@ -1,0 +1,209 @@
+<template>
+<view class="chooseImageTips">
+  <view class="cu-modal bottom-modal {{chooseShow?'show':''}}"  catchtap="hideModal">
+    <view class="cu-dialog">
+        <view class="g_ct">
+          <view class="u_tt font_26 color999">
+            <view class="font_26 color-333">上传本人真实正面照，不规范的头像将无法通过审核哦</view>
+            <image class="u_tt_img" catchtap="hideModal" src="https://images.ufutx.com/202107/26/1a2f798de1a7f2d4f69ba4f9f4936f34.png" mode="aspectFit" lazy-load="false"></image>
+          </view>
+          <view class="font_24" style="color: #FF6464;text-align: left;padding: 0 30rpx;">（请勿上传个人二维码、个人信息等联系方式的图片）</view>
+          <view class="m_img f-fbc" wx:if="{{unmarriVShow}}">
+            <view>
+              <image src="https://images.ufutx.com/202107/26/c0668beb4677d89f40f217db82b58409.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">记录生活</view>
+            </view>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/b93279c76ee33b3ae0a3acfd29ef380a.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">旅行的意义</view>
+            </view>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/33c7e305e813cd5374b33a25b1d3fbad.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">热衷的事物</view>
+            </view>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/40cc54109333fa37e3b2546d77e5d068.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">萌宠与你</view>
+            </view>
+            <!-- <image src="https://images.ufutx.com/202107/26/509150a2d6b088a408b5c4142f655e0b.png" lazy-load  mode="aspectFill" class="image" />
+            <image src="https://images.ufutx.com/202107/26/411cc572b20807615fdc2bec91e2c4f4.png" lazy-load  mode="aspectFill" class="image" />
+            <image src="https://images.ufutx.com/202107/26/431f8cb8da0bf46e3f83c611e4d0874d.png" lazy-load  mode="aspectFill" class="image" />
+            <image src="https://images.ufutx.com/202107/26/11caf19cc9294bcf95cc5996b7548fd6.png" lazy-load  mode="aspectFill" class="image" /> -->
+          </view>
+          <view class="m_img f-fbc" wx:else>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/38ff7d41297d444cf2e7f07788a809c7.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-333">五官清晰</view>
+            </view>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/f65d9c42de6c2e5eabd09e401a5aa3f7.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">墨镜口罩</view>
+            </view>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/0478fed7e888f63944f85726588d7144.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">看不清人</view>
+            </view>
+            <view>
+              <image src="https://images.ufutx.com/202107/26/2afaf2cb480eae15f039079e0352f611.png" lazy-load  mode="aspectFill" class="image" />
+              <view class="font_24 color-999">侧脸</view>
+            </view>
+            <!-- <image src="https://images.ufutx.com/202105/10/913418e68c8b8e3bb6b24bd6a43b93b1.png" lazy-load  mode="aspectFill" class="image" />
+            <image src="https://images.ufutx.com/202105/12/3bcd90d246d4f0830b86b2d7cfd64776.png" lazy-load  mode="aspectFill" class="image" />
+            <image src="https://images.ufutx.com/202105/12/272a929ba88c01f2ad8e976a6459fa7e.png" lazy-load  mode="aspectFill" class="image" />
+            <image src="https://images.ufutx.com/202105/12/d7cdbf5cadcdcad5e656e762067a8545.png" lazy-load  mode="aspectFill" class="image" /> -->
+          </view>
+          <view class="u_camera font_32 color333" catchtap="onCamera">拍摄</view>
+          <view class="u_album font_32 color333" catchtap="onAlbum">从手机相册选择</view>
+          <!-- <view class="font_32 color999" catchtap="hideModal">取消</view> -->
+        </view>
+    </view>
+  </view>
+</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base'
+  // import ImageCropper from '../users/ImageCropper'
+  export default class chooseImageTips extends wepy.component {
+    mixins = [base]
+    props = {
+      chooseShow: {
+        type: Boolean,
+        default: false
+      },
+      unmarriVShow: {
+        type: Boolean,
+        default: false
+      },
+      jumpString: {
+        type: String,
+        default: null
+      },
+      photo: {
+        type: String,
+        default: null
+      }
+    }
+    data = {
+
+    }
+    onModal() {
+      this.chooseShow = false
+      this.$emit('hideCut', {
+        chooseShow: this.chooseShow
+      })
+      this.$apply()
+    }
+    methods = {
+      onCamera() {
+        let vm = this
+        wx.chooseImage({
+          count: 1,
+          // sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: (res) => {
+            vm.onModal()
+            let imgSrc = res.tempFilePaths[0]
+            if (imgSrc.indexOf('png') >= 0 || imgSrc.indexOf('jpeg') >= 0 || imgSrc.indexOf('jpg') >= 0) {
+            } else {
+              vm.$showToast('上传图片只能是 jpg、png、jpeg 格式!')
+              return
+            }
+            if (this.jumpString) {
+              wx.navigateTo({
+                url: `/pages/users/ImageCropper?src=${imgSrc}&jumpString=${this.jumpString}&newPic=${1}`
+              })
+              // wx.removeStorageSync('headPortraitImg', null)
+            }
+            // wx.setStorageSync('headPortraitImg', imgSrc)
+            // vm.$invoke('../pages/users/ImageCropper', 'imgSrcCut', imgSrc);
+            vm.$apply()
+            vm.$emit('imgSrcCut', {
+              imgSrc: imgSrc
+            })
+          }
+        })
+      },
+      onAlbum() {
+        let vm = this
+        wx.chooseImage({
+          count: 1,
+          // sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album'], // 可以指定来源是相册还是相机，默认二者都有
+          success: (res) => {
+            vm.onModal()
+            let imgSrc = res.tempFilePaths[0]
+            if (imgSrc.indexOf('png') >= 0 || imgSrc.indexOf('jpeg') >= 0 || imgSrc.indexOf('jpg') >= 0) {
+            } else {
+              vm.$showToast('上传图片只能是 jpg、png、jpeg 格式!')
+              return
+            }
+            if (this.jumpString) {
+              wx.navigateTo({
+                url: `/pages/users/ImageCropper?src=${imgSrc}&jumpString=${this.jumpString}&newPic=${1}`
+              })
+
+              // wx.removeStorageSync('headPortraitImg', null)
+            }
+            // wx.setStorageSync('headPortraitImg', imgSrc)
+            vm.$apply()
+            vm.$emit('imgSrcCut', {
+              imgSrc: imgSrc
+            })
+          }
+        })
+      },
+      hideModal() {
+        this.onModal()
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+.chooseImageTips {
+  .cu-modal {
+    z-index: 9999999999;
+  }
+    .cu-dialog{
+      height: 640rpx;
+      border-radius: 32rpx 32rpx 0px 0px !important;
+      .g_ct {
+        padding: 30rpx 0;
+        .u_tt {
+          padding: 0 30rpx;
+          text-align: left;
+          position: relative;
+          .u_tt_img {
+            width: 28rpx;
+            height: 28rpx;
+            position: absolute;
+            right: 30rpx;
+            top: 50%;
+            transform: translateY(-50%);
+          }
+        }
+        .m_img {
+          padding: 30rpx;
+          border-bottom: 2px solid #F5F5F5;
+          view {
+            image {
+              width: 160rpx;
+              height: 160rpx;
+            }
+          }
+        }
+        .font_32 {
+          padding: 30rpx;
+        }
+        .u_album {
+          border-top: 2px solid #F5F5F5;
+          // border-bottom: 8px solid #F5F5F5;
+        }
+      }
+    }
+}
+</style>
