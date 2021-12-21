@@ -5,25 +5,33 @@
         <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>
         <image class="report_icon" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>
       </view>
-      <view class="chat_box">
-        <view class="" wx:for="{{list}}" wx:key="index">
-          <view class="clearfix message-box">
-            <view class="chat_time font_24 color-999 text-center">2021.11.10 09:00</view>
-            <image class="right-Avatar" src="{{item.pic}}" mode="aspectFill"></image>
-            <view class="right-message">
-              {{item.content}}
+      <view class="m_chat_box">
+        <view class="chat_box">
+          <view class="" wx:for="{{list}}" wx:key="index">
+            <view wx:if="{{item.identity != 'other_user'}}" class="clearfix message-box">
+              <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
+              <image class="right-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
+              <view class="right-message">
+                {{item.content}}
+              </view>
             </view>
-          </view>
-          <view class="clearfix message-box">
-            <view class="chat_time font_24 color-999 text-center">2021.11.10 09:00</view>
-            <image class="left-Avatar" src="{{item.pic}}" mode="aspectFill"></image>
-            <view class="left-message">
-              {{item.content}}
+            <view wx:else class="clearfix message-box">
+              <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
+              <image class="left-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
+              <view class="left-message">
+                {{item.content}}
+              </view>
             </view>
           </view>
         </view>
       </view>
     </scroll-view>
+    <view class="m_inp">
+      <view class="u_inp f-fcc">
+        <input class="u_field" bindinput="sendMessage" value="{{chatValue}}" placeholder="" />
+        <view class="u_inp_bu" @tap="postBottleChat">发送</view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -45,13 +53,18 @@ export default class chat extends wepy.page {
   data = {
     list: [],
     blessingPage: 1,
-    onToupperShow: false
+    onToupperShow: false,
+    chatValue: ''
   }
 
   computed = {}
 
   async onLoad (e) {
-    this.getList()
+    wepy.$instance.userInfoReadyCallback = res => {
+      this.id = e.receiving_id
+      this.setIntervalCatch()
+      this.getList()
+    }
   }
 
   onShow () {
@@ -61,11 +74,9 @@ export default class chat extends wepy.page {
 
   getList() {
     let vm = this
-    vm.loading = true
     this.$get({
-      url: `${service.host}/official/bottle/list`,
+      url: `${service.bottleRecord}/${vm.id}`,
       data: {
-        openid: 'oPC_2vgxDzn-G1DREnusMCXDD4Us',
         page: vm.blessingPage
       }
     }, {
@@ -100,6 +111,39 @@ export default class chat extends wepy.page {
       },
       complete: () => {
         vm.loading = false
+      }
+    })
+  }
+
+  getArrDifference(arr1, arr2) {
+    return arr1.concat(arr2).filter(function(item1) {
+      return arr2.every(function(item2) {
+        return item2.id == item1.id
+      })
+    })
+  }
+
+  getListNew(id) {
+    const vm = this
+    var data = {
+        id: id,
+        receiving_id: vm.id
+      }
+    this.$get({
+      url: `${service.bottleLatestData}`,
+      data
+    }, {
+      success: ({code, data}) => {
+        if (data.length > 0) {
+          let tempResArr = vm.getArrDifference(vm.list, data)
+          console.log(tempResArr, 'tempResArr---------------')
+          if (tempResArr && tempResArr.length > 0) {
+            // tempResArr.forEach(item => {
+            //   item.created_at = formatDate(item.created_at, 1)
+            // })
+            vm.list = [...tempResArr, ...vm.list]
+          }
+        }
       }
     })
   }
@@ -231,6 +275,14 @@ export default class chat extends wepy.page {
     }).exec()
   }
 
+  setIntervalCatch() {
+    const vm = this
+    clearTimeout(vm.setIntervalList)
+    vm.setIntervalList = setInterval(function() {
+      vm.getListNew(vm.list[0].id)
+    }, 5000)
+  }
+
   methods = {
     hideModal () {
       this.modalName = ''
@@ -238,7 +290,35 @@ export default class chat extends wepy.page {
     },
     onPullings(e) {
       this.triggeredShow = true
-    }
+    },
+    // 回复祝福
+    postBottleChat() {
+      const vm = this
+      if (this.chatValue == '') {
+        this.$showToast('内容不能为空')
+        return
+      }
+      var data = {
+        receiving_id: this.id,
+        content: this.chatValue
+      }
+      vm.chatValue = ''
+      this.$post({
+				url: `${service.bottleChat}`,
+				data
+			}, {
+				success: ({
+					code,
+					data
+				}) => {
+          vm.setIntervalCatch()
+          vm.getListNew(vm.list[0].id)
+				}
+			})
+    },
+    sendMessage (e) {
+      this.chatValue = e.detail.value
+    },
   }
   events = {
   }
@@ -266,51 +346,87 @@ page {
     height: 40rpx;
   }
 }
-.chat_box{
-  padding: 120rpx 30rpx 100rpx 30rpx;
-  .chat_time{
-    padding-bottom: 40rpx;
-  }
-  .message-box{
-    padding-bottom: 40rpx;
-    .right-Avatar{
-      float: right;
-      width: 80rpx;
-      height: 80rpx;
-      border-radius: 50%;
+.m_chat_box {
+  height: 100vh !important;
+  padding-bottom: 52px;
+  box-sizing: border-box;
+  .chat_box{
+    height: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    box-sizing: border-box;
+    padding: 120rpx 30rpx 100rpx 30rpx;
+    .chat_time{
+      padding-bottom: 40rpx;
     }
-    .right-message{
-      max-width: 72%;
-      float: right;
-      padding: 10rpx 20rpx;
-      background: #FBB040;
-      color: white;
-      margin-right: 12rpx;
-      border-radius: 32rpx 0 32rpx 32rpx;
-      font-size: 28rpx;
-    }
-    .left-Avatar{
-      float: left;
-      width: 80rpx;
-      height: 80rpx;
-      border-radius: 50%;
-    }
-    .left-message{
-      max-width: 72%;
-      float: left;
-      padding: 10rpx 20rpx;
-      color: #333333;
-      background: white;
-      border-radius: 0 32rpx 32rpx 32rpx;
-      margin-left: 12rpx;
-      font-size: 28rpx;
-      .m_imgLst {
-        .u_img_lst {
-          max-width: 200rpx;
-          max-height: 200rpx;
-          border-radius: 20rpx;
+    .message-box{
+      padding-bottom: 40rpx;
+      .right-Avatar{
+        float: right;
+        width: 80rpx;
+        height: 80rpx;
+        border-radius: 50%;
+      }
+      .right-message{
+        max-width: 72%;
+        float: right;
+        padding: 10rpx 20rpx;
+        background: #FBB040;
+        color: white;
+        margin-right: 12rpx;
+        border-radius: 32rpx 0 32rpx 32rpx;
+        font-size: 28rpx;
+      }
+      .left-Avatar{
+        float: left;
+        width: 80rpx;
+        height: 80rpx;
+        border-radius: 50%;
+      }
+      .left-message{
+        max-width: 72%;
+        float: left;
+        padding: 10rpx 20rpx;
+        color: #333333;
+        background: white;
+        border-radius: 0 32rpx 32rpx 32rpx;
+        margin-left: 12rpx;
+        font-size: 28rpx;
+        .m_imgLst {
+          .u_img_lst {
+            max-width: 200rpx;
+            max-height: 200rpx;
+            border-radius: 20rpx;
+          }
         }
       }
+    }
+  }
+}
+.m_inp {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  .u_inp {
+    padding: 16rpx 30rpx;
+    box-sizing: border-box;
+    background: #f5f5f5;
+    border-top: 2rpx solid #e8e8e8;
+    .u_field {
+      flex: 1;
+      border-radius: 8rpx;
+      height: 72rpx;
+      font-size: 32rpx;
+      padding: 14rpx 22rpx;
+      line-height: 44rpx;
+    }
+    .u_inp_bu {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #fbb040;
+      line-height: 44rpx;
+      padding-left: 30rpx;
     }
   }
 }
