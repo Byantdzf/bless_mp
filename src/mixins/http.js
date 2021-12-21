@@ -89,8 +89,8 @@ export default class httpMixin extends wepy.mixin {
     wx.showNavigationBarLoading()
     // 构造请求体
     const request = {
-      // url: url + '?XDEBUG_SESSION_START=1&from_openid='+ wx.getStorageSync('from_openid'),
-      url: url + '?XDEBUG_SESSION_START=1&formId=' + wx.getStorageSync('formId') + '&from_user_id=' + wx.getStorageSync('from_user_id') + '&openGId=' + wx.getStorageSync('openGId') + '&from_openid=' + wx.getStorageSync('from_openid') + '&from_platform=' + wx.getStorageSync('from_platform') + '&systemInfo=' + wx.getStorageSync('SystemInfo') + '&system=' + wx.getStorageSync('system') + '&share_user_id=' + wx.getStorageSync('share_user_id') + '&versions=v5.2.61',
+      url: url + '?XDEBUG_SESSION_START=1&openid=' + wx.getStorageSync('openid'),
+      // url: url + '?XDEBUG_SESSION_START=1&formId=' + wx.getStorageSync('formId') + '&from_user_id=' + wx.getStorageSync('from_user_id') + '&openGId=' + wx.getStorageSync('openGId') + '&from_openid=' + wx.getStorageSync('from_openid') + '&from_platform=' + wx.getStorageSync('from_platform') + '&systemInfo=' + wx.getStorageSync('SystemInfo') + '&system=' + wx.getStorageSync('system') + '&share_user_id=' + wx.getStorageSync('share_user_id') + '&versions=v5.2.61',
       method: ['GET', 'POST', 'PUT', 'DELETE'].indexOf(methods) > -1 ? methods : 'GET',
       header: Object.assign({
         'Authorization': 'Bearer ' + wx.getStorageSync('token'),

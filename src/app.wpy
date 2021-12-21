@@ -143,11 +143,10 @@ export default class extends wepy.app {
                 //   'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
                 // },
                 method: "get",
-                success: function (res) {
-                  
+                success: function (data) {
+                  wx.setStorageSync("openid", data.data.data.openid);
                 },
                 fail: function (res) {
-                  that.globalData.userInfo = "0";
                   wx.switchTab({ url: "/pages/tabBar/home" });
                 },
               });

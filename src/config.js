@@ -22,8 +22,10 @@ if (_NODE_) {
 }
 
 export const service = {
-    // 登录接口
-  login: `${host}/official/bottle/login`
+  // 登录接口
+  login: `${host}/official/bottle/login`,
+  // 发祝福
+  bottle: `${host}/official/bottle`
 }
 
 export default {

@@ -84,7 +84,7 @@
 <!--          <view class="u_share_bu bold font_20_30 f-fcc" @tap="shareQrcode">分享至朋友圈</view>-->
           <view>
             <block wx:if="{{senValue}}">
-              <button class="font_30 u_share_bu_s" open-type="share" @tap.stop="hideModal">
+              <button class="font_30 u_share_bu_s" open-type="share" @tap.stop="postBottle">
                 <view class="bold font_30 f-fcc">分享给好友</view>
               </button>
             </block>
@@ -134,7 +134,7 @@
 
 <script>
 import wepy from "wepy";
-// import { service } from "../../config.js";
+import { service } from "../../config.js";
 import http from "../../mixins/http";
 import base from "../../mixins/base";
 import user from "../../mixins/user";
@@ -198,7 +198,9 @@ export default class home extends wepy.page {
   }
   onShow() {}
   // 分享
-  onShareAppMessage(res) {}
+  onShareAppMessage(res) {
+	
+  }
   methods = {
 		textareaValue(e) {
 			this.value = e
@@ -209,11 +211,28 @@ export default class home extends wepy.page {
 		compTextareaValue(e) {
 			this.compValue = e
 		},
-    hideModal() {
-		  console.log('11111111')
-      this.modalName = "";
-      this.$apply()
-    },
+		hideModal() {
+			// console.log('11111111')
+			// this.modalName = "";
+			// this.$apply()
+		},
+		// 发祝福
+		postBottle () {
+			var data = {
+				content: this.senValue
+			}
+			this.$post({
+				url: `${service.bottle}`,
+				data
+			}, {
+				success: ({
+					code,
+					data
+				}) => {
+					this.modalName = ''
+				}
+			})
+		},
 		displayModal(e) {
 			this.modalName = e
 		},
@@ -231,22 +250,22 @@ export default class home extends wepy.page {
 			}, 500)
 		},
 		hiddenSendOut() {
+			const vm = this
 			if(this.senValue == '') {
 				this.$showToast('说点什么吧')
 				return
 			}
-			this.modalName = ''
 		},
-    sendOut(){
-      this.modalName = 'sendOutModal'
-    },
-    shareQrcode() {
-      if(this.senValue == '') {
-        this.$showToast('说点什么吧')
-        return
-      }
-		  this.modalName = 'shareModal'
-    },
+		sendOut(){
+			this.modalName = 'sendOutModal'
+		},
+		shareQrcode() {
+			if(this.senValue == '') {
+				this.$showToast('说点什么吧')
+				return
+			}
+			this.modalName = 'shareModal'
+		},
 		complaint() {
 			this.modalName = 'complaintModal'
 		},
