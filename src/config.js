@@ -22,12 +22,20 @@ if (_NODE_) {
 }
 
 export const service = {
+  // 主域
+  host: `${host}`,
   // 登录接口
   login: `${host}/official/bottle/login`,
   // 发祝福
   bottle: `${host}/official/bottle`,
   // 祝福详情
-  bottleId: `${host}/official/bottle`
+  bottleId: `${host}/official/bottle`,
+  // 祝福聊天记录
+  bottleRecord: `${host}/official/bottle/record`,
+  // 回复祝福
+  bottleChat: `${host}/official/bottle/chat`,
+  // 聊天记录最新数据
+  bottleLatestData: `${host}/official/bottle/LatestData`
 }
 
 export default {
