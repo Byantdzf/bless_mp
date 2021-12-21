@@ -25,7 +25,9 @@ export const service = {
   // 登录接口
   login: `${host}/official/bottle/login`,
   // 发祝福
-  bottle: `${host}/official/bottle`
+  bottle: `${host}/official/bottle`,
+  // 祝福详情
+  bottleId: `${host}/official/bottle`
 }
 
 export default {

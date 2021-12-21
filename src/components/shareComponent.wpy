@@ -1,33 +1,37 @@
 <template>
-  <view class="cu-modal {{hide?'':'show'}}">
-    <view class="cu-dialog" style="background-color: white;width: 600rpx;border-radius: 24rpx;">
-      <view class="bg-white justify-end">
-        <!-- <view class="content">提示</view> -->
+  <view class="cu-modal  bottom-modal {{hide?'show':''}}">
+    <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;">
+      <!-- <view class="bg-white justify-end">
+        <view class="content">提示</view>
         <view class="action f-fec" bindtap="hideModel">
           <text class="cuIcon-close font_40 color999" style="line-height: 40rpx;margin: 30rpx 30rpx 0 0;"></text>
         </view>
-      </view>
+      </view> -->
       <view class="text-center m_sha">
-        <view class="text-center font_32 bold color_333" style="margin-bottom: 40rpx;line-height: 32rpx;">分享至</view>
-        <view style="width: 50%" class="text-center inline-block" @tap.stop="hideModel">
-          <button class="btn text-center font_28" open-type="share" style="line-height: 1.6;padding: 6rpx">
-            <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/d14663aeb3a6663ed926e8e3949ca8fb.png"></image>
-            <view class="font_24 black_6">微信好友</view>
-          </button>
+        <view class="text-center font_32 bold color_333">分享至</view>
+        <view class="m_box f-fc">
+          <view class="text-center inline-block" @tap.stop="hideModel">
+            <button class="btn text-center font_28" open-type="share" style="line-height: 1.6;padding: 6rpx">
+              <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/d14663aeb3a6663ed926e8e3949ca8fb.png"></image>
+              <view class="font_24 black_6">微信好友</view>
+            </button>
+          </view>
         </view>
-        <view style="width: 50%" class="text-center inline-block color-666">
+        <!-- <view style="width: 50%" class="text-center inline-block color-666">
           <button class="btn text-center font_28"  style="line-height: 1.6;padding: 6rpx" @tap="showPic">
-			  <block wx:if="{{poster == 'custom'}}">
-				  <image class="share-image" mode="aspectFit" src="https://image.fulllinkai.com/202112/03/4e3908cc9b20b9af0c35908eb7b2fa7b.png"></image>
-				  <view class="font_24 black_6">生成海报</view>
-			  </block>
+            <block wx:if="{{poster == 'custom'}}">
+              <image class="share-image" mode="aspectFit" src="https://image.fulllinkai.com/202112/03/4e3908cc9b20b9af0c35908eb7b2fa7b.png"></image>
+              <view class="font_24 black_6">生成海报</view>
+            </block>
             <block wx:else>
-				<image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/114c3bcabf2fdabc555923d61a3b790d.png"></image>
-				<view class="font_24 black_6">朋友圈</view>
-			</block>
+              <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/114c3bcabf2fdabc555923d61a3b790d.png"></image>
+              <view class="font_24 black_6">朋友圈</view>
+            </block>
           </button>
+        </view> -->
+        <view class="clearfloat font_36 color999 text-center" bindtap="hideModel">
+          取消
         </view>
-        <view class="clearfloat"></view>
       </view>
     </view>
   </view>
@@ -95,7 +99,7 @@
 	  }
     }
     data = {
-      hide: true,
+      hide: false,
       showImage: true,
       showOpenSet: true,
       formID: [],
@@ -109,7 +113,7 @@
 
     methods = {
       hideModel() {
-        this.hide = true
+        this.hide = false
         this.$emit('hideShare', this.hide)
         this.$apply()
       },
@@ -242,6 +246,13 @@
   }
   .m_sha {
     background-color: white;
-    padding-bottom: 50rpx;
+    padding-top: 40rpx;
+    .m_box {
+      padding: 50rpx 40rpx;
+    }
+    .clearfloat {
+      border-top: solid 10rpx #F8F8F8;
+      position: 30rpx 0 50rpx;
+    }
   }
 </style>
