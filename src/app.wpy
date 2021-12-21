@@ -87,7 +87,7 @@ export default class extends wepy.app {
   };
 
   globalData = {
-    userInfo: null,
+    openid: null,
     tourist: null,
     cart: null,
     tracker: null,
@@ -145,6 +145,10 @@ export default class extends wepy.app {
                 method: "get",
                 success: function (data) {
                   wx.setStorageSync("openid", data.data.data.openid);
+                  that.globalData.openid = data.data.data.openid
+                  if (that.userInfoReadyCallback) {
+                    that.userInfoReadyCallback(data)
+                  }
                 },
                 fail: function (res) {
                   wx.switchTab({ url: "/pages/tabBar/home" });
