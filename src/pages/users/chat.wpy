@@ -1,147 +1,317 @@
 <template>
-	<cuCustom bgColor="bg-gradual-pink" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">徒弟</view></cuCustom>
-	<view class="cu-chat">
-	  <view class="cu-item self">
-	    <view class="main">
-	      <view class="content bg-green shadow">
-	        <text>喵喵喵！喵喵喵！喵喵喵！喵喵！喵喵！！喵！喵喵喵！</text>
-	      </view>
-	    </view>
-	    <view class="cu-avatar radius" style="background-image:url(https://image.fulllinkai.com/202112/15/f8a9e410ec73d151ef5a6c67b8ce714f.png);"></view>
-	    <view class="date">2018年3月23日 13:23</view>
-	  </view>
-	  <view class="cu-info round">对方撤回一条消息!</view>
-	  <view class="cu-item">
-	    <view class="cu-avatar radius" style="background-image:url(https://image.fulllinkai.com/202112/15/ebd7ffdfbb3b63efa2533a5255224cd5.jpeg);"></view>
-	    <view class="main">
-	      <view class="content shadow">
-	        <text>喵喵喵！喵喵喵！</text>
-	      </view>
-	    </view>
-	    <view class="date "> 13:23</view>
-	  </view>
-	  <view class="cu-info">
-	    <text class="cuIcon-roundclosefill text-red "></text> 对方拒绝了你的消息
-	  </view>
-	  <view  class="cu-info">
-	    对方开启了好友验证，你还不是他(她)的好友。请先发送好友验证请求，对方验证通过后，才能聊天。
-	    <text class="text-blue">发送好友验证</text>
-	  </view>
-	  <view class="cu-item self">
-	    <view class="main">
-	      <image src="https://img2.baidu.com/it/u=2498285511,1190639525&fm=26&fmt=auto" class="radius" mode="widthFix"></image>
-	    </view>
-	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big107000.jpg);"></view>
-	    <view class="date"> 13:23</view>
-	  </view>
-	  <!-- <view class="cu-item self">
-	    <view class="main">
-	      <view class="action text-bold text-grey">
-	        3"
-	      </view>
-	      <view class="content shadow">
-	        <text class="cuIcon-sound text-xxl padding-right-xl"> </text>
-	      </view>
-	    </view>
-	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big107000.jpg);"></view>
-	    <view class="date">13:23</view>
-	  </view>
-	  <view class="cu-item self">
-	    <view class="main">
-	      <view class="action">
-	        <text class="cuIcon-locationfill text-orange text-xxl"></text>
-	      </view>
-	      <view class="content shadow">
-	        喵星球，喵喵市
-	      </view>
-	    </view>
-	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big107000.jpg);"></view>
-	    <view class="date">13:23</view>
-	  </view>
-	  <view class="cu-item">
-	    <view class="cu-avatar radius" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big143004.jpg);"></view>
-	    <view class="main">
-	      <view class="content shadow">
-	       @#$^&**
-	      </view>      
-	      <view class="action text-grey">
-	        <text class="cuIcon-warnfill text-red text-xxl"></text> <text class="text-sm margin-left-sm">翻译错误</text> 
-	      </view>
-	    </view>
-	    <view class="date">13:23</view>
-	  </view> -->
-	</view>
-	
-	<view class="cu-bar foot input {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
-	  <view class="action">
-	    <text class="cuIcon-sound text-grey"></text>
-	  </view>
-	  <input class="solid-bottom" bindfocus="InputFocus" bindblur="InputBlur" adjust-position="{{false}}" focus="{{false}}" maxlength="300" cursor-spacing="10"></input>
-	  <view class="action">
-	    <text class="cuIcon-emojifill text-grey"></text>
-	  </view>
-	  <button class="cu-btn bg-green shadow">发送</button>
-	</view>
+  <view>
+    <scroll-view scroll-y="true" style="height: 100vh;overflow: hidden;background: #f5f5f5;{{pushUpShow?'display: flex;flex-direction: column-reverse;':''}}" scroll-into-view="{{onToupperShow?'':toView}}" enable-flex="{{true}}" refresher-triggered="{{triggeredShow}}" bindscrolltoupper="onToupper" bindrefresherpulling="onPullings" upper-threshold="200">
+      <view class="m_tips f-fbc">
+        <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>
+        <image class="report_icon" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>
+      </view>
+      <view class="chat_box">
+        <view class="" wx:for="{{list}}" wx:key="index">
+          <view class="clearfix message-box">
+            <view class="chat_time font_24 color-999 text-center">2021.11.10 09:00</view>
+            <image class="right-Avatar" src="{{item.pic}}" mode="aspectFill"></image>
+            <view class="right-message">
+              {{item.content}}
+            </view>
+          </view>
+          <view class="clearfix message-box">
+            <view class="chat_time font_24 color-999 text-center">2021.11.10 09:00</view>
+            <image class="left-Avatar" src="{{item.pic}}" mode="aspectFill"></image>
+            <view class="left-message">
+              {{item.content}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
 </template>
 
 <script>
-import wepy from "wepy";
-import { service } from "../../config.js";
-import http from "../../mixins/http";
-import base from "../../mixins/base";
-import user from "../../mixins/user";
-import cuCustom from "../../components/cu-custom";
-// import { getsubscription } from "../../utils/fn";
+import wepy from 'wepy'
+import { service } from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
 
-let date = new Date();
 export default class chat extends wepy.page {
-  mixins = [base, http, user];
+  mixins = [base, http, user]
+  components = {
+  };
   config = {
-    navigationBarTitleText: "首页推荐",
-    onReachBottomDistance: 10,
-    navigationStyle: "custom",
-    enablePullDownRefresh: false,
-  };
-  components = { cuCustom };
-  watch = {};
-  data = {
-    modalName: "",
-    placeholderText: "",
-    max: 800,
-    value: "",
-  };
-  computed = {};
-  async onLoad(e) {
-    wx.hideTabBar({});
+    navigationBarTitleText: '聊天',
+    enablePullDownRefresh: false
   }
-  onShow() {}
-  // 分享
-  onShareAppMessage(res) {}
+  data = {
+    list: [],
+    blessingPage: 1,
+    onToupperShow: false
+  }
+
+  computed = {}
+
+  async onLoad (e) {
+    this.getList()
+  }
+
+  onShow () {
+    let that = this
+    that.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+  }
+
+  getList() {
+    let vm = this
+    vm.loading = true
+    this.$get({
+      url: `${service.host}/official/bottle/list`,
+      data: {
+        openid: 'oPC_2vgxDzn-G1DREnusMCXDD4Us',
+        page: vm.blessingPage
+      }
+    }, {
+      success: ({code, data}) => {
+        if (vm.blessingPage > 1 && data.data.length == 0) {
+          vm.blessingMessage = true
+          return
+        } else {
+          vm.blessingMessage = false
+        }
+        if (vm.blessingPage == 1) {
+          vm.list = [...vm.list, ...data.data]
+          vm.$apply()
+          if (vm.list.length == 0) {
+            vm.showNoData = false
+            vm.$apply()
+          } else {
+            vm.showNoData = true
+            vm.$apply()
+          }
+        } else {
+          data.data.map(function (item, index) {
+            vm.list.push(item)
+            vm.$apply()
+          })
+        }
+        vm.triggeredsBlessing = false
+        vm.$apply()
+      },
+      fail: ({code, data}) => {
+        // 失败了什么也不做
+      },
+      complete: () => {
+        vm.loading = false
+      }
+    })
+  }
+
+  onPullDownRefresh () {
+  }
+
+  // 下一页
+  onToupper() {
+    let that = this
+    let cont = []
+    let dataArr = []
+    that.onToupperShow = true
+  }
+
+  onUnload () {
+    let that = this
+    clearInterval(that.Loadingtime)
+  }
+
+  save() {
+    let vm = this
+    if (vm.coin < 100) {
+      vm.modalName = 'insufficientModal'
+      vm.$apply()
+      return
+    }
+    vm.$post({url: `${service.host}/exchange/with/coin`}, {
+      success: ({code, data}) => {
+        vm.modalName = ''
+        vm.$Toast_success('解锁成功')
+        vm.$apply()
+      }
+    })
+  }
+
+  // 显示时间
+  showTme (startTime, endTime) {
+    let dateEnd = new Date(startTime.replace(/-/g, '/'))
+    let dateBegin = new Date(endTime.replace(/-/g, '/'))
+    var retValue = {}
+    var date3 = dateEnd.getTime() - dateBegin.getTime()  // 时间差的毫秒数
+    // 计算出相差天数
+    var days = Math.floor(date3 / (24 * 3600 * 1000))
+    retValue.Days = days
+    var years = Math.floor(days / 365)
+    retValue.Years = years
+    var months = Math.floor(days / 30)
+    retValue.Months = months
+    // 计算出小时数
+    var leave1 = date3 % (24 * 3600 * 1000)    // 计算天数后剩余的毫秒数
+    var hours = Math.floor(leave1 / (3600 * 1000))
+    retValue.Hours = hours
+    // 计算相差分钟数
+    var leave2 = leave1 % (3600 * 1000)        // 计算小时数后剩余的毫秒数
+    var minutes = Math.floor(leave2 / (60 * 1000))
+    retValue.Minutes = minutes
+    // 计算相差秒数
+    var leave3 = leave2 % (60 * 1000)      // 计算分钟数后剩余的毫秒数
+    var seconds = Math.round(leave3 / 1000)
+    retValue.Seconds = seconds
+    var strTime = ''
+    if (years >= 1) {
+      strTime = years + '年前'
+    } else if (months >= 1) {
+      strTime = months + '个月前'
+    } else if (days >= 1) {
+      strTime = days + '天前'
+    } else if (hours >= 1) {
+      strTime = hours + '小时前'
+    } else {
+      strTime = minutes + '分钟前'
+    }
+    retValue.PubTime = strTime
+    if (minutes < 5) {
+      return false
+    } else {
+      return true
+    }
+  }
+
+  // 转换时间
+  getTime (time) {
+    // 时间统一函数
+    function getTimeText (argument) {
+      var timeS = argument
+      var todayT = ''
+      var yestodayT = ''
+      var timeCha = getTimeS(timeS)
+      timeS = timeS.slice(-8)
+      todayT = new Date().getHours() * 60 * 60 * 1000 + new Date().getMinutes() * 60 * 1000 + new Date().getSeconds() * 1000
+      yestodayT = todayT + 24 * 60 * 60 * 1000
+      const date = new Date()
+      var year = date.getFullYear()
+      var yea = Number(argument.slice(0, 4))
+      if (timeCha > yestodayT) {
+        if (yea == year) {
+          return argument.slice(5, 11) + (timeS.slice(0, 2) >= 12 ? '下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '上午' + timeS.slice(0, 5))
+        } else {
+          return timeS.slice(0, 2) >= 12 ? '下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '上午' + timeS.slice(0, 5)
+        }
+      }
+      if (timeCha > todayT && timeCha < yestodayT) {
+        return timeS.slice(0, 2) > 12 ? '昨天 下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '昨天 上午' + timeS.slice(0, 5)
+      }
+      if (timeCha < todayT) {
+        return timeS.slice(0, 2) >= 12 ? '下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '上午' + timeS.slice(0, 5)
+      }
+    }
+
+// 时间戳获取
+    function getTimeS (argument) {
+      var timeS = argument
+      timeS = timeS.replace(/[-]/g, '/').replace(/[-]/, '')
+      timeS = timeS.replace(/[年月]/g, '/').replace(/[日]/, '')
+      return new Date().getTime() - new Date(timeS).getTime() - 1000 // 有一秒的误差
+    }
+    var timeText = getTimeText(time)
+    return timeText
+  }
+
+  pageScroll() {
+    let that = this
+    wx.createSelectorQuery().select('#curr').boundingClientRect(function(rect){
+      if ((that.fullHeight / 2) < rect.height) {
+        that.pushUpShow = true
+        that.$apply()
+      }
+    }).exec()
+  }
+
   methods = {
-    hideModal() {
-      this.modalName = "";
+    hideModal () {
+      this.modalName = ''
+      this.$apply()
     },
-		displayModal(e) {
-			this.modalName = e
-		},
-		goToUrlId(e) {
-			this.$goto(e)
-		}
-  };
+    onPullings(e) {
+      this.triggeredShow = true
+    }
+  }
   events = {
-    textareaValue: (e) => {
-      console.log(e, "text------------------------");
-      this.$apply();
-    },
-  };
+  }
 }
+
 </script>
 
 <style lang="less">
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/wa-ui.less";
 page {
-  padding-bottom: 100rpx;
+  background: #f5f5f5;
 }
-.cu-avatar {
-	border-radius: 50%;
+.m_tips {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80rpx;
+  background-color: #FFF8F2;
+  z-index: 1000;
+  padding: 0 30rpx;
+  .report_icon {
+    width: 100rpx;
+    height: 40rpx;
+  }
+}
+.chat_box{
+  padding: 120rpx 30rpx 100rpx 30rpx;
+  .chat_time{
+    padding-bottom: 40rpx;
+  }
+  .message-box{
+    padding-bottom: 40rpx;
+    .right-Avatar{
+      float: right;
+      width: 80rpx;
+      height: 80rpx;
+      border-radius: 50%;
+    }
+    .right-message{
+      max-width: 72%;
+      float: right;
+      padding: 10rpx 20rpx;
+      background: #FBB040;
+      color: white;
+      margin-right: 12rpx;
+      border-radius: 32rpx 0 32rpx 32rpx;
+      font-size: 28rpx;
+    }
+    .left-Avatar{
+      float: left;
+      width: 80rpx;
+      height: 80rpx;
+      border-radius: 50%;
+    }
+    .left-message{
+      max-width: 72%;
+      float: left;
+      padding: 10rpx 20rpx;
+      color: #333333;
+      background: white;
+      border-radius: 0 32rpx 32rpx 32rpx;
+      margin-left: 12rpx;
+      font-size: 28rpx;
+      .m_imgLst {
+        .u_img_lst {
+          max-width: 200rpx;
+          max-height: 200rpx;
+          border-radius: 20rpx;
+        }
+      }
+    }
+  }
 }
 </style>
