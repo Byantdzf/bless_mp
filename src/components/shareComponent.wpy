@@ -111,13 +111,6 @@
     }
     computed = {
     }
-    watch = {
-      'hide' () {
-        wx.showToast({
-          title: '提示'
-        })
-      }
-    }
 
     methods = {
       hideModel() {

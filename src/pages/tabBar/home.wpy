@@ -90,12 +90,12 @@
 		</view>
     <view class="cu-modal {{modalName=='envelope'?'show':''}}">
       <button class="envelope_bto" open-type="getUserInfo" bindgetuserinfo="userInfoHandler">
-        <view class="envelope_box" wx:show="{{showEnvelope}}"></view>
+        <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202112/22/a9889a18556d0922b2e583b462635363.png"></image>
       </button>
     </view>
-    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}" @tap="hideModal">
-      <view class="openEnvelope_box">
-        <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/21/920b694a9919092600eaca94d8586055.gif" mode="widthFix">
+    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}" @tap.stop="hideModal">
+      <view class="openEnvelope_box" catchtap>
+        <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/22/227d9a5635cc2392c50c5434d55ff1bf.gif" mode="widthFix">
           <view class="m_open_send_con" wx:if="{{showEnvelopeText}}">
             <view class="m_open_texTarea">
               <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue"></openTexTarea>
@@ -213,20 +213,32 @@ export default class home extends wepy.page {
   };
   computed = {};
   async onLoad(e) {
+    this.showEnvelope = false
     this.value = this.obtainData[this.obtainIndex].content
     wx.hideTabBar({})
-    wepy.$instance.userInfoReadyCallback = res => {
+    if (wepy.$instance.globalData.openid) {
       if (e.receiving_id) {
         this.receiving_id = e.receiving_id
-        this.modalName = 'envelope'
-        this.$apply()
-        setTimeout(() => {
-          this.showEnvelope = true
-          this.$apply()
-        }, 400)
+        this.getDetail()
         this.$apply()
       }
+    } else {
+      wepy.$instance.userInfoReadyCallback = res => {
+        if (e.receiving_id) {
+          this.receiving_id = e.receiving_id
+          this.getDetail()
+          this.$apply()
+        }
+      }
     }
+  }
+  onHide() {
+    this.modalName = ''
+    this.senValue = ''
+    this.receiving_id = ''
+    this.showEnvelope = false
+    this.showEnvelopeText = false
+    this.$apply()
   }
   onShow() {}
 
@@ -258,9 +270,25 @@ export default class home extends wepy.page {
       }
     }
   }
+  getDetail (id) { // 判断信封是否本人发送
+    this.$showLoading('加载中...')
+    this.$get({url: `${service.host + `/official/bottle/${this.receiving_id}`}`}, {
+      success: ({code, data}) => {
+        this.senValue = data.content
+        if (data.claim_status) {
+          this.modalName = 'envelope'
+          setTimeout(() => {
+            this.showEnvelope = true
+            this.$apply()
+          }, 1500)
+        }
+        wx.hideLoading()
+      }
+    })
+  }
   getBottleId (id) { // 祝福详情
     this.$showLoading('加载中...')
-    this.$get({url: `${service.bottleId}/${id}`}, {
+    this.$get({url: `${service.host + `/official/bottle?id=${this.receiving_id}`}`}, {
       success: ({code, data}) => {
         this.senValue = data.content
         this.modalName = 'openEnvelope'
@@ -277,7 +305,7 @@ export default class home extends wepy.page {
           setTimeout(() => {
             this.showEnvelopeText = true
             this.$apply()
-          }, 1200)
+          }, 1000)
         } else {
           this.modalName = 'sendOutModal'
           this.$apply()
@@ -404,7 +432,9 @@ page {
       }
       .Wish_box{
         margin-top: -24rpx;
-		background-color: rgba(0, 0, 0, 0);
+        padding-left: 56rpx;
+        padding-right: 0;
+		    background-color: rgba(0, 0, 0, 0);
         .Wish_box_icon{
           width: 80rpx;
           height: 80rpx;
@@ -480,22 +510,19 @@ page {
     vertical-align: middle;
     margin-left: auto;
     margin-right: auto;
-    background: url("https://image.fulllinkai.com/202112/21/0a03541a88c151ece67833869c4b6a37.png");
-    background-repeat: no-repeat;
-    background-size: cover;
     width: 600rpx;
     height: 356rpx;
-    animation: warn 1.5s ease-in-out 1.5s 1 alternate, zy 2.5s ease-in-out 3s 1 alternate;
+    animation: warn 1.5s ease-in-out 0s 1 alternate, zy 2.5s ease-in-out 2s 10 alternate;
   }
   @keyframes warn {
     0% {transform: scale(0);}
     100% {transform: scale(1);}
   }
   @keyframes zy{
-    10%{transform: rotate(6deg);}
-    20%{transform: rotate(-6deg);}
-    30%{transform: rotate(6deg);}
-    40%{transform: rotate(-6deg);}
+    10%{transform: rotate(3deg);}
+    20%{transform: rotate(-3deg);}
+    30%{transform: rotate(3deg);}
+    40%{transform: rotate(-3deg);}
     50%,100%{transform: rotate(0deg);}
   }
   .openEnvelope_box{
@@ -606,6 +633,7 @@ page {
     background: #F5F5F5;
     border-radius: 40rpx;
     color: #333333;
+    z-index: 99999999;
   }
   .u_share_bu_s{
     margin: 30rpx auto 0 auto;
