@@ -1,10 +1,10 @@
 <template>
   <view style="height: 100vh;overflow: hidden;background: #f5f5f5;">
     <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
-      <view class="m_tips f-fbc">
-        <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>
-        <image class="report_icon" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>
-      </view>
+<!--      <view class="m_tips f-fbc">-->
+<!--        <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>-->
+<!--        <image class="report_icon" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>-->
+<!--      </view>-->
       <view class="m_chat_box">
         <view class="chat_box">
           <view class="" wx:for="{{list}}" wx:key="index">
@@ -56,23 +56,25 @@ export default class chat extends wepy.page {
     onToupperShow: false,
     chatValue: '',
     blessingTopHandle: -1,
-    triggeredsBlessing: false,
+    triggeredsBlessing: false
   }
 
   computed = {}
 
   async onLoad (e) {
-    if(wepy.$instance.globalData.openid) {
+    if (wepy.$instance.globalData.openid) {
       this.id = e.receiving_id
       this.setIntervalCatch()
       this.getList()
-    }else {
+    } else {
       wepy.$instance.userInfoReadyCallback = res => {
         this.id = e.receiving_id
         this.setIntervalCatch()
         this.getList()
       }
     }
+    console.log(e.receiving_id, '7-------------')
+    this.$showLoading(e.receiving_id)
   }
 
   onShow () {
@@ -129,9 +131,9 @@ export default class chat extends wepy.page {
   getListNew(id) {
     const vm = this
     var data = {
-        id: id,
-        receiving_id: vm.id
-      }
+      id: id,
+      receiving_id: vm.id
+    }
     this.$get({
       url: `${service.bottleLatestData}`,
       data
@@ -277,7 +279,7 @@ export default class chat extends wepy.page {
 
   pageScroll() {
     let that = this
-    wx.createSelectorQuery().select('#curr').boundingClientRect(function(rect){
+    wx.createSelectorQuery().select('#curr').boundingClientRect(function(rect) {
       if ((that.fullHeight / 2) < rect.height) {
         that.pushUpShow = true
         that.$apply()
@@ -327,21 +329,21 @@ export default class chat extends wepy.page {
       }
       vm.chatValue = ''
       this.$post({
-				url: `${service.bottleChat}`,
-				data
-			}, {
-				success: ({
+        url: `${service.bottleChat}`,
+        data
+      }, {
+        success: ({
 					code,
 					data
 				}) => {
           vm.setIntervalCatch()
           vm.getListNew(vm.list[0].id)
-				}
-			})
+        }
+      })
     },
     sendMessage (e) {
       this.chatValue = e.detail.value
-    },
+    }
   }
   events = {
   }
@@ -377,7 +379,7 @@ page {
     display: flex;
     flex-direction: column-reverse;
     box-sizing: border-box;
-    padding: 120rpx 30rpx 20rpx 30rpx;
+    padding: 60rpx 30rpx 20rpx 30rpx;
     .chat_time{
       padding-bottom: 40rpx;
     }
