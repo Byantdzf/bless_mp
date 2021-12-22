@@ -95,7 +95,8 @@
     </view>
     <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}" @tap.stop="hideModal">
       <view class="openEnvelope_box" catchtap>
-        <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/22/227d9a5635cc2392c50c5434d55ff1bf.gif" mode="widthFix">
+        <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/22/227d9a5635cc2392c50c5434d55ff1bf.gif" mode="scaleToFill">
+<!--          mix-blend-mode: screen;-->
           <view class="m_open_send_con" wx:if="{{showEnvelopeText}}">
             <view class="m_open_texTarea">
               <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue"></openTexTarea>
