@@ -32,6 +32,34 @@
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
       </view>
     </view>
+		<!-- 投诉 -->
+		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">
+		  <view class="perfect_data_box animation-slide-top" catchtap>
+		    <view class="m_comp_con">
+		      <view class="m_comp_tt font_32 color333 bold">举报</view>
+					<view class="m_comp">
+						<view class="font_30 color333 bold text-left">举报类型</view>
+						<view class="m_comp_type f-fc f-wrap">
+							<block  wx:for="{{compType}}" wx:key="index">
+								<view class="u_comp_type f-fcc font_28 {{item.choiceTips?'sel':''}}" @tap="choiceType({{index}})">{{item.name}}</view>
+							</block>
+						</view>
+					</view>
+		      <view class="m_texTarea">
+		        <compTexTarea
+		          :placeholderText.sync="compPlaceholderText"
+		          :max.sync="max"
+		          :value.sync="compValue"
+							@textareaValue.user="compTextareaValue"
+             :readonly="false"
+		        ></compTexTarea>
+		      </view>
+		      <view class="m_ble_bu f-fcc">
+		        <view class="u_ble_bu bold fong_30 f-fcc" @tap="Submit">提交</view>
+		      </view>
+		    </view>
+		  </view>
+		</view>
   </view>
 </template>
 
@@ -41,11 +69,11 @@ import { service } from '../../config.js'
 import http from '../../mixins/http'
 import base from '../../mixins/base'
 import user from '../../mixins/user'
+import texTarea from '../../components/textarea'
 
 export default class chat extends wepy.page {
   mixins = [base, http, user]
-  components = {
-  };
+  components = {compTexTarea: texTarea};
   config = {
     navigationBarTitleText: '聊天',
     enablePullDownRefresh: false
@@ -57,6 +85,27 @@ export default class chat extends wepy.page {
     chatValue: '',
     blessingTopHandle: -1,
     triggeredsBlessing: false,
+    modalName: '',
+    compType: [
+      {
+        name: '政治敏感',
+        choiceTips: false
+      },
+      {
+        name: '色情低俗',
+        choiceTips: false
+      },
+      {
+        name: '广告软文',
+        choiceTips: false
+      },
+      {
+        name: '内容引起不适',
+        choiceTips: false
+      }
+    ],
+    compValue: '',
+    setIntervalList: null
   }
 
   computed = {}
@@ -66,7 +115,7 @@ export default class chat extends wepy.page {
       this.id = e.receiving_id
       this.setIntervalCatch()
       this.getList()
-    }else {
+    }else { 
       wepy.$instance.userInfoReadyCallback = res => {
         this.id = e.receiving_id
         this.setIntervalCatch()
@@ -293,7 +342,35 @@ export default class chat extends wepy.page {
     }, 5000)
   }
 
+  Submit() {
+      const vm = this
+      const compTypeArr = []
+      this.compType.forEach(item => {
+        if (item.choiceTips) {
+          compTypeArr.push(item.name)
+        }
+      })
+      if (compTypeArr.length == 0) {
+        this.$showToast('请选择举报内容')
+        return
+      }
+      vm.complaintModal = false
+      var data = {
+        type: compTypeArr,
+        content: this.compValue
+      }
+      vm.$post({url: `${service.host}/official/complaint/bless/${this.id}`}, {
+        success: ({code, data}) => {
+          vm.modalName = ''
+          vm.$apply()
+        }
+      })
+    }
+
   methods = {
+    compTextareaValue(e) {
+      this.compValue = e
+    },
     onPullingsBlessing(e) {
       this.triggeredsBlessing = true
     },
@@ -325,6 +402,7 @@ export default class chat extends wepy.page {
         receiving_id: this.id,
         content: this.chatValue
       }
+      clearTimeout(vm.setIntervalList)
       vm.chatValue = ''
       this.$post({
 				url: `${service.bottleChat}`,
@@ -341,6 +419,14 @@ export default class chat extends wepy.page {
     },
     sendMessage (e) {
       this.chatValue = e.detail.value
+    },
+    choiceType(index) {
+      this.compType.forEach((item, i) => {
+        if (i == index) {
+          item.choiceTips = !item.choiceTips
+        }
+      })
+      this.$apply()
     },
   }
   events = {
@@ -452,4 +538,63 @@ page {
     }
   }
 }
+.m_comp_con {
+		padding: 30rpx 0rpx 50rpx;
+		.m_comp_tt {
+			padding: 0 30rpx;
+		}
+		.m_comp {
+			padding: 0 10rpx 0 30rpx;
+			margin-top: 30rpx;
+			.m_comp_type {
+				.u_comp_type {
+					margin-top: 24rpx;
+					line-height: 40rpx;
+					background: #F8F8F8;
+					border-radius: 34rpx;
+					padding: 10rpx 24rpx;
+					margin-right: 20rpx;
+					color: #666666;
+				}
+				.u_comp_type.sel {
+					color: #FBB040;
+					background: #FFF8F2;
+				}
+			}
+		}
+		.m_texTarea {
+			margin: 50rpx 30rpx 40rpx;
+			background-color: #f5f5f5;
+		}
+		.u_ble_bu {
+			width: 400rpx;
+			height: 72rpx;
+			background: linear-gradient(90deg, #FFCE84 0%, #FBB040 100%);
+			border-radius: 36rpx;
+			color: #994D2C;
+		}
+	}
+  .perfect_data_box {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+		.u_complaint {
+			width: 60rpx;
+			height: 60rpx;
+			position: absolute;
+			z-index: 22;
+			top: 16rpx;
+			right: 30rpx;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+  }
 </style>
