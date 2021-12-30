@@ -30,7 +30,7 @@
               </block>
             </button>
           </view> -->
-          <view class="clearfloat font_36 color999 text-center" bindtap="hideModel">
+          <view class="clearfloat font_36 color999 text-center f-fcc" bindtap="hideModel">
             取消
           </view>
         </view>
@@ -251,8 +251,8 @@
       padding: 50rpx 40rpx;
     }
     .clearfloat {
+      height: 130rpx;
       border-top: solid 10rpx #F8F8F8;
-      position: 30rpx 0 50rpx;
     }
   }
 </style>

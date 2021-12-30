@@ -1,5 +1,5 @@
 <template>
-  <view class="textarea" style="{{tabSearch?'padding: 0;':''}}">
+  <view class="textareaV2" style="{{tabSearch?'padding: 0;':''}}">
     <textarea
       class="areas"
       style="{{tabSearch?'text-align: left;min-height: 40rpx;font-size: 28rpx;border-bottom: #F2F2F2 solid 2rpx;line-height: 72rpx;':''}}"
@@ -20,7 +20,7 @@ import wepy from "wepy";
 import http from "../mixins/http";
 import { service } from "../config.js";
 import base from "../mixins/base";
-export default class textarea extends wepy.component {
+export default class textareaV2 extends wepy.component {
   mixins = [base, http];
   components = {};
   props = {
@@ -93,18 +93,19 @@ export default class textarea extends wepy.component {
   events = {};
 }
 </script>
-<style lang="less">
-textarea {
+<style lang="less" scoped>
+textareaV2 {
   width: 80%;
   caret-color:#8962ff;
 }
-.textarea {
+.textareaV2 {
   padding: 20rpx 24rpx;
   box-sizing: border-box;
   border-radius: 32rpx;
   .areas {
     width: 100%;
-    min-height: 240rpx;
+    min-height: 220rpx;
+    height: 220rpx;
     font-size: 30rpx;
     line-height: 40rpx;
     color: #333333;

@@ -10,6 +10,7 @@
       rows="6"
       bindinput="inputs"
       value="{{value}}"
+      disabled="{{readonly}}"
     >
     </textarea>
     <!-- <view wx:if="{{!tabSearch}}" class="currentWordNumber font_24">{{currentWordNumber}}/{{max}}</view> -->
@@ -46,6 +47,10 @@ export default class textarea extends wepy.component {
       type: Boolean,
       default: false
     },
+    readonly: {
+      type: Boolean,
+      default: false
+    }
   };
   watch = {
     value(e) {
@@ -89,7 +94,7 @@ export default class textarea extends wepy.component {
   events = {};
 }
 </script>
-<style lang="less">
+<style lang="less" scoped>
 textarea {
   width: 80%;
   caret-color:#8962ff;

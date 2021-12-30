@@ -12,11 +12,24 @@
 				</view>
 			</view>
       <view class="m_bu f-fbc">
-        <button open-type="getUserInfo" class="making_bto font_32 bold" bindgetuserinfo="userInfoHandler">制作祝福贺卡</button>
-        <button class="Wish_box" open-type="getUserInfo" bindgetuserinfo="userInfoHandlerV2">
-          <image class="Wish_box_icon" src="https://image.fulllinkai.com/202112/18/b651ec61b60ba8b446b7c46c08739f94.png" mode="aspectFill"></image>
-          <view class="font_26 color-333">祝福箱</view>
-        </button>
+        <block wx:if="{{wxUserInfo}}">
+          <view class="making_bto font_32 bold" @tap.stop="userInfoHandler">制作祝福贺卡</view>
+          <view class="Wish_box" @tap.stop="userInfoHandlerV2">
+            <image class="Wish_box_icon" src="https://image.fulllinkai.com/202112/18/b651ec61b60ba8b446b7c46c08739f94.png" mode="aspectFill">
+            </image>
+            <view class="u_unr font_20 f-fcc white" wx:if="{{unread != 0}}">{{unread}}</view>
+            <view class="font_26 color-333">祝福箱</view>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="making_bto font_32 bold" @tap.stop="getWxUserInfo('userInfoHandler')">制作祝福贺卡</view>
+          <view class="Wish_box" @tap.stop="getWxUserInfo('userInfoHandlerV2')">
+            <image class="Wish_box_icon" src="https://image.fulllinkai.com/202112/18/b651ec61b60ba8b446b7c46c08739f94.png" mode="aspectFill">
+            </image>
+            <view class="u_unr font_20  f-fcc white">{{unread}}</view>
+            <view class="font_26 color-333">祝福箱</view>
+          </view>
+        </block>
       </view>
     </view>
 		<!-- 捞祝福 -->
@@ -69,7 +82,32 @@
 <!--        </view>-->
 <!--      </view>-->
 <!--    </view>-->
-		<!-- 发送祝福 -->
+
+
+    <!-- 选择祝福方式 -->
+    <view class="cu-modal bottom-modal {{modalName=='blessingTypeModal'?'show':''}}">
+      <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;">
+        <view class="m_blTp_con">
+          <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
+          <view class="u_blTp_tt font_32 color333 bold">选择祝福方式</view>
+          <view class="m_ty f-fbc">
+            <view class="m_ty_img f-fcc f-fdc" @tap.stop="modaltype('sendOutModal')">
+              <image class="u_ty_img" src="https://image.fulllinkai.com/202112/24/818f8514365c8bda1672d45d4cb7da2b.png" mode="widthFix"></image>
+              <view class="u_ty_tt font_28 color333">文字祝福</view>
+            </view>
+            <view class="m_ty_img f-fcc f-fdc" @tap.stop="modaltype('audioOutModal')">
+              <image class="u_ty_img" src="https://image.fulllinkai.com/202112/24/0864d8543115b6f2689ed739b226ef46.png" mode="widthFix"></image>
+              <view class="u_ty_tt font_28 color333">语音祝福</view>
+            </view>
+            <view class="m_ty_img f-fcc f-fdc" @tap.stop="modaltype('vudioOutModal')">
+              <image class="u_ty_img" src="https://image.fulllinkai.com/202112/24/71312386b874915ba458dbf6423a0e6f.png" mode="widthFix"></image>
+              <view class="u_ty_tt font_28 color333">视频祝福</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+		<!-- 文字祝福 -->
 		<view class="cu-modal {{modalName=='sendOutModal'?'show':''}}">
 		  <view class="blessing_box">
 			<view class="cancelPlaceholder" @tap="hideModal">
@@ -80,32 +118,187 @@
 		        <senTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue" :readonly="false"></senTexTarea>
 		      </view>
 		    </view>
-			<view class="m_share_bu">
-				<!-- <view class="u_share_bu bold font_20_30 f-fcc" @tap="shareQrcode">分享至朋友圈</view> -->
-				<view>
-          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="postBottle">分享给好友</view>
-				</view>
-			</view>
+        <view class="m_share_bu">
+          <!-- <view class="u_share_bu bold font_20_30 f-fcc" @tap="shareQrcode">分享至朋友圈</view> -->
+          <view>
+            <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="postBottle('chat')">分享给好友</view>
+          </view>
+        </view>
 		  </view>
 		</view>
+    <!-- 语音祝福 -->
+		<view class="cu-modal {{modalName=='audioOutModal'?'show':''}}">
+		  <view class="m_audio">
+			<view class="cancelPlaceholder" @tap="reRecordBu">
+				<image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="aspectFit"></image>
+			</view>
+      <view class="m_audio_ct f-fdc">
+        <view class="u_audio_ct_tt font_36 bold">{{showhandle1?'录制一段语音祝福':recordingTimeqwe+'S'}}</view>
+        <block wx:if="{{showhandle2}}">
+          <image class="u_audio_ct_img" @tap="listenRecord" wx:if="{{showhandle3}}" src="https://image.fulllinkai.com/202112/24/21d6980bd3d7098e8e608def79e180a9.png" mode="aspectFit"></image>
+          <image class="u_audio_ct_img" @tap="listenRecord" wx:else src="https://image.fulllinkai.com/202112/29/5f3b05e8bdfabc09af710ed3e58cd7ea.png" mode="aspectFit"></image>
+          <view class="font_28 color33" style="padding-top: 30rpx;">试听</view>
+          <view class="m_ca f-fcc" @tap="reRecord">
+            <image class="u_ca_img" src="https://image.fulllinkai.com/202112/24/72caca2a1a7507d846eb12baf7fc6f43.png" mode="aspectFit"></image>
+            <view class="u_ca_tt font_26">重录</view>
+          </view>
+        </block>
+        <block wx:else>
+          <block wx:if="{{showhandle1}}">
+            <image class="u_audio_ct_img" @tap="startRecord" src="https://image.fulllinkai.com/202112/24/807e08ae2e2bbf009ffa1efaaffc9934.png" mode="aspectFit"></image>
+          </block>
+          <block wx:else>
+            <view class="m_audio_c3 f-fcc">
+              <view class="dot">
+                <view class="dot2">
+                    <image class="dot3" @tap="shutRecord" src="https://image.fulllinkai.com/202112/24/fa6772a0e0a7ea42b9d9b67ba46fb788.png" mode="aspectFit"></image>
+                </view>
+              </view>
+            </view>
+          </block>
+          <view class="font_28 color33" style="padding-top: 30rpx;">{{showhandle1?'点击录音':'录音中'}}</view>
+        </block>
+      </view>
+      <view class="m_bu_img">
+        <image class="u_bu_img" @tap="uploadVoice" src="https://image.fulllinkai.com/202112/24/587f32956bc182f141287713bae32e96.png" mode="aspectFit"></image>
+      </view>
+		  </view>
+		</view>
+    <!-- 视频祝福 -->
+		<view class="cu-modal {{modalName=='vudioOutModal'?'show':''}}">
+		  <view class="m_vudio">
+			<view class="cancelPlaceholder" @tap="hideModal">
+				<image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="aspectFit"></image>
+			</view>
+      <view class="m_vudio_ct f-fdc">
+        <view class="u_audio_ct_tt font_36 bold">录制一段祝福视频</view>
+        <view class="m_vi_box f-fcc">
+          <view class="m_vi f-fcc f-fdc" @tap="toChooseVideo" wx:if="{{videoUrl == ''}}">
+            <image class="u_vi_img" src="https://image.fulllinkai.com/202112/24/032156698bcd4360bcdc761f65e6ff59.png" mode="aspectFit"></image>
+            <view class="font_28" style="color: #FF9F45;">录制</view>
+          </view>
+          <view class="m_video" wx:else>
+            <video class="u_video" src="{{videoUrl}}"></video>
+          </view>
+        </view>
+      </view>
+      <view class="m_bu_img">
+        <image class="u_bu_img" @tap="uploadFile" src="https://image.fulllinkai.com/202112/24/587f32956bc182f141287713bae32e96.png" mode="aspectFit"></image>
+      </view>
+		  </view>
+		</view>
+    <!-- 信封 -->
     <view class="cu-modal {{modalName=='envelope'?'show':''}}">
-      <button class="envelope_bto" open-type="getUserInfo" bindgetuserinfo="userInfoHandler">
-        <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202112/22/a9889a18556d0922b2e583b462635363.png"></image>
-      </button>
+      <block  wx:if="{{wxUserInfo}}">
+        <view class="envelope_bto" @tap.stop="userInfoHandlerV3">
+          <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202112/22/a9889a18556d0922b2e583b462635363.png"></image>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="envelope_bto" @tap.stop="getWxUserInfo('userInfoHandlerV3')">
+          <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202112/22/a9889a18556d0922b2e583b462635363.png"></image>
+        </view>
+      </block>
     </view>
+    <!-- 信封内容 -->
     <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}" @tap.stop="hideModal">
       <view class="openEnvelope_box" catchtap>
-        <image class="openEnvelope_bg" src="https://image.fulllinkai.com/202112/22/227d9a5635cc2392c50c5434d55ff1bf.gif" mode="scaleToFill">
-<!--          mix-blend-mode: screen;-->
-          <view class="m_open_send_con" wx:if="{{showEnvelopeText}}">
+        <image class="openEnvelope_bg" src="{{openImage}}" mode="widthFix">
+        <!--mix-blend-mode: screen;-->
+          <view class="m_open_info">
+            <view class="m_open_ipc">
+              <image class="u_open_ipcImg" src="{{openData.pic}}" mode="aspectFit"></image>
+            </view>
+            <view class="m_open_text">
+              <view class="m_optt f-fbc">
+                <view class="u_optt font_28 ellipsis_1 bold color333 text-left">{{openData.nickname}}</view>
+                <view class="font_26 color666" @tap="complaint">举报</view>
+              </view>
+              <view class="u_opStt font_24 color999 text-left">给你发了一个祝福！！！</view>
+            </view>
+          </view>
+          <view class="m_open_send_con" wx:if="{{modalName=='openEnvelope'}}">
             <view class="m_open_texTarea">
-              <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue"></openTexTarea>
+              <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="openValue" @textareaValue.user="openTextareaValue"></openTexTarea>
             </view>
           </view>
         </image>
-        <view class="u_share_bu_s bold fong_30 f-fcc" wx:if="{{receiving_id}}" @tap.stop="goToUrlId">回复好友</view>
+        <view class="f-fcc">
+          <view class="u_share_bu_s let bold fong_30 f-fcc" @tap.stop="hideModal">收下</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="goToUrlId">回复Ta</view>
+        </view>
       </view>
     </view>
+    <!-- 信封语音 -->
+    <view class="cu-modal {{modalName=='vudioOpenEnvelope'?'show':''}}" @tap.stop="hideModal">
+      <view class="m_en" catchtap wx:if="{{modalName=='vudioOpenEnvelope'}}">
+        <view class="cancelPlaceholder" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202112/29/3bded8a5a19cc6d5b46425b6dc944df6.png" mode="aspectFit"></image>
+        </view>
+        <image class="u_en_img" src="https://image.fulllinkai.com/202112/29/01194d4f4ceeac54cf53a0ab085b993c.png" mode="widthFix">
+          <view class="m_loader f-fcc f-fdc">
+            <view class="m_loader_tt font_32 white">点击播放收获你的祝福</view>
+            <view class="loader-container_s f-fcc"  wx:if="{{playShow}}">
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-3"></view>
+            </view>
+            <view class="loader-container f-fcc" wx:else>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-3"></view>
+            </view>
+            <!-- <view class="voice">
+              <view class="bg voicePlay"></view>
+            </view> -->
+            <view class="font_32 white" wx:if="{{playShow}}">{{voiceDuration}}S</view>
+            <view class="font_32 white" wx:else>{{recordingTimeqwe}}S</view>
+            <image class="u_en_icon_t" @tap="playMethod" wx:if="{{playShow}}" src="https://image.fulllinkai.com/202112/29/48143e7e3170fcebfad61d10f0391084.png" mode="aspectFit"></image>
+            <image class="u_en_icon_f" @tap="playMethod" wx:else src="https://image.fulllinkai.com/202112/29/bc06d968049b76c3dee0e0f3c4e12623.png" mode="aspectFit"></image>
+          </view>
+        </image>
+      </view>
+    </view>
+    <!-- 信封视频 -->
+    <view class="cu-modal {{modalName=='videoOpenEnvelope'?'show':''}}" @tap.stop="hideModal">
+      <view class="m_en_vi" catchtap wx:if="{{modalName=='videoOpenEnvelope'}}">
+        <view class="cancelPlaceholder" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202112/29/3bded8a5a19cc6d5b46425b6dc944df6.png" mode="aspectFit"></image>
+        </view>
+        <view class="m_loader_tt font_32 white">点击播放收获你的祝福</view>
+        <view @tap="gotoTv()">
+          <video id="video_" loop="loop" class="u_video" src="{{openValue}}"></video>
+        </view>
+        <image class="u_vi_buImg" src="https://image.fulllinkai.com/202112/29/6bff86ad937264ae7c5c8814f92bb784.png" mode="aspectFit"></image>
+      </view>
+    </view>
+    <!-- 分享海报 -->
 		<view class="cu-modal {{modalName=='shareModal'?'show':''}}">
       <view class="share_code_box">
         <view class="cancelShare" @tap="hideModal">
@@ -114,34 +307,36 @@
       </view>
 		</view>
 		<!-- 投诉 -->
-<!--		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">-->
-<!--		  <view class="perfect_data_box animation-slide-top" catchtap>-->
-<!--		    <view class="m_comp_con">-->
-<!--		      <view class="m_comp_tt font_32 color333 bold">举报{{obtainData[obtainIndex].name}}</view>-->
-<!--					<view class="m_comp">-->
-<!--						<view class="font_30 color333 bold text-left">举报类型</view>-->
-<!--						<view class="m_comp_type f-fc f-wrap">-->
-<!--							<block  wx:for="{{compType}}" wx:key="index">-->
-<!--								<view class="u_comp_type f-fcc font_28 {{typeIndex == index?'sel':''}}" @tap="choiceType({{index}})">{{item}}</view>-->
-<!--							</block>-->
-<!--						</view>-->
-<!--					</view>-->
-<!--		      <view class="m_texTarea">-->
-<!--		        <compTexTarea-->
-<!--		          :placeholderText.sync="compPlaceholderText"-->
-<!--		          :max.sync="max"-->
-<!--		          :value.sync="compValue"-->
-<!--							@textareaValue.user="compTextareaValue"-->
-<!--              :readonly="false"-->
-<!--		        ></compTexTarea>-->
-<!--		      </view>-->
-<!--		      <view class="m_ble_bu f-fcc">-->
-<!--		        <view class="u_ble_bu bold fong_30 f-fcc" @tap="Submit">提交</view>-->
-<!--		      </view>-->
-<!--		    </view>-->
-<!--		  </view>-->
-<!--		</view>-->
+    <view class="cu-modal {{modalName=='complaintModal'?'show':''}}" @tap.stop="hideModal">
+      <view class="perfect_data_box animation-slide-top" catchtap>
+        <view class="m_comp_con">
+          <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
+          <view class="m_comp_tt font_32 color333 bold">举报</view>
+          <view class="m_comp">
+            <view class="font_30 color333 bold text-left">举报类型</view>
+            <view class="m_comp_type f-fc f-wrap">
+              <block  wx:for="{{compType}}" wx:key="index">
+                <view class="u_comp_type f-fcc font_28 {{item.choiceTips?'sel':''}}" @tap="choiceType({{index}})">{{item.name}}</view>
+              </block>
+            </view>
+          </view>
+          <view class="m_texTarea">
+            <compTexTarea
+              wx:if="{{modalName=='complaintModal'}}"
+              :placeholderText.sync="compPlaceholderText"
+              :max.sync="max"
+              :value.sync="compValue"
+              @textareaValue.user="compTextareaValue"
+            ></compTexTarea>
+          </view>
+          <view class="m_ble_bu f-fcc">
+            <view class="u_ble_bu bold fong_30 f-fcc" @tap="Submit">提交</view>
+          </view>
+        </view>
+      </view>
+    </view>
     <shareComponent :hide.sync="hide" poster="custom" :shareImage.sync="pic"></shareComponent>
+    <backgroundAudio></backgroundAudio>
   </view>
 </template>
 
@@ -154,7 +349,8 @@ import user from '../../mixins/user'
 import texTarea from '../../components/textarea'
 import textareaV2 from '../../components/textareaV2'
 import shareComponent from '../../components/shareComponent'
-// import { getsubscription } from "../../utils/fn";
+import {getsubscription} from '../../utils/fn'
+import backgroundAudio from '../../components/backgroundAudio'
 
 let date = new Date()
 export default class home extends wepy.page {
@@ -165,7 +361,7 @@ export default class home extends wepy.page {
     navigationStyle: 'custom',
     enablePullDownRefresh: false
   };
-  components = { shareComponent, texTarea, senTexTarea: texTarea, openTexTarea: textareaV2, compTexTarea: texTarea };
+  components = { shareComponent, texTarea, senTexTarea: texTarea, openTexTarea: textareaV2, compTexTarea: texTarea, backgroundAudio };
   watch = {};
   data = {
     modalName: '',
@@ -178,7 +374,25 @@ export default class home extends wepy.page {
     value: '',
     senValue: '',
     compValue: '',
-    compType: ['政治敏感', '色情低俗', '广告软文', '内容引起不适'],
+    openValue: '',
+    compType: [
+      {
+        name: '政治敏感',
+        choiceTips: false
+      },
+      {
+        name: '色情低俗',
+        choiceTips: false
+      },
+      {
+        name: '广告软文',
+        choiceTips: false
+      },
+      {
+        name: '内容引起不适',
+        choiceTips: false
+      }
+    ],
     obtainData: [
       {
         name: '郭老师',
@@ -210,13 +424,27 @@ export default class home extends wepy.page {
     typeIndex: null,
     bottleData: {},
     hide: false,
-    receiving_id: ''
+    receiving_id: '',
+    chat_id: '',
+    chat_data: {},
+    openData: {},
+    wxUserInfo: null,
+    unread: 0,
+    openImage: 'https://image.fulllinkai.com/202112/23/8310729201193b799fc296d555760cd7.png',
+    claim_status: false,
+    recordingTimeqwe: 0,
+    showhandle1: true,
+    showhandle2: false,
+    showhandle3: true,
+    videoUrl: '',
+    aliyunVideoUrl: '',
+    playShow: true,
+    voiceDuration: 0
   };
   computed = {};
   async onLoad(e) {
+    this.wxUserInfo = wx.getStorageSync('wxUserInfo') 
     this.showEnvelope = false
-    this.value = this.obtainData[this.obtainIndex].content
-    wx.hideTabBar({})
     if (wepy.$instance.globalData.openid) {
       if (e.receiving_id) {
         this.receiving_id = e.receiving_id
@@ -233,15 +461,19 @@ export default class home extends wepy.page {
       }
     }
   }
+  onShow() {
+    this.getBottleUnread()
+  }
   onHide() {
     this.modalName = ''
-    this.senValue = ''
-    this.receiving_id = ''
     this.showEnvelope = false
     this.showEnvelopeText = false
+    this.$invoke('backgroundAudio', 'endedVoice')
     this.$apply()
   }
-  onShow() {}
+  onUnload() {
+    this.$invoke('backgroundAudio', 'endedVoice')
+  }
 
   getCurrentPageUrlWithArgs() {
     var pages = getCurrentPages() // 获取加载的页面
@@ -249,7 +481,7 @@ export default class home extends wepy.page {
     var url = currentPage.route // 当前页面url
     var options = currentPage.options // 如果要获取url中所带的参数可以查看options
     var fromUserID = wx.getStorageSync('user_id') // 拼接url的参数
-    var urlWithArgs = `${url}?openid=${wx.getStorageSync('openid')}&receiving_id=${this.bottleData.id}`
+    var urlWithArgs = `${url}?openid=${wx.getStorageSync('openid')}&receiving_id=${this.bottleData.id}&type=${this.bottleData.type}`
     for (var key in options) {
       var value = options[key]
       if (key !== 'receiving_id') {
@@ -264,60 +496,214 @@ export default class home extends wepy.page {
       url = that.getCurrentPageUrlWithArgs()
     console.log(url)
     return {
-      title: '分享祝福',
+      title: `来自${this.wxUserInfo.nickName}的祝福贺卡`,
       path: url,
+      imageUrl: 'https://image.fulllinkai.com/202112/22/cc2931000bf5f146229f3afd1f4eab43.png',
       success: function (res) {
         console.log('成功', res)
       }
     }
   }
-  getDetail (id) { // 判断信封是否本人发送
-    this.$showLoading('加载中...')
+  // 判断信封是否本人发送
+  getDetail (id) {
     this.$get({url: `${service.host + `/official/bottle/${this.receiving_id}`}`}, {
       success: ({code, data}) => {
-        this.senValue = data.content
-        if (data.claim_status) {
-          this.modalName = 'envelope'
-          setTimeout(() => {
-            this.showEnvelope = true
-            this.$apply()
-          }, 1500)
+        this.openValue = data.content
+        this.openData = data
+        this.chat_id = data.receiving_id
+        this.claim_status = data.claim_status
+        if (data.identity == 'holder') {
+          if(data.type == 'chat') {
+            this.modalName = 'envelope'
+            setTimeout(() => {
+              this.showEnvelope = true
+              this.$apply()
+            }, 1500)
+          }else if(data.type == 'voice'){
+            this.voiceDuration = data.duration
+            this.modalName = 'vudioOpenEnvelope'
+            if(!data.claim_status) {
+              this.getBottleId(data.receiving_id)
+            }
+          }else {
+            this.modalName = 'videoOpenEnvelope'
+            if(!data.claim_status) {
+              this.getBottleId(data.receiving_id)
+            }
+          }
         }
-        wx.hideLoading()
+        this.$apply()
       }
     })
   }
-  getBottleId (id) { // 祝福详情
-    this.$showLoading('加载中...')
-    this.$get({url: `${service.host + `/official/bottle?id=${this.receiving_id}`}`}, {
+  // 祝福详情
+  getBottleId (id) {
+    var data = {
+      id: this.receiving_id
+    }
+    this.$get({url: `${service.host}/official/bottle`,data}, {
       success: ({code, data}) => {
-        this.senValue = data.content
-        this.modalName = 'openEnvelope'
+        this.chat_id = data.receiving_id
+        if(this.openData.type == 'chat') {
+          this.modalName = 'openEnvelope'
+        }
+        this.getBottleUnread()
         wx.hideLoading()
       }
     })
   }
-  methods = {
-    userInfoHandler(e) {
-      if (e.detail.userInfo != undefined) {
-        wx.setStorageSync('userInfo', e.detail.userInfo)
-        if (this.receiving_id) {
-          this.getBottleId(this.receiving_id)
-          setTimeout(() => {
-            this.showEnvelopeText = true
-            this.$apply()
-          }, 1000)
-        } else {
-          this.modalName = 'sendOutModal'
-          this.$apply()
-        }
+  getBottleUnread (id) { // 未读消息数
+    this.$get({url: `${service.host}/official/bottle/unread`}, {
+      success: ({code, data}) => {
+        this.unread = data.unread_num
       }
+    })
+  }
+
+  userInfoHandlerV3_sub(that = this) {
+    if(!that.claim_status) {
+      that.getBottleId(that.receiving_id)
+    }else {
+      that.modalName = 'openEnvelope'
+    }
+    setTimeout(() => {
+      that.showEnvelopeText = true
+      that.$apply()
+    }, 1200)
+    that.$apply()
+  }
+
+  goToUrlId_sub(that = this) {
+    that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&b_id=${that.openData.b_id}`)
+    that.modalName = ''
+    that.$apply()
+  }
+
+  getsubscrip_tion(method) {
+    const that = this
+    getsubscription(['xxUe_-b4w1ZcNFuPqjbH6qJw5g5fb4nhEIBJ9LT5pu4']).then((res) => {
+      console.log(res, 'getsubscription-----res-------------')
+      method(that)
+    }).catch((erro) => {
+      console.log(erro, 'getsubscription----erro--------------')
+      method(that)
+    })
+  }
+
+  // 视频上传
+  uploadFile(filePaths) {
+    let vm = this
+    vm.modalName = ''
+    vm.$showLoading('视频上传中...')
+    wx.uploadFile({
+      url: service.image_upload,
+      filePath: vm.videoUrl,
+      path: 'live/person/audit',
+      method: 'POST',
+      name: 'fileData',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+        'content-type': 'multipart/form-data',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      success: (res) => {
+        vm.videoUrl = ''
+        let url = JSON.parse(res.data).data
+        vm.aliyunVideoUrl = url
+        if(vm.aliyunVideoUrl == '') {
+          vm.$showToast('视频不能为空')
+          return
+        }
+        var data = {
+          content: vm.aliyunVideoUrl,
+          type: 'video'
+        }
+        vm.$post({
+          url: `${service.bottle}`,
+          data
+        }, {
+          success: ({code, data}) => {
+            wx.hideLoading()
+            vm.senValue = ''
+            vm.bottleData = data
+            vm.hide = true
+            vm.$apply()
+          }
+        })
+      },
+      fail: (res) => {
+        vm.modalName = ''
+        vm.loading = false
+        vm.$apply()
+        vm.$showToast('请先录制视频')
+      },
+      complete: () => {
+      }
+    })
+  }
+
+  methods = {
+    getWxUserInfo(type) {
+      const that = this
+      // wx.showModal({
+      //   title: '温馨提示',
+      //   content: '正在请求您的个人信息',
+      //   success(res) {
+      //     if (res.confirm) {
+      //       } else if (res.cancel) {
+      //       //拒绝授权 showErrorModal是自定义的提示
+      //       that.showErrorModal('您拒绝了请求');
+      //       return;
+      //     }
+      //   }
+      // })
+      wx.getUserProfile({
+        desc: "获取你的昵称、头像、地区及性别",
+        success: res => {
+          console.log(res)
+          let wxUserInfo = res.userInfo;
+          that.wxUserInfo = wxUserInfo
+          wx.setStorageSync('wxUserInfo', wxUserInfo)
+          that.$get({url: `${service.host}/official/bottle/userInfo`,
+          data: {
+            nickname: wxUserInfo.nickName,
+            pic: wxUserInfo.avatarUrl,
+            openid: wx.getStorageSync('openid')
+          }}, {
+            success: ({code, data}) => {}
+          })
+          if(type == 'userInfoHandler') {
+            this.modalName = 'blessingTypeModal'
+            this.$apply()
+          }else if(type == 'userInfoHandlerV2') {
+            that.$goto(`/pages/users/myNews`)
+          }else {
+            this.getBottleId(this.receiving_id)
+            setTimeout(() => {
+              this.showEnvelopeText = true
+              this.$apply()
+            }, 1200)
+          }
+        },
+        fail: res => {
+          //拒绝授权
+          // that.showErrorModal('您拒绝了请求');
+          return;
+        }
+      })
+    },
+    userInfoHandler(e) {
+      this.modalName = 'blessingTypeModal'
+      this.$apply()
     },
     userInfoHandlerV2(e) {
-      if (e.detail.userInfo != undefined) {
-        wx.setStorageSync('userInfo', e.detail.userInfo)
-        this.$goto(`/pages/users/myNews`)
-      }
+      const that =this
+      this.getsubscrip_tion(function() {
+        that.$goto(`/pages/users/myNews`)
+      })
+    },
+    userInfoHandlerV3(e) {
+      this.userInfoHandlerV3_sub(this)
     },
     textareaValue(e) {
       this.value = e
@@ -325,18 +711,39 @@ export default class home extends wepy.page {
     senTextareaValue(e) {
       this.senValue = e
     },
+    openTextareaValue(e) {
+      this.openValue = e
+    },
     compTextareaValue(e) {
       this.compValue = e
     },
     hideModal() {
+      const that = this
+      if(this.modalName = 'vudioOpenEnvelope' || this.modalName == 'vudioOpenEnvelope') {
+        this.$invoke('backgroundAudio', 'endedVoice')
+      }
       this.modalName = ''
-      this.senValue = ''
-      this.receiving_id = ''
       this.$apply()
     },
-    postBottle () { // 发祝福
-      var data = {
-        content: this.senValue
+    // 发祝福
+    postBottle (type) {
+      if(type == 'chat') {
+        if(this.senValue == '') {
+          this.$showToast('内容不能为空')
+          return
+        }
+        var data = {
+          content: this.senValue
+        }
+      }else if(type == 'video') {
+        if(this.videoUrl == '') {
+          this.$showToast('视频不能为空')
+          return
+        }
+        var data = {
+          content: this.videoUrl,
+          type
+        }
       }
       this.modalName = ''
       // this.$showLoading('加载中...')
@@ -346,6 +753,7 @@ export default class home extends wepy.page {
       }, {
         success: ({code, data}) => {
           // wx.hideLoading()
+          this.senValue = ''
           this.bottleData = data
           this.hide = true
           this.$apply()
@@ -356,11 +764,12 @@ export default class home extends wepy.page {
       this.modalName = e
     },
     goToUrlId() {
-      this.$goto(`/pages/users/chat?receiving_id=${this.receiving_id}`)
-      this.modalName = ''
-      this.senValue = ''
-      this.receiving_id = ''
-      this.$apply()
+      const that =this
+      this.getsubscrip_tion(function() {
+        that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&b_id=${that.openData.b_id}&nickname=${that.openData.nickname}`)
+        that.modalName = ''
+        that.$apply()
+      })
     },
     againGat() {
       const that = this
@@ -385,14 +794,123 @@ export default class home extends wepy.page {
     complaint() {
       this.modalName = 'complaintModal'
     },
+    modaltype(e) {
+      this.modalName = e
+    },
     choiceType(index) {
-      this.typeIndex = index
+      this.compType.forEach((item, i) => {
+        if (i == index) {
+          item.choiceTips = !item.choiceTips
+        }
+      })
+      this.$apply()
     },
     Submit() {
+      const vm = this
+      const compTypeArr = []
+      this.compType.forEach(item => {
+        if (item.choiceTips) {
+          compTypeArr.push(item.name)
+        }
+      })
+      if (compTypeArr.length == 0) {
+        this.$showToast('请选择举报内容')
+        return
+      }
+      vm.complaintModal = false
+      var data = {
+        type: compTypeArr,
+        content: this.compValue
+      }
+      vm.$post({url: `${service.host}/official/complaint/bless/${this.receiving_id}`, data}, {
+        success: ({code, data}) => {
+          vm.modalName = ''
+          vm.$showToast('举报成功')
+          vm.$apply()
+        }
+      })
+    },
+    startRecord() {
+      this.$invoke('backgroundAudio', 'startRecord')
+    },
+    shutRecord() {
+      this.$invoke('backgroundAudio', 'shutRecord')
+    },
+    listenRecord() {
+      this.showhandle3 = false
+      this.$invoke('backgroundAudio', 'listenRecord')
+    },
+    reRecordBu() {
       this.modalName = ''
+      this.$invoke('backgroundAudio', 'endedVoice')
+    },
+    reRecord() {
+      this.$invoke('backgroundAudio', 'reRecord')
+    },
+    uploadVoice() {
+      this.$invoke('backgroundAudio', 'uploadVoice')
+    },
+    toChooseVideo() {
+      const that = this
+      that.$showLoading('视频录制中...')
+      wx.chooseVideo({
+        sourceType: ['album','camera'],
+        maxDuration: 60,
+        camera: 'back',
+        success(res) {
+          wx.hideLoading()
+          console.log(res.tempFilePath)
+          that.videoUrl = res.tempFilePath
+          that.modalName = 'vudioOutModal'
+          that.$apply()
+        },
+        fail: (res) => {
+          wx.hideLoading()
+        },
+        complete: () => {
+        }
+      })
+    },
+    playMethod() {
+      if(this.playShow) {
+        this.$invoke('backgroundAudio', 'listenRecord', {tempFilePath: this.openValue})
+        this.playShow = !this.playShow
+      }
+    },
+    gotoTv() {
+      var videoContext = wx.createVideoContext('video_', this)
+      console.log(videoContext)
+      videoContext.requestFullScreen()
     }
   }
   events = {
+    'hideShare': (e) => {
+      this.hide = e
+    },
+    'recording': (e) => {
+      this.recordingTimeqwe = e
+    },
+    'shutRecord': (e) => {
+      if(e.type == 'showhandle1') {
+        this.showhandle1 = e.data
+      }else if(e.type == 'showhandle2') {
+        this.showhandle2 = e.data
+      }else {
+        this.showhandle3 = e.data
+      }
+    },
+    'UpLoadImage': (e) => {
+      console.log(e,'UpLoadImage---------------------')
+      this.modalName = ''
+      this.senValue = ''
+      this.bottleData = e
+      this.hide = true
+      this.$apply()
+    },
+    'playEnded': (e) => {
+      this.playShow = true
+      this.$apply()
+    },
   }
 }
 </script>
@@ -436,11 +954,23 @@ page {
         padding-left: 56rpx;
         padding-right: 0;
 		    background-color: rgba(0, 0, 0, 0);
+        position: relative;
         .Wish_box_icon{
           width: 80rpx;
           height: 80rpx;
           display: block;
           margin-bottom: 6rpx;
+        }
+        .u_unr {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 28rpx;
+          height: 28rpx;
+          background: #F1013D;
+          border: 2rpx solid #FFFFFF;
+          border-radius: 50%;
+          font-size: 20rpx;
         }
       }
       .u_bu {
@@ -477,7 +1007,7 @@ page {
 		.m_texTarea {
 			background-color: #ffffff;
 			margin-bottom: 70rpx;
-			margin-top: 50rpx;
+			margin-top: 42rpx;
 		}
 		.m_ble_tt {
 			text-align: left;
@@ -513,7 +1043,7 @@ page {
     margin-right: auto;
     width: 600rpx;
     height: 356rpx;
-    animation: warn 1.5s ease-in-out 0s 1 alternate, zy 2.5s ease-in-out 2s 10 alternate;
+    animation: warn 1s ease-in-out 0s 1 alternate, zy 2s ease-in-out 1.2s 10 alternate;
   }
   @keyframes warn {
     0% {transform: scale(0);}
@@ -539,16 +1069,248 @@ page {
       width: 100%;
       display: block;
       position: relative;
+      overflow: hidden;
+      .m_open_info {
+        width: 450rpx;
+        position: absolute;
+        top: 46rpx;
+        left: 76rpx;
+        display: flex;
+        justify-content: left;
+        .m_open_ipc {
+          width: 80rpx;
+          height: 80rpx;
+          border-radius: 50%;
+          margin-right: 10rpx;
+          overflow: hidden;
+          .u_open_ipcImg {
+            width: 100%;
+            height: 100%;
+          }
+        }
+        .m_open_text {
+          flex: 1;
+          height: auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          .m_optt {
+            .u_optt {
+              width: 230rpx;
+            }
+          }
+        }
+      }
     }
     .m_open_send_con{
       position: absolute;
-      top: -20rpx;
+      top: 142rpx;
       left: 50%;
       transform: translateX(-50%);
-      width: 80%;
-      .m_open_texTarea{
-        margin-bottom: 36rpx;
+      width: 83%;
+    }
+  }
+  .m_en_vi{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    height: 840rpx;
+    border-radius: 32rpx;
+    background-image: linear-gradient(#DD3A15, #FF7244);
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 30rpx;
+      margin-top: 30rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+    .u_en_img {
+      width: 100%;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .u_vi_buImg {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 132rpx;
+    }
+    .m_loader_tt {
+      padding: 64rpx 0 30rpx;
+    }
+    .u_video {
+      width: 508rpx;
+      height: 678rpx;
+    }
+  }
+  .m_en{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 30rpx;
+      margin-top: 30rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+    .u_en_img {
+      width: 100%;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .m_loader {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      .m_loader_tt {
+        padding-top: 64rpx;
+      }
+      .u_en_icon_t,
+      .u_en_icon_f {
         margin-top: 50rpx;
+        width: 132rpx;
+        height: 132rpx;
+      }
+    }
+    .loader-container_s > view {
+        display: inline-block;
+        background: #FFFFFF;
+        width: 6rpx;
+        margin: 0 6rpx;
+        border-radius: 100rpx;
+    }
+    .loader-container_s {
+        margin-top: 98rpx;
+        width: 100%;
+        margin-bottom: 30rpx;
+        .rectangle-1 {
+          height: 24rpx;
+        }
+        .rectangle-2 {
+          height: 32rpx;
+        }
+        .rectangle-3 {
+          height: 46rpx;
+        }
+        .rectangle-4 {
+          height: 64rpx;
+        }
+    }
+    .loader-container {
+      margin-top: 118rpx;
+      width: 100%;
+      margin-bottom: 50rpx;
+      // width: 160rpx;
+      // margin: 200px auto 0;
+    }
+    .loader-container > view {
+        display: inline-block;
+        background: #FFFFFF;
+        width: 6rpx;
+        height: 24rpx;
+        margin: 0 6rpx;
+        border-radius: 100rpx;
+        -webkit-animation: load 4s ease-in-out infinite;
+        animation: load 4s ease-in-out infinite;
+    }
+    .loader-container .rectangle-2 {
+      -webkit-animation-delay: 0.3s;
+      animation-delay: 0.3s;
+    }
+    .loader-container .rectangle-3 {
+      -webkit-animation-delay: 0.6s;
+      animation-delay: 0.6s;
+    }
+    .loader-container .rectangle-4 {
+      -webkit-animation-delay: 0.9s;
+      animation-delay: 0.9s;
+    }
+    .loader-container .rectangle-5 {
+      -webkit-animation-delay: 1.2s;
+      animation-delay: 1.2s;
+    }
+    .loader-container .rectangle-6 {
+      -webkit-animation-delay: 0.5s;
+      animation-delay: 0.5s;
+    }
+    @keyframes load {
+        0%, 100% {
+            transform: scaleY(1);
+            background: #FFFFFF;
+        }
+        16.67% {
+            transform: scaleY(2.6);
+            background: #FFFFFF;
+        }
+        33.33% {
+            transform: scaleY(1);
+            background: #FFFFFF;
+        }
+        50% {
+            transform: scaleY(2.6);
+            background: #FFFFFF;
+        }
+        66.67% {
+            transform: scaleY(1);
+            background: #FFFFFF;
+        }
+        83.34% {
+            transform: scaleY(2.6);
+            background: #FFFFFF;
+        }
+    }
+  }
+  .m_blTp_con {
+    background: #FFFFFF;
+    position: relative;
+    .u_blTp_tt {
+      padding-top: 20rpx;
+    }
+    .u_comp_icon {
+      width: 28rpx;
+      height: 28rpx;
+      position: absolute;
+      top: 30rpx;
+      right: 30rpx;
+    }
+    .m_ty {
+      padding: 62rpx 92rpx 90rpx;
+      .m_ty_img {
+        .u_ty_img {
+          width: 96rpx;
+          height: 96rpx;
+        }
+        .u_ty_tt {
+          line-height: 40rpx;
+          margin-top: 12rpx;
+        }
       }
     }
   }
@@ -579,6 +1341,192 @@ page {
       }
     }
   }
+  .m_vudio {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    .m_vudio_ct {
+      width: 100%;
+      height: 722rpx;
+      background: url("https://image.fulllinkai.com/202112/24/e70b05f5737a18b51a7d0c0989435611.png");
+      background-repeat: no-repeat;
+      background-size: cover;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      .u_audio_ct_tt {
+        padding-top: 204rpx;
+        line-height: 50rpx;
+        padding-bottom: 60rpx;
+        color: #994D2C;
+      }
+      .m_vi_box {
+        .m_vi {
+          width: 260rpx;
+          height: 348rpx;
+          background: #FFFFFF;
+          border-radius: 20rpx;
+          border: 4rpx solid rgba(255, 255, 255, 0.3);
+          .u_vi_img {
+            width: 72rpx;
+            height: 44rpx;
+            margin-bottom: 16rpx;
+          }
+        }
+        .m_video {
+          width: 260rpx;
+          height: 348rpx;
+          background: #FFFFFF;
+          border-radius: 20rpx;
+          border: solid 4rpx white;
+          overflow: hidden;
+          .u_video {
+            width: 100%;
+            height: 100%;
+            border-radius: 20rpx;
+          }
+        }
+      }
+    }
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 0;
+      margin-top: -20rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+    .m_bu_img {
+      padding-top: 30rpx;
+      .u_bu_img {
+        width: 444rpx;
+        height: 104rpx;
+      }
+    }
+  }
+  .m_audio{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    .m_audio_ct {
+      width: 100%;
+      height: 612rpx;
+      background: url("https://image.fulllinkai.com/202112/24/0f16fa4e30e8e2cae9c63c29da67060b.png");
+      background-repeat: no-repeat;
+      background-size: cover;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      .m_ca {
+        position: absolute;
+        top: 158rpx;
+        right: 42rpx;
+        .u_ca_img {
+          width: 28rpx;
+          height: 24rpx;
+          margin-right: 8rpx;
+        }
+        .u_ca_tt{
+          color: #994D2C;
+          line-height: 26rpx;
+        }
+      }
+      .u_audio_ct_tt {
+        padding-top: 204rpx;
+        line-height: 50rpx;
+        padding-bottom: 60rpx;
+        color: #994D2C;
+      }
+      .u_audio_ct_img {
+        width: 168rpx;
+        height: 168rpx;
+      }
+      .m_audio_c3 {
+        .dot {
+          animation: sploosh 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .dot2 {
+          animation: sploosh2 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .dot3 {
+          // animation: sploosh3 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .dot,.dot2,.dot3{
+          height: 168rpx;
+          width: 168rpx;
+          font-size: 20rpx;
+          border-radius: 100%;
+          animation-iteration-count:infinite;
+          background: transparent;
+        }
+        @keyframes sploosh {
+          0% {
+            box-shadow: 0 0 0 0rpx rgba(255, 230, 188, 1);
+            background: rgba(255, 230, 188, 1);
+          }
+          100% {
+            box-shadow: 0 0 0 60rpx rgba(255, 230, 188, 0);
+            background: rgba(255, 230, 188, 0);
+          }
+        }
+        @keyframes sploosh2 {
+          0% {
+            box-shadow: 0 0 0 0rpx rgba(255, 230, 188, 1);
+            background: rgba(255, 230, 188, 1);
+          }
+          100% {
+            box-shadow: 0 0 0 40rpx rgba(255, 230, 188, 0);
+            background: rgba(255, 230, 188, 0.3);
+          }
+        }
+        @keyframes sploosh3 {
+          0% {
+            width: 140rpx;
+            height: 140rpx;
+          }
+          100% {
+            height: 168rpx;
+          width: 168rpx;
+          }
+        }
+      }
+    }
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 0;
+      margin-top: -20rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+    .m_bu_img {
+      padding-top: 30rpx;
+      .u_bu_img {
+        width: 444rpx;
+        height: 104rpx;
+      }
+    }
+  }
   .share_code_box{
     position: relative;
     display: inline-block;
@@ -601,11 +1549,11 @@ page {
     }
   }
 	.m_send_con {
-		padding: 100rpx 90rpx 50rpx;
+		padding: 100rpx 86rpx 50rpx;
 		.m_texTarea {
 			background-color: #ffffff;
 			margin-bottom: 36rpx;
-			margin-top: 50rpx;
+			margin-top: 42rpx;
 		}
 		.u_ble_bu {
 			width: 400rpx;
@@ -636,13 +1584,24 @@ page {
     color: #333333;
     z-index: 99999999;
   }
+  .u_share_bu_s.let {
+    background: #FFF3D3;
+  }
   .u_share_bu_s{
-    margin: 30rpx auto 0 auto;
+    margin: 10rpx 20rpx;
     color: #994D2C;
     background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
   }
 	.m_comp_con {
 		padding: 30rpx 0rpx 50rpx;
+    position: relative;
+    .u_comp_icon {
+      width: 28rpx;
+      height: 28rpx;
+      position: absolute;
+      top: 24rpx;
+      right: 30rpx;
+    }
 		.m_comp_tt {
 			padding: 0 30rpx;
 		}
@@ -668,6 +1627,7 @@ page {
 		.m_texTarea {
 			margin: 50rpx 30rpx 40rpx;
 			background-color: #f5f5f5;
+      height: 340rpx;
 		}
 		.u_ble_bu {
 			width: 400rpx;

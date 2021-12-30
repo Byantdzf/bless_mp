@@ -2,18 +2,20 @@
   <view style="background:#f5f5f5;height:100%;">
     <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
       <view class="m_abo">
-        <view class="blessingBox" wx:for="{{list}}" wx:key="index" @tap="goToUrlChat({{item}})">
+        <view class="blessingBox" wx:for="{{list}}" wx:key="index" @tap="goToUrlChat({{item}}, {{index}})">
           <view class="blessing_lst">
             <view class="m_lstImg">
               <image class="u_lstImg" src="{{item.pic}}" mode="aspectFill"></image>
-              <view class="u_lstHint" wx:if="{{item.status == 1}}"></view>
+              <view class="u_lstHint" wx:if="{{item.status == 0}}"></view>
             </view>
             <view class="m_lstCt">
               <view class="f-fbc">
                 <view class="font_32 bold color-333">{{ item.nickname }}</view>
                 <view class="font_24 color-999">{{ item.updated_at }}</view>
               </view>
-              <view class="font_28 color-666 ellipsis_1 m_lstCon">{{ item.content }}</view>
+              <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:if="{{item.type == 'chat'}}">{{ item.content }}</view>
+              <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:elif="{{item.type == 'voice'}}">[收到一条语音祝福]</view>
+              <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:else>[收到一个视频祝福]</view>
             </view>
           </view>
         </view>
@@ -139,8 +141,15 @@ export default class myNews extends wepy.page {
       this.blessingTatus = false
       this.$apply()
     },
-    goToUrlChat(item) {
-			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&b_id=${item.b_id}$userName=${item.nickname}`)
+    goToUrlChat(item, index) {
+      this.list.forEach((item, i) => {
+        if(i == index) {
+          setTimeout(() => {
+            item.status = 1
+          }, 500)
+        }
+      })
+			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&b_id=${item.b_id}&nickname=${item.nickname}`)
 		},
   }
   events = {
@@ -197,7 +206,6 @@ scroll-view {
         flex-direction: column;
         justify-content: center;
         .m_lstCon{
-          max-width: 100%;
           margin-top: 12rpx;
         }
       }

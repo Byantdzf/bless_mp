@@ -1,0 +1,44 @@
+<template>
+  <view class="audio">
+      <backgroundAudio></backgroundAudio>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import backgroundAudio from '../../components/backgroundAudio'
+
+export default class audio extends wepy.page {
+  mixins = []
+  config = {
+    navigationBarTitleText: '欢迎使用',
+    enablePullDownRefresh: false,
+    navigationStyle: 'custom'
+  }
+  components = {backgroundAudio}
+  data = {
+  }
+
+  computed = {}
+
+  onShow() {
+  }
+
+  onLoad(e) {
+  }
+
+  changeWallpaper() {
+  }
+
+  // ------------------------------------------------------------------------
+
+  methods = {
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.audio {
+
+}
+</style>

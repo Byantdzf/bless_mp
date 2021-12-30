@@ -85,8 +85,6 @@ export default class httpMixin extends wepy.mixin {
       }
     }
   ) {
-    // 增强体验：加载中
-    wx.showNavigationBarLoading()
     // 构造请求体
     const request = {
       url: url + '?XDEBUG_SESSION_START=1&openid=' + wx.getStorageSync('openid'),

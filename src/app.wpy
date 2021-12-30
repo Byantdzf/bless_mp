@@ -38,7 +38,8 @@ export default class extends wepy.app {
 			  'root': 'pages/users',
 			  'pages': [
 			    'myNews',
-    'chat'
+			    'audio',
+          'chat'
 			  ]
       }
     ],
@@ -53,26 +54,26 @@ export default class extends wepy.app {
       backgroundTextStyle: 'light',
       enablePullDownRefresh: true
     },
-    tabBar: {
-      color: '#666666',
-      selectedColor: '#F33B6C',
-      backgroundColor: '#ffffff',
-      borderStyle: 'black',
-      list: [
-        {
-          pagePath: 'pages/tabBar/home',
-          selectedIconPath: './images/tabbar/homeActive.png',
-          iconPath: './images/tabbar/home.png',
-          text: '推荐'
-        },
-        {
-          pagePath: 'pages/tabBar/user',
-          selectedIconPath: './images/tabbar/myActive.png',
-          iconPath: './images/tabbar/my.png',
-          text: '我的'
-        }
-      ]
-    },
+    // tabBar: {
+    //   color: '#666666',
+    //   selectedColor: '#F33B6C',
+    //   backgroundColor: '#ffffff',
+    //   borderStyle: 'black',
+    //   list: [
+    //     {
+    //       pagePath: 'pages/tabBar/home',
+    //       selectedIconPath: './images/tabbar/homeActive.png',
+    //       iconPath: './images/tabbar/home.png',
+    //       text: '推荐'
+    //     },
+    //     {
+    //       pagePath: 'pages/tabBar/user',
+    //       selectedIconPath: './images/tabbar/myActive.png',
+    //       iconPath: './images/tabbar/my.png',
+    //       text: '我的'
+    //     }
+    //   ]
+    // },
     networkTimeout: {
       request: 10000,
       downloadFile: 10000

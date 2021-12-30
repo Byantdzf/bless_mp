@@ -35,7 +35,9 @@ export const service = {
   // 回复祝福
   bottleChat: `${host}/official/bottle/chat`,
   // 聊天记录最新数据
-  bottleLatestData: `${host}/official/bottle/LatestData`
+  bottleLatestData: `${host}/official/bottle/LatestData`,
+  // 上传
+  image_upload: `${host}/admin/upload/file/aliyun`
 }
 
 export default {

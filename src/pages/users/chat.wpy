@@ -1,25 +1,47 @@
 <template>
   <view style="height: 100vh;overflow: hidden;background: #f5f5f5;">
-    <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
-<!--      <view class="m_tips f-fbc">-->
-<!--        <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>-->
-<!--        <image class="report_icon" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>-->
-<!--      </view>-->
+    <scroll-view scroll-top="{{blessingTopHandle}}" scroll-into-view="{{toView}}" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0">
+     <view class="m_tips f-fbc">
+       <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>
+       <image class="report_icon" @tap="complaint" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>
+     </view>
       <view class="m_chat_box">
-        <view class="chat_box">
-          <view class="" wx:for="{{list}}" wx:key="index">
+        <view class="chat_box" id="m_curr">
+          <view class="" wx:for="{{list}}" wx:key="index" id="chat_{{item.id}}">
             <view wx:if="{{item.identity != 'other_user'}}" class="clearfix message-box">
               <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
               <image class="right-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
-              <view class="right-message">
+              <view class="right-message" wx:if="{{item.type == 'chat'}}">
                 {{item.content}}
+              </view>
+              <view class="right-voice f-fcc" @tap="playMethod({{item.content}})" wx:elif="{{item.type == 'voice'}}">
+                <view class="font333" style="padding-right: 30rpx;">{{playShow?item.duration:recordingTimeqwe}}S"</view>
+                <view class="wifi-symbol">
+                    <view class="wifi-circle first"></view>
+                    <view class="wifi-circle second {{playShow?'':'sel'}}"></view>
+                    <view class="wifi-circle third {{playShow?'':'sel'}}"></view>
+                </view>
+              </view>
+              <view class="right-video" wx:else>
+                <video class="u_video" src="{{item.content}}"></video>
               </view>
             </view>
             <view wx:else class="clearfix message-box">
               <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
               <image class="left-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
-              <view class="left-message">
+              <view class="left-message" wx:if="{{item.type == 'chat'}}">
                 {{item.content}}
+              </view>
+              <view class="left-voice f-fcc" @tap="playMethod({{item.content}})" wx:elif="{{item.type == 'voice'}}">
+                <view class="wifi-symbol">
+                    <view class="wifi-circle first"></view>
+                    <view class="wifi-circle second {{playShow?'':'sel'}}"></view>
+                    <view class="wifi-circle third {{playShow?'':'sel'}}"></view>
+                </view>
+                <view class="font333" style="padding-left: 30rpx;">{{playShow?item.duration:recordingTimeqwe}}S"</view>
+              </view>
+              <view class="left-video" @tap="gotoTv({{item}})" wx:else>
+                <video class="u_video" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
               </view>
             </view>
           </view>
@@ -28,7 +50,7 @@
     </scroll-view>
     <view class="m_inp">
       <view class="u_inp f-fcc">
-        <input class="u_field" bindinput="sendMessage" value="{{chatValue}}" placeholder="" />
+        <input class="u_field" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
       </view>
     </view>
@@ -36,6 +58,7 @@
 		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">
 		  <view class="perfect_data_box animation-slide-top" catchtap>
 		    <view class="m_comp_con">
+          <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
 		      <view class="m_comp_tt font_32 color333 bold">举报</view>
 					<view class="m_comp">
 						<view class="font_30 color333 bold text-left">举报类型</view>
@@ -70,10 +93,11 @@ import http from '../../mixins/http'
 import base from '../../mixins/base'
 import user from '../../mixins/user'
 import texTarea from '../../components/textarea'
+import backgroundAudio from '../../components/backgroundAudio'
 
 export default class chat extends wepy.page {
   mixins = [base, http, user]
-  components = {compTexTarea: texTarea};
+  components = {compTexTarea: texTarea, backgroundAudio};
   config = {
     navigationBarTitleText: '聊天',
     enablePullDownRefresh: false
@@ -105,25 +129,35 @@ export default class chat extends wepy.page {
       }
     ],
     compValue: '',
-    setIntervalList: null
+    setIntervalList: null,
+    b_id: '',
+    nickname: '',
+    toView: 'chat_',
+    pushUpShow: false,
+    playShow: true,
+    recordingTimeqwe: 0,
+    voiceDuration: 0,
+    videoContext: null
   }
 
   computed = {}
 
   async onLoad (e) {
+    this.nickname = e.nickname
+    this.id = e.receiving_id
+    this.b_id = e.b_id
+    wx.setNavigationBarTitle({
+      title: e.nickname
+    })
     if (wepy.$instance.globalData.openid) {
-      this.id = e.receiving_id
       this.setIntervalCatch()
       this.getList()
     }else { 
       wepy.$instance.userInfoReadyCallback = res => {
-        this.id = e.receiving_id
         this.setIntervalCatch()
         this.getList()
       }
     }
-    console.log(e.receiving_id, '7-------------')
-    this.$showLoading(e.receiving_id)
   }
 
   onShow () {
@@ -148,6 +182,11 @@ export default class chat extends wepy.page {
             vm.showNoData = false
             vm.$apply()
           } else {
+            setTimeout(() => {
+              const {id} = vm.list[0]
+              vm.toView = `chat_${id}`
+              vm.$apply()
+            }, 100)
             vm.showNoData = true
             vm.$apply()
           }
@@ -179,6 +218,7 @@ export default class chat extends wepy.page {
 
   getListNew(id) {
     const vm = this
+    wx.hideNavigationBarLoading()
     var data = {
       id: id,
       receiving_id: vm.id
@@ -196,6 +236,9 @@ export default class chat extends wepy.page {
             //   item.created_at = formatDate(item.created_at, 1)
             // })
             vm.list = [...tempResArr, ...vm.list]
+            const {id} = tempResArr[0]
+            this.toView = `chat_${id}`
+            this.$apply()
           }
         }
       }
@@ -223,6 +266,7 @@ export default class chat extends wepy.page {
     let that = this
     clearInterval(that.Loadingtime)
     clearTimeout(that.setIntervalList)
+    this.$invoke('backgroundAudio', 'endedVoice')
   }
 
   save() {
@@ -326,16 +370,6 @@ export default class chat extends wepy.page {
     return timeText
   }
 
-  pageScroll() {
-    let that = this
-    wx.createSelectorQuery().select('#curr').boundingClientRect(function(rect) {
-      if ((that.fullHeight / 2) < rect.height) {
-        that.pushUpShow = true
-        that.$apply()
-      }
-    }).exec()
-  }
-
   setIntervalCatch() {
     const vm = this
     clearTimeout(vm.setIntervalList)
@@ -361,9 +395,10 @@ export default class chat extends wepy.page {
         type: compTypeArr,
         content: this.compValue
       }
-      vm.$post({url: `${service.host}/official/complaint/bless/${this.id}`}, {
+      vm.$post({url: `${service.host}/official/complaint/bless/${this.b_id}`, data}, {
         success: ({code, data}) => {
           vm.modalName = ''
+          vm.$showToast('举报成功')
           vm.$apply()
         }
       })
@@ -430,8 +465,36 @@ export default class chat extends wepy.page {
       })
       this.$apply()
     },
+    complaint() {
+      this.modalName = 'complaintModal'
+    },
+    playMethod(e) {
+      this.$invoke('backgroundAudio', 'endedVoice')
+      if(this.playShow) {
+        this.$invoke('backgroundAudio', 'listenRecord', {tempFilePath: e})
+      }
+      this.playShow = !this.playShow
+    },
+    gotoTv(item) {
+      const that = this
+      that.videoContext = wx.createVideoContext('video_' + item.id, this)
+      that.videoContext.requestFullScreen()
+      setTimeout(() => {
+        that.videoContext.play()
+      }, 300)
+    },
+    leaveVideo() {
+      this.videoContext.pause()
+    }
   }
   events = {
+    'playEnded': (e) => {
+      this.playShow = true
+      this.$apply()
+    },
+    'recording': (e) => {
+      this.recordingTimeqwe = e
+    },
   }
 }
 
@@ -442,6 +505,8 @@ export default class chat extends wepy.page {
 @import "../../styles/custom/wa-ui.less";
 page {
   background: #f5f5f5;
+  overflow: hidden;
+  position: relative;
 }
 .m_tips {
   position: fixed;
@@ -458,14 +523,14 @@ page {
   }
 }
 .m_chat_box {
-  padding-bottom: 52px;
+  padding-bottom: 72px;
   box-sizing: border-box;
   .chat_box{
     height: auto;
     display: flex;
     flex-direction: column-reverse;
     box-sizing: border-box;
-    padding: 60rpx 30rpx 20rpx 30rpx;
+    padding: 90rpx 30rpx 20rpx 30rpx;
     .chat_time{
       padding-bottom: 40rpx;
     }
@@ -480,12 +545,96 @@ page {
       .right-message{
         max-width: 72%;
         float: right;
-        padding: 10rpx 20rpx;
+        padding: 20rpx 24rpx;
         background: #FBB040;
         color: white;
-        margin-right: 12rpx;
+        margin-right: 16rpx;
         border-radius: 32rpx 0 32rpx 32rpx;
         font-size: 28rpx;
+        line-height: 40rpx;
+        word-wrap: break-word;
+      }
+      .right-voice{
+        max-width: 72%;
+        float: right;
+        padding: 20rpx 34rpx 20rpx 24rpx;
+        background: #FBB040;
+        color: white;
+        margin-right: 16rpx;
+        border-radius: 32rpx 0 32rpx 32rpx;
+        font-size: 28rpx;
+        line-height: 40rpx;
+        word-wrap: break-word;
+        .wifi-symbol {
+            width: 50rpx;
+            height: 50rpx;
+            box-sizing: border-box;
+            overflow: hidden;
+            transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+        }
+        .wifi-circle {
+            border: 5rpx solid #333333;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .first {
+            width: 5rpx;
+            height: 5rpx;
+            background: #333333;
+            top: 45rpx;
+            left: 45rpx;
+            overflow: hidden;
+            z-index: 3;
+        }
+        .second {
+            width: 25rpx;
+            height: 25rpx;
+            top: 35rpx;
+            left: 35rpx;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .third {
+            width: 40rpx;
+            height: 40rpx;
+            top: 25rpx;
+            left: 25rpx;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .third.sel {
+          animation: fadeInOut 1s infinite 0.4s;
+        }
+        .second.sel {
+          animation: fadeInOut 1s infinite 0.2s;
+        }
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+      }
+      .right-video {
+        max-width: 72%;
+        float: right;
+        color: #333333;
+        border-radius: 0 32rpx 32rpx 32rpx;
+        margin-left: 16rpx;
+        font-size: 28rpx;
+        line-height: 40rpx;
+        word-wrap: break-word;
+        .u_video {
+          width: 232rpx;
+          height: 412rpx;
+          border-radius: 30rpx;
+        }
       }
       .left-Avatar{
         float: left;
@@ -496,12 +645,14 @@ page {
       .left-message{
         max-width: 72%;
         float: left;
-        padding: 10rpx 20rpx;
+        padding: 20rpx 24rpx;
         color: #333333;
         background: white;
         border-radius: 0 32rpx 32rpx 32rpx;
-        margin-left: 12rpx;
+        margin-left: 16rpx;
         font-size: 28rpx;
+        line-height: 40rpx;
+        word-wrap: break-word;
         .m_imgLst {
           .u_img_lst {
             max-width: 200rpx;
@@ -509,6 +660,91 @@ page {
             border-radius: 20rpx;
           }
         }
+      }
+      .left-voice{
+        max-width: 72%;
+        float: left;
+        padding: 20rpx 24rpx 20rpx 34rpx;
+        color: #333333;
+        background: white;
+        border-radius: 0 32rpx 32rpx 32rpx;
+        margin-left: 16rpx;
+        font-size: 28rpx;
+        line-height: 40rpx;
+        word-wrap: break-word;
+        .wifi-symbol {
+            width: 50rpx;
+            height: 50rpx;
+            box-sizing: border-box;
+            overflow: hidden;
+            transform: rotate(135deg);
+            -ms-transform: rotate(135deg);
+            -moz-transform: rotate(135deg);
+            -webkit-transform: rotate(135deg);
+            -o-transform: rotate(135deg);
+            position: relative;
+        }
+        .wifi-circle {
+            border: 5rpx solid #333333;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .first {
+            width: 5rpx;
+            height: 5rpx;
+            background: #333333;
+            top: 45rpx;
+            left: 45rpx;
+            overflow: hidden;
+            z-index: 3;
+        }
+        .second {
+            width: 25rpx;
+            height: 25rpx;
+            top: 35rpx;
+            left: 35rpx;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .third {
+            width: 40rpx;
+            height: 40rpx;
+            top: 25rpx;
+            left: 25rpx;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .third.sel {
+          animation: fadeInOut 1s infinite 0.4s;
+        }
+        .second.sel {
+          animation: fadeInOut 1s infinite 0.2s;
+        }
+ 
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+      }
+    }
+    .left-video {
+      max-width: 72%;
+      float: left;
+      color: #333333;
+      border-radius: 0 32rpx 32rpx 32rpx;
+      margin-left: 16rpx;
+      font-size: 28rpx;
+      line-height: 40rpx;
+      word-wrap: break-word;
+      .u_video {
+        width: 232rpx;
+        height: 412rpx;
+        border-radius: 30rpx;
       }
     }
   }
@@ -519,10 +755,10 @@ page {
   bottom: 0;
   left: 0;
   .u_inp {
-    padding: 16rpx 30rpx;
-    box-sizing: border-box;
+    padding: 0 30rpx;
     background: #f5f5f5;
     border-top: 2rpx solid #e8e8e8;
+    padding: 28rpx 30rpx 52rpx;
     .u_field {
       flex: 1;
       border-radius: 8rpx;
@@ -530,6 +766,7 @@ page {
       font-size: 32rpx;
       padding: 14rpx 22rpx;
       line-height: 44rpx;
+      background: white;
     }
     .u_inp_bu {
       font-size: 32rpx;
@@ -542,6 +779,14 @@ page {
 }
 .m_comp_con {
 		padding: 30rpx 0rpx 50rpx;
+    position: relative;
+    .u_comp_icon {
+      width: 28rpx;
+      height: 28rpx;
+      position: absolute;
+      top: 24rpx;
+      right: 30rpx;
+    }
 		.m_comp_tt {
 			padding: 0 30rpx;
 		}
