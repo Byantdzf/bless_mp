@@ -85,8 +85,8 @@
 
 
     <!-- 选择祝福方式 -->
-    <view class="cu-modal bottom-modal {{modalName=='blessingTypeModal'?'show':''}}">
-      <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;">
+    <view class="cu-modal bottom-modal {{modalName=='blessingTypeModal'?'show':''}}" @tap.stop="hideModal">
+      <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;" catchtap>
         <view class="m_blTp_con">
           <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
           <view class="u_blTp_tt font_32 color333 bold">选择祝福方式</view>
