@@ -179,6 +179,7 @@
           </view>
           <view class="m_video" wx:else>
             <video class="u_video" src="{{videoUrl}}"></video>
+            <image class="u_vi_icon" @tap.stop="closeVideo" src="https://image.fulllinkai.com/202112/31/059f97bcb612237a2b4d106d62207090.png" mode="aspectFit"></image>
           </view>
         </view>
       </view>
@@ -889,6 +890,9 @@ export default class home extends wepy.page {
       var videoContext = wx.createVideoContext('video_', this)
       console.log(videoContext)
       videoContext.requestFullScreen()
+    },
+    closeVideo() {
+      this.videoUrl = ''
     }
   }
   events = {
@@ -1391,10 +1395,19 @@ page {
           border-radius: 20rpx;
           border: solid 4rpx white;
           overflow: hidden;
+          position: relative;
           .u_video {
             width: 100%;
             height: 100%;
             border-radius: 20rpx;
+          }
+          .u_vi_icon {
+            width: 44rpx;
+            height: 44rpx;
+            position: absolute;
+            top: 12rpx;
+            right: 10rpx;
+            z-index: 10;
           }
         }
       }
