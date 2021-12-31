@@ -283,6 +283,10 @@
             <image class="u_en_icon_f" @tap="playMethod" wx:else src="https://image.fulllinkai.com/202112/29/bc06d968049b76c3dee0e0f3c4e12623.png" mode="aspectFit"></image>
           </view>
         </image>
+        <view class="f-fcc" style="padding-top: 20rpx;">
+          <view class="u_share_bu_s let bold fong_30 f-fcc" @tap.stop="hideModal">收下</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="goToUrlId">回复Ta</view>
+        </view>
       </view>
     </view>
     <!-- 信封视频 -->
@@ -296,6 +300,10 @@
           <video id="video_" loop="loop" class="u_video" src="{{openValue}}"></video>
         </view>
         <image class="u_vi_buImg" src="https://image.fulllinkai.com/202112/29/6bff86ad937264ae7c5c8814f92bb784.png" mode="aspectFit"></image>
+        <view class="f-fcc" style="padding-top: 20rpx;">
+          <view class="u_share_bu_s let bold fong_30 f-fcc" @tap.stop="hideModal">收下</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="goToUrlId">回复Ta</view>
+        </view>
       </view>
     </view>
     <!-- 分享海报 -->

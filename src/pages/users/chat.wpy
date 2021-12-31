@@ -22,8 +22,8 @@
                     <view class="wifi-circle third {{playShow?'':'sel'}}"></view>
                 </view>
               </view>
-              <view class="right-video" wx:else>
-                <video class="u_video" src="{{item.content}}"></video>
+              <view class="right-video" @tap="gotoTv({{item}})" wx:else>
+                <video class="u_video" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
               </view>
             </view>
             <view wx:else class="clearfix message-box">

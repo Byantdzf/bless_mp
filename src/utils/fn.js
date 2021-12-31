@@ -78,45 +78,49 @@ const wx_login = () => { // 微信登录
   })
 }
 
-const getsubscription = (ids) => {
-  let subscriptionsSetting = wx.getStorageSync('subscriptionsSetting')
+const getsubscription = (params) => {
+  // 这里的tmplId是一个数组得注意一下
+  var tmplIds = params
+  console.log(tmplIds)
   return new Promise((resolve, reject) => {
-    if (subscriptionsSetting && subscriptionsSetting == 'true') {
-      reject(resV)
-    } else {
-      wx.getSetting({
-        withSubscriptions: true,
-        success (resV) {
-          let {itemSettings, mainSwitch} = resV.subscriptionsSetting
-          if (!mainSwitch) {
-            resolve(resV)
-            return console.log('需要跳转到授权页面')
-          }
-          if (!itemSettings) {
-            wx.setStorageSync('subscriptionsSetting', 'false')
-            console.log('需要授权')
-            wx.requestSubscribeMessage({
-              tmplIds: ids, // 此处可填写多个模板 ID，但低版本微信不兼容只能授权一个
-              success(res) {
-                if (res[ids[0]] === 'accept') {
-                  console.log('订阅成功')
-                } else {
-                  console.log('拒绝授权')
-                }
-              },
-              complete(res) {
-                resolve(res)
-                console.log('complete  调用完成')
-              }
-            })
-          } else {
-            console.log('授权成功')
-            wx.setStorageSync('subscriptionsSetting', 'true')
-            reject(resV)
-          }
+    wx.getSetting({
+      withSubscriptions: true,
+      success(res) {
+        console.log(res)
+        if (res.subscriptionsSetting.itemSettings != undefined) {
+          var flag = res.subscriptionsSetting.itemSettings[tmplIds[0]]
+        } else {
+          var flag = undefined
         }
-      })
-    }
+        console.log(flag)
+        if (flag == undefined) {
+          wx.requestSubscribeMessage({
+            tmplIds: tmplIds,
+            success(res) {
+              // 点击完成后就返回成功就行
+              resolve(res)
+            }
+          })
+        } else if (flag != 'accept') {
+          wx.requestSubscribeMessage({
+            tmplIds: tmplIds,
+            success(res) {
+              // 点击完成后就返回成功就行
+              resolve(true)
+            }
+          })
+        } else {
+          // 直接返回true,原本以为用户选择一直同意之后，就可以一直推送，这里是一个bug
+          wx.requestSubscribeMessage({
+            tmplIds: tmplIds,
+            success(res) {
+              // 点击完成后就返回成功就行
+              resolve(true)
+            }
+          })
+        }
+      }
+    })
   })
 }
 export {getElement_WH, wxPay, callPhone, wx_login, getsubscription}

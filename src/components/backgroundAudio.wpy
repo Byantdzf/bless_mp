@@ -1131,6 +1131,9 @@ export default class backgroundAudio extends wepy.component{
             // })
 
             let vm = this
+            clearInterval(this.setInter)
+            clearInterval(this.setInter1)
+            backgroundAudioManager.stop()
             vm.uploadState = true
             vm.$showLoading('加载中...')
             wx.uploadFile({
