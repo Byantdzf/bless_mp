@@ -137,7 +137,8 @@ export default class extends wepy.app {
                 data: {
                   code: res.code,
                   iv: info.iv,
-                  encryptedData: info.encryptedData
+                  encryptedData: info.encryptedData,
+                  version: 2
                 },
                 // header: {
                 //   'content-type': 'application/x-www-form-urlencoded;charset=utf-8'

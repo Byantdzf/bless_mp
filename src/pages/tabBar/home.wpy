@@ -590,7 +590,7 @@ export default class home extends wepy.page {
 
   getsubscrip_tion(method) {
     const that = this
-    getsubscription(['xxUe_-b4w1ZcNFuPqjbH6qJw5g5fb4nhEIBJ9LT5pu4']).then((res) => {
+    getsubscription(['XY_8qQRgcTj4fYWy8CfpKbbQ1Oo_9DR-OaZ1FXpopZI']).then((res) => {
       console.log(res, 'getsubscription-----res-------------')
       method(that)
     }).catch((erro) => {
