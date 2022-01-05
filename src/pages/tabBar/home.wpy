@@ -149,11 +149,11 @@
           </block>
           <block wx:else>
             <view class="m_audio_c3 f-fcc">
-              <view class="dot">
+              <!-- <view class="dot"> -->
                 <view class="dot2">
                     <image class="dot3" @tap="shutRecord" src="https://image.fulllinkai.com/202112/24/fa6772a0e0a7ea42b9d9b67ba46fb788.png" mode="aspectFit"></image>
                 </view>
-              </view>
+              <!-- </view> -->
             </view>
           </block>
           <view class="font_28 color33" style="padding-top: 30rpx;">{{showhandle1?'点击录音':'录音中'}}</view>
@@ -286,7 +286,8 @@
         </image>
         <view class="f-fcc" style="padding-top: 20rpx;">
           <view class="u_share_bu_s let bold fong_30 f-fcc" @tap.stop="hideModal">收下</view>
-          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="goToUrlId">回复Ta</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" wx:if="{{wxUserInfo}}" @tap.stop="goToUrlId">回复Ta</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" wx:else @tap.stop="getWxUserInfo('otChat')">回复Ta</view>
         </view>
       </view>
     </view>
@@ -300,10 +301,11 @@
         <view @tap="gotoTv()">
           <video id="video_" loop="loop" class="u_video" src="{{openValue}}"></video>
         </view>
-        <image class="u_vi_buImg" src="https://image.fulllinkai.com/202112/29/6bff86ad937264ae7c5c8814f92bb784.png" mode="aspectFit"></image>
+        <image class="u_vi_buImg" src="https://image.fulllinkai.com/202112/29/6bff86ad937264ae7c5c8814f92bb784.png" mode="widthFix"></image>
         <view class="f-fcc" style="padding-top: 20rpx;">
           <view class="u_share_bu_s let bold fong_30 f-fcc" @tap.stop="hideModal">收下</view>
-          <view class="u_share_bu_s bold fong_30 f-fcc" @tap.stop="goToUrlId">回复Ta</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" wx:if="{{wxUserInfo}}" @tap.stop="goToUrlId">回复Ta</view>
+          <view class="u_share_bu_s bold fong_30 f-fcc" wx:else @tap.stop="getWxUserInfo('otChat')">回复Ta</view>
         </view>
       </view>
     </view>
@@ -452,7 +454,7 @@ export default class home extends wepy.page {
   };
   computed = {};
   async onLoad(e) {
-    this.wxUserInfo = wx.getStorageSync('wxUserInfo') 
+    this.wxUserInfo = wx.getStorageSync('wxUserInfo')
     this.showEnvelope = false
     if (wepy.$instance.globalData.openid) {
       if (e.receiving_id) {
@@ -465,13 +467,17 @@ export default class home extends wepy.page {
         if (e.receiving_id) {
           this.receiving_id = e.receiving_id
           this.getDetail()
+          this.getBottleUnread()
           this.$apply()
         }
       }
     }
   }
   onShow() {
-    this.getBottleUnread()
+    if (wepy.$instance.globalData.openid) {
+      this.getBottleUnread()
+      this.$apply()
+    }
   }
   onHide() {
     this.modalName = ''
@@ -583,7 +589,7 @@ export default class home extends wepy.page {
   }
 
   goToUrlId_sub(that = this) {
-    that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&b_id=${that.openData.b_id}`)
+    that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.bottle_id}`)
     that.modalName = ''
     that.$apply()
   }
@@ -686,6 +692,8 @@ export default class home extends wepy.page {
             this.$apply()
           }else if(type == 'userInfoHandlerV2') {
             that.$goto(`/pages/users/myNews`)
+          }else if(type == 'otChat') {
+            that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.bottle_id}&nickname=${that.openData.nickname}`)
           }else {
             this.getBottleId(this.receiving_id)
             setTimeout(() => {
@@ -775,7 +783,7 @@ export default class home extends wepy.page {
     goToUrlId() {
       const that =this
       this.getsubscrip_tion(function() {
-        that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&b_id=${that.openData.b_id}&nickname=${that.openData.nickname}`)
+        that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.bottle_id}&nickname=${that.openData.nickname}`)
         that.modalName = ''
         that.$apply()
       })
@@ -857,6 +865,10 @@ export default class home extends wepy.page {
       this.$invoke('backgroundAudio', 'reRecord')
     },
     uploadVoice() {
+      if(!this.showhandle2) {
+        this.$showToast('请先暂停语音')
+        return
+      }
       this.$invoke('backgroundAudio', 'uploadVoice')
     },
     toChooseVideo() {
@@ -1131,7 +1143,7 @@ page {
     width: 600rpx;
     height: 840rpx;
     border-radius: 32rpx;
-    background-image: linear-gradient(#DD3A15, #FF7244);
+    background-image: linear-gradient(#FF7244, #DD3A15);
     .cancelPlaceholder {
       width: 60rpx;
       height: 60rpx;
@@ -1166,6 +1178,7 @@ page {
     .u_video {
       width: 508rpx;
       height: 678rpx;
+      border-radius: 16px;
     }
   }
   .m_en{
@@ -1495,22 +1508,22 @@ page {
         }
         @keyframes sploosh {
           0% {
-            box-shadow: 0 0 0 0rpx rgba(255, 230, 188, 1);
-            background: rgba(255, 230, 188, 1);
+            box-shadow: 0 0 0 0rpx rgba(255, 159, 69, .3);
+            background: rgba(255, 159, 69, .3);
           }
           100% {
-            box-shadow: 0 0 0 60rpx rgba(255, 230, 188, 0);
-            background: rgba(255, 230, 188, 0);
+            box-shadow: 0 0 0 60rpx rgba(255, 159, 69, 0);
+            background: rgba(255, 159, 69, 0);
           }
         }
         @keyframes sploosh2 {
           0% {
-            box-shadow: 0 0 0 0rpx rgba(255, 230, 188, 1);
-            background: rgba(255, 230, 188, 1);
+            box-shadow: 0 0 0 0rpx rgba(255, 159, 69, .5);
+            background: rgba(255, 159, 69, .5);
           }
           100% {
-            box-shadow: 0 0 0 40rpx rgba(255, 230, 188, 0);
-            background: rgba(255, 230, 188, 0.3);
+            box-shadow: 0 0 0 40rpx rgba(255, 159, 69, 0);
+            background: rgba(255, 159, 69, 0.3);
           }
         }
         @keyframes sploosh3 {

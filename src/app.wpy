@@ -128,10 +128,8 @@ export default class extends wepy.app {
 
       wepy.login({
         success: (res) => {
-          console.log(res, 'login--------------')
           wepy.getUserInfo({
             success: (info) => {
-              console.log(info, 'info--------------------')
               wx.request({
                 url: service.login,
                 data: {
@@ -144,9 +142,9 @@ export default class extends wepy.app {
                 //   'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
                 // },
                 method: 'get',
-                success: function (data) {
-                  wx.setStorageSync('openid', data.data.data.openid)
-                  that.globalData.openid = data.data.data.openid
+                success: function ({code, data}) {
+                  wx.setStorageSync('openid', data.data.openid)
+                  that.globalData.openid = data.data.openid
                   if (that.userInfoReadyCallback) {
                     that.userInfoReadyCallback(data)
                   }

@@ -50,12 +50,12 @@
     </scroll-view>
     <view class="m_inp">
       <view class="u_inp f-fcc">
-        <input class="u_field" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
+        <input class="u_field" hold-keyboard="{{true}}" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
       </view>
     </view>
 		<!-- 投诉 -->
-		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" bindtap="hideModal">
+		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" wx:if="{{modalName=='complaintModal'}}" bindtap="hideModal">
 		  <view class="perfect_data_box animation-slide-top" catchtap>
 		    <view class="m_comp_con">
           <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
@@ -130,14 +130,17 @@ export default class chat extends wepy.page {
     ],
     compValue: '',
     setIntervalList: null,
-    b_id: '',
+    bottle_id: '',
     nickname: '',
     toView: 'chat_',
     pushUpShow: false,
     playShow: true,
     recordingTimeqwe: 0,
     voiceDuration: 0,
-    videoContext: null
+    videoContext: null,
+    focusShow: false,
+    wxUserInfo: {},
+    userNextId: ''
   }
 
   computed = {}
@@ -145,7 +148,8 @@ export default class chat extends wepy.page {
   async onLoad (e) {
     this.nickname = e.nickname
     this.id = e.receiving_id
-    this.b_id = e.b_id
+    this.bottle_id = e.bottle_id
+    this.wxUserInfo = wx.getStorageSync('wxUserInfo')
     wx.setNavigationBarTitle({
       title: e.nickname
     })
@@ -175,6 +179,11 @@ export default class chat extends wepy.page {
     }, {
       success: ({code, data}) => {
         vm.blessingMessage = false
+        if(data.data && data.data.length > 0) {
+          data.data.forEach(item => {
+            item.updated_at = vm.getTime(item.updated_at)
+          })
+        }
         if (vm.blessingPage == 1) {
           vm.list = [...vm.list, ...data.data]
           vm.$apply()
@@ -229,17 +238,23 @@ export default class chat extends wepy.page {
     }, {
       success: ({code, data}) => {
         if (data.length > 0) {
-          let tempResArr = vm.getArrDifference(vm.list, data)
-          console.log(tempResArr, 'tempResArr---------------')
-          if (tempResArr && tempResArr.length > 0) {
-            // tempResArr.forEach(item => {
-            //   item.created_at = formatDate(item.created_at, 1)
-            // })
-            vm.list = [...tempResArr, ...vm.list]
-            const {id} = tempResArr[0]
-            this.toView = `chat_${id}`
-            this.$apply()
-          }
+          data.forEach(item => {
+            var enceArr = []
+            item.updated_at = vm.getTime(item.updated_at)
+            enceArr.push(item)
+            let tempResArr = vm.getArrDifference(vm.list, enceArr)
+            console.log(tempResArr, 'tempResArr---------------')
+            if (tempResArr && tempResArr.length > 0) {
+              // tempResArr.forEach(item => {
+              //   item.created_at = formatDate(item.created_at, 1)
+              // })
+              // vm.list = [...tempResArr, ...vm.list]
+              vm.list.unshift(tempResArr[0])
+              const {id} = tempResArr[0]
+              this.toView = `chat_${id}`
+              this.$apply()
+            }
+          })
         }
       }
     })
@@ -359,7 +374,7 @@ export default class chat extends wepy.page {
       }
     }
 
-// 时间戳获取
+    // 时间戳获取
     function getTimeS (argument) {
       var timeS = argument
       timeS = timeS.replace(/[-]/g, '/').replace(/[-]/, '')
@@ -369,6 +384,43 @@ export default class chat extends wepy.page {
     var timeText = getTimeText(time)
     return timeText
   }
+
+    curentTime(){
+        var now = new Date();
+
+        var year = now.getFullYear();       //年
+        var month = now.getMonth() + 1;     //月
+        var day = now.getDate();            //日
+
+        var hh = now.getHours();            //时
+        var mm = now.getMinutes();          //分
+        var ss = now.getSeconds();          //分
+
+        var clock = year + "-";
+
+        if(month < 10)
+            clock += "0";
+
+        clock += month + "-";
+
+        if(day < 10)
+            clock += "0";
+
+        clock += day + " ";
+
+        if(hh < 10)
+            clock += "0";
+
+        clock += hh + ":";
+        if (mm < 10)
+            clock += '0';
+        clock += mm + ":";
+
+        if (ss < 10)
+            clock += '0';
+        clock += ss;
+        return clock;
+    }
 
   setIntervalCatch() {
     const vm = this
@@ -395,7 +447,7 @@ export default class chat extends wepy.page {
         type: compTypeArr,
         content: this.compValue
       }
-      vm.$post({url: `${service.host}/official/complaint/bless/${this.b_id}`, data}, {
+      vm.$post({url: `${service.host}/official/complaint/bless/${this.bottle_id}`, data}, {
         success: ({code, data}) => {
           vm.modalName = ''
           vm.$showToast('举报成功')
@@ -431,13 +483,26 @@ export default class chat extends wepy.page {
     // 回复祝福
     postBottleChat() {
       const vm = this
+      var myDate = new Date()
       if (this.chatValue == '') {
         this.$showToast('内容不能为空')
         return
       }
+      this.userNextId = +vm.list[0].id + 1
+      vm.list.unshift({
+        updated_at: vm.getTime(vm.curentTime()),
+        user_name: vm.wxUserInfo.nickName,
+        user_pic: vm.wxUserInfo.avatarUrl,
+        type: "chat",
+        identity: "user",
+        content: this.chatValue,
+        id: this.userNextId,
+      })
+      this.toView = `chat_${this.userNextId}`
       var data = {
         receiving_id: this.id,
-        content: this.chatValue
+        content: this.chatValue,
+        version: 2
       }
       clearTimeout(vm.setIntervalList)
       vm.chatValue = ''
@@ -449,8 +514,13 @@ export default class chat extends wepy.page {
 					code,
 					data
 				}) => {
-          vm.setIntervalCatch()
-          vm.getListNew(vm.list[0].id)
+          if(code == 0) {
+            vm.setIntervalCatch()
+            vm.getListNew(vm.list[0].id)
+          }else {
+            vm.$showToast('发送失败')
+            vm.list.splice(0, 1)
+          }
         }
       })
     },

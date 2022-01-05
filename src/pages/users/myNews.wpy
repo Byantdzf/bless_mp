@@ -149,7 +149,7 @@ export default class myNews extends wepy.page {
           }, 500)
         }
       })
-			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&b_id=${item.b_id}&nickname=${item.nickname}`)
+			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&bottle_id=${item.bottle_id}&nickname=${item.nickname}`)
 		},
   }
   events = {

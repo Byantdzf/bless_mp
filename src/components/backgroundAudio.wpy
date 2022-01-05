@@ -925,6 +925,7 @@ export default class backgroundAudio extends wepy.component{
     shutRecordMe(){
         recorderManager.stop()
         clearInterval(this.setInter)
+        this.startClick = false
         this.showhandle1 = false
         this.showhandle2 = true
         this.$emit('shutRecord', {type: 'showhandle1',data: this.showhandle1})
@@ -1033,6 +1034,7 @@ export default class backgroundAudio extends wepy.component{
             if(this.startClick){
                 return
             }
+            this.startClick = true
             wx.authorize({
                 scope: 'scope.record',
                 success() {
