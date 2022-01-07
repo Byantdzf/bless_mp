@@ -2,6 +2,11 @@
   <view style="background:#f5f5f5;height:100%;">
     <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
       <view class="m_abo">
+        <view wx:if="{{!showNoData}}" class="no_data_box">
+          <image class="no_data_icon" src="https://image.fulllinkai.com/202201/07/665010b5c361cc4fa1d5a4eed8911e27.png" mode="aspectFill"></image>
+          <view class="font_30 color-999 text-center">暂无内容</view>
+        </view>
+        <view wx:if="{{blessingMessage}}" style="padding-bottom: 20rpx;" class="text-center">没有更多数据了</view>
         <view class="blessingBox" wx:for="{{list}}" wx:key="index" @tap="goToUrlChat({{item}}, {{index}})">
           <view class="blessing_lst">
             <view class="m_lstImg">
@@ -10,7 +15,7 @@
             </view>
             <view class="m_lstCt">
               <view class="f-fbc">
-                <view class="font_32 bold color-333">{{ item.nickname }}</view>
+                <view class="font_32 bold color-333 ellipsis_1" style="width: 220rpx;">{{ item.nickname }}</view>
                 <view class="font_24 color-999">{{ item.updated_at }}</view>
               </view>
               <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:if="{{item.type == 'chat'}}">{{ item.content }}</view>
@@ -20,7 +25,6 @@
           </view>
         </view>
       </view>
-      <view wx:if="{{blessingMessage && showNoData}}" style="padding-bottom: 20rpx;" class="text-center">没有更多数据了</view>
     </scroll-view>
     <view class="m_returnTop {{blessingTatus?'show':'hide'}}">
       <image class="u_returnTop_img" bindtap="blessingToReturnTop" src="https://images.ufutx.com/202106/23/f0d10551dc5d3399cc7f15805cf04f4f.png" mode="scaleToFill" lazy-load="false"></image>
@@ -230,5 +234,17 @@ scroll-view {
 }
 .m_returnTop.hide {
   opacity: 0;
+}
+.no_data_box{
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.no_data_icon{
+  width: 440rpx;
+  height: 300rpx;
+  display: block;
+  margin: 0 auto -50rpx auto;
 }
 </style>

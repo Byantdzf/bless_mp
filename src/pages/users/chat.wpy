@@ -2,8 +2,8 @@
   <view style="height: 100vh;overflow: hidden;background: #f5f5f5;">
     <scroll-view scroll-top="{{blessingTopHandle}}" scroll-into-view="{{toView}}" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0">
      <view class="m_tips f-fbc">
-       <view class="font_26"  style="color: #FBB040;">如遇营销，涉黄等骚扰情况</view>
-       <image class="report_icon" @tap="complaint" src="https://image.fulllinkai.com/202112/21/104374082c9e2bd160ee963b4f29c98f.png" mode="aspectFill"></image>
+       <view class="font_26"  style="color: #A13791;">如遇营销，涉黄等骚扰情况</view>
+       <image class="report_icon" @tap="complaint" src="https://image.fulllinkai.com/202201/07/c37e67cc0c648a882c0224fb025b961f.png" mode="aspectFill"></image>
      </view>
       <view class="m_chat_box">
         <view class="chat_box" id="m_curr">
@@ -50,7 +50,7 @@
     </scroll-view>
     <view class="m_inp">
       <view class="u_inp f-fcc">
-        <input class="u_field" hold-keyboard="{{true}}" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
+        <input class="u_field" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
       </view>
     </view>
@@ -59,7 +59,7 @@
 		  <view class="perfect_data_box animation-slide-top" catchtap>
 		    <view class="m_comp_con">
           <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
-		      <view class="m_comp_tt font_32 color333 bold">举报</view>
+		      <view class="m_comp_tt font_32 color333 bold">举报{{nickname}}</view>
 					<view class="m_comp">
 						<view class="font_30 color333 bold text-left">举报类型</view>
 						<view class="m_comp_type f-fc f-wrap">
@@ -140,7 +140,8 @@ export default class chat extends wepy.page {
     videoContext: null,
     focusShow: false,
     wxUserInfo: {},
-    userNextId: ''
+    userNextId: '',
+    compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户'
   }
 
   computed = {}
@@ -584,7 +585,7 @@ page {
   left: 0;
   width: 100%;
   height: 80rpx;
-  background-color: #FFF8F2;
+  background-color: #FEF5FF;
   z-index: 1000;
   padding: 0 30rpx;
   .report_icon {
@@ -616,7 +617,7 @@ page {
         max-width: 72%;
         float: right;
         padding: 20rpx 24rpx;
-        background: #FBB040;
+        background: linear-gradient(225deg, #F594BD 0%, #FD8E67 100%);
         color: white;
         margin-right: 16rpx;
         border-radius: 32rpx 0 32rpx 32rpx;
@@ -628,7 +629,7 @@ page {
         max-width: 72%;
         float: right;
         padding: 20rpx 34rpx 20rpx 24rpx;
-        background: #FBB040;
+        background: linear-gradient(225deg, #F594BD 0%, #FD8E67 100%);
         color: white;
         margin-right: 16rpx;
         border-radius: 32rpx 0 32rpx 32rpx;
@@ -841,7 +842,7 @@ page {
     .u_inp_bu {
       font-size: 32rpx;
       font-weight: bold;
-      color: #fbb040;
+      color: #A13791;
       line-height: 44rpx;
       padding-left: 30rpx;
     }
@@ -874,8 +875,8 @@ page {
 					color: #666666;
 				}
 				.u_comp_type.sel {
-					color: #FBB040;
-					background: #FFF8F2;
+					color: #A13791;
+					background: #FEF5FF;
 				}
 			}
 		}
@@ -886,9 +887,9 @@ page {
 		.u_ble_bu {
 			width: 400rpx;
 			height: 72rpx;
-			background: linear-gradient(90deg, #FFCE84 0%, #FBB040 100%);
+			background: linear-gradient(131deg, #FC5D9F 0%, #5863FC 100%);
 			border-radius: 36rpx;
-			color: #994D2C;
+			color: white;
 		}
 	}
   .perfect_data_box {

@@ -27,7 +27,7 @@ export default class textarea extends wepy.component {
   props = {
     placeholderText: {
       type: String,
-      default: '说出你的性格特点、兴趣爱好、自我评论、家庭情况等'
+      default: '请您详细描述举报内容，福恋会用心服务每一个反馈用户'
     },
     value: {
       type: String,

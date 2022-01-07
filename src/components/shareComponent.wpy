@@ -11,10 +11,16 @@
         <view class="text-center m_sha">
           <view class="text-center font_32 bold color_333">分享至</view>
           <view class="m_box f-fc">
-            <view class="text-center inline-block" @tap.stop="hideModel">
+            <view class="u_box text-center inline-block" bindtap="hideModel">
               <button class="btn text-center font_28" open-type="share" style="line-height: 1.6;padding: 6rpx">
                 <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202106/16/d14663aeb3a6663ed926e8e3949ca8fb.png"></image>
                 <view class="font_24 black_6">微信好友</view>
+              </button>
+            </view>
+            <view class="u_box text-center inline-block">
+              <button class="btn text-center font_28" style="line-height: 1.6;padding: 6rpx" @tap="showPic">
+                <image class="share-image" mode="aspectFit" src="https://image.fulllinkai.com/202201/06/f72bc8a6b46b378ef6bbb3947f1227df.png"></image>
+                <view class="font_24 black_6">生成海报</view>
               </button>
             </view>
           </view>
@@ -37,24 +43,33 @@
       </view>
     </view>
     <view class="cu-modal {{modalName=='Image'?'show':''}}">
-      <view class="cu-dialog">
-        <view class="cu-bar bg-white justify-end">
+      <view class="cu-dialog" style="background-color: transparent;width: 600rpx;">
+        <!-- <view class="cu-bar bg-white justify-end">
           <view class="content">分享海报</view>
           <view class="action" bindtap="listenerCancel">
             <text class="cuIcon-close text-red"></text>
           </view>
+        </view> -->
+        <view style="position: relative;">
+          <image style="width: 60rpx;height: 60rpx;position: absolute;top: 6rpx;right: 2rpx;z-index: 999;"
+            mode="aspectFit"
+            src="https://image.fulllinkai.com/202201/06/0fb3ec31f29628d09d18135a826154fe.png"
+            bindtap="listenerCancel"
+            class="shaerImage"></image>
+          <image style="width: 600rpx;height: 1080rpx;"
+            mode="aspectFit"
+            src="{{shareImage}}"
+            class="shaerImage"></image>
+          <view class="m_sha_bu f-fcc" bindtap="saveImage('save')">
+            <view class="u_sha_bu font_30 bold">保存至相册，分享给好友或朋友圈</view>
+          </view>
         </view>
-        <view class="padding-xl">
-          <image style="position: relative;left: -3%;top:0%;" mode="aspectFit"
-                 src="{{shareImage}}"
-                 class="shaerImage"></image>
-        </view>
-        <view class="cu-bar bg-white justify-end">
+        <!-- <view class="cu-bar bg-white justify-end">
           <view class="action">
             <button class="cu-btn line-green text-green" bindtap="listenerCancel">取消</button>
             <button class="cu-btn bg-green margin-left" bindtap="saveImage('save')">保存</button>
           </view>
-        </view>
+        </view> -->
       </view>
     </view>
     <view class="cu-modal {{modalName=='DialogModal'?'show':''}}">
@@ -81,8 +96,10 @@
 
 <script>
   import wepy from 'wepy'
+  import base from '../mixins/base'
 
   export default class shareComponent extends wepy.component {
+    mixins = [base];
     props = {
       shareImage: {
         type: String,
@@ -98,14 +115,15 @@
       },
       poster: {
         type: String,
-        default: null
+        default: ''
       }
     }
     data = {
       showImage: true,
       showOpenSet: true,
       formID: [],
-      modalName: ''
+      modalName: '',
+      currentLeft: 0
     }
     onLoad() {
     }
@@ -115,33 +133,48 @@
     methods = {
       hideModel() {
         this.hide = false
+        this.shareImage = ''
+        this.$emit('shareImageShare', this.shareImage)
         this.$emit('hideShare', this.hide)
         this.$apply()
       },
       showPic() {
-        if (this.poster == 'custom') {
-          this.hide = true
-          this.$emit('hideShare', this.hide)
-          this.$apply()
-          this.$emit('shareShow')
-        } else {
-          if (this.shareImage) {
-            this.showImage = false
-            this.hide = true
-            this.modalName = 'Image'
-            this.$apply()
-          } else {
+        const vm = this
+        vm.$showLoading('海报生成中...')
+        vm.timeoutId = setInterval(() => {
+          if(vm.currentLeft > 20) {
+            clearTimeout(vm.timeoutId)
             wx.showModal({
               title: '提示',
               content: '海报生成失败，请重试！'
             })
           }
-        }
+          if (vm.shareImage) {
+            clearTimeout(vm.timeoutId)
+            wx.hideLoading()
+            this.hide = false
+            this.$emit('hideShare', this.hide)
+            vm.showImage = false
+            vm.modalName = 'Image'
+            vm.$apply()
+          }else {
+            vm.currentLeft += 1
+          }
+        }, 300)
+        // if (this.shareImage) {
+        //   this.showImage = false
+        //   this.hide = true
+        //   this.modalName = 'Image'
+        //   this.$apply()
+        // } else {
+        //   wx.showModal({
+        //     title: '提示',
+        //     content: '海报生成失败，请重试！'
+        //   })
+        // }
       },
       listenerCancel () {
         this.modalName = ''
-        this.hide = true
-        this.$emit('hideShare', this.hide)
         this.$apply()
       },
       hideOpenSet () {
@@ -159,16 +192,16 @@
         })
         if (e.detail.authSetting['scope.writePhotosAlbum']) {
           that.modalName = ''
-          that.hide = true
-          that.$emit('hideShare', this.hide)
           that.$apply()
-          wepy.downloadFile({
+          wx.downloadFile({
             url: that.shareImage,
             success: (res) => {
-              wepy.saveImageToPhotosAlbum({
+              wx.saveImageToPhotosAlbum({
                 filePath: res.tempFilePath,
                 success: (res) => {
                   wx.hideLoading()
+                  that.shareImage = ''
+                  that.$emit('shareImageShare', that.shareImage)
                   wx.showModal({
                     title: '保存成功',
                     content: '赶紧分享给你的朋友吧！'
@@ -192,17 +225,17 @@
           title: '保存中...',
           mask: true
         })
-        wepy.downloadFile({
+        wx.downloadFile({
           url: that.shareImage,
           success: (res) => {
-            wepy.saveImageToPhotosAlbum({
+            wx.saveImageToPhotosAlbum({
               filePath: res.tempFilePath,
               success: (res) => {
                 that.modalName = ''
-                that.hide = true
-                that.$emit('hideShare', this.hide)
                 that.$apply()
                 wx.hideLoading()
+                that.shareImage = ''
+                that.$emit('shareImageShare', that.shareImage)
                 wx.showModal({
                   title: '已保存在相册了！',
                   content: '赶紧分享给你的朋友吧！'
@@ -231,7 +264,6 @@
 </script>
 
 <style type="less" scoped>
-
   @import "../styles/weui/base/fn.wxss";
   @import "../styles/custom/fn.less";
   @import "../styles/custom/animation.less";
@@ -249,10 +281,24 @@
     padding-top: 40rpx;
     .m_box {
       padding: 50rpx 40rpx;
+      .u_box {
+        margin-right: 104rpx;
+      }
     }
     .clearfloat {
       height: 130rpx;
       border-top: solid 10rpx #F8F8F8;
+    }
+  }
+  .m_sha_bu {
+    width: 600rpx;
+    height: 80rpx;
+    background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
+    border-radius: 40rpx;
+    margin-top: 30rpx;
+    .u_sha_bu {
+      color: #994D2C;
+      line-height: 30rpx;
     }
   }
 </style>
