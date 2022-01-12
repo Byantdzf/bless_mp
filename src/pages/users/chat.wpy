@@ -1,10 +1,10 @@
 <template>
   <view style="height: 100vh;overflow: hidden;background: #f5f5f5;">
+    <view class="m_tips f-fbc">
+      <view class="font_26"  style="color: #A13791;">如遇营销，涉黄等骚扰情况</view>
+      <image class="report_icon" @tap="complaint" src="https://image.fulllinkai.com/202201/07/c37e67cc0c648a882c0224fb025b961f.png" mode="aspectFill"></image>
+    </view>
     <scroll-view scroll-top="{{blessingTopHandle}}" scroll-into-view="{{toView}}" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0">
-     <view class="m_tips f-fbc">
-       <view class="font_26"  style="color: #A13791;">如遇营销，涉黄等骚扰情况</view>
-       <image class="report_icon" @tap="complaint" src="https://image.fulllinkai.com/202201/07/c37e67cc0c648a882c0224fb025b961f.png" mode="aspectFill"></image>
-     </view>
       <view class="m_chat_box">
         <view class="chat_box" id="m_curr">
           <view class="" wx:for="{{list}}" wx:key="index" id="chat_{{item.id}}">
@@ -22,7 +22,7 @@
                     <view class="wifi-circle third {{playShow?'':'sel'}}"></view>
                 </view>
               </view>
-              <view class="right-video" @tap="gotoTv({{item}})" wx:else>
+              <view class="right-video" wx:else>
                 <video class="u_video" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
               </view>
             </view>
@@ -40,7 +40,7 @@
                 </view>
                 <view class="font333" style="padding-left: 30rpx;">{{playShow?item.duration:recordingTimeqwe}}S"</view>
               </view>
-              <view class="left-video" @tap="gotoTv({{item}})" wx:else>
+              <view class="left-video" wx:else>
                 <video class="u_video" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
               </view>
             </view>
@@ -50,13 +50,13 @@
     </scroll-view>
     <view class="m_inp">
       <view class="u_inp f-fcc">
-        <input class="u_field" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
+        <input class="u_field" maxlength="1200" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
       </view>
     </view>
 		<!-- 投诉 -->
-		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" wx:if="{{modalName=='complaintModal'}}" bindtap="hideModal">
-		  <view class="perfect_data_box animation-slide-top" catchtap>
+		<view class="cu-modal {{modalName=='complaintModal'?'show':''}}" wx:if="{{modalName=='complaintModal'}}">
+		  <view class="perfect_data_box animation-slide-top">
 		    <view class="m_comp_con">
           <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
 		      <view class="m_comp_tt font_32 color333 bold">举报{{nickname}}</view>
@@ -70,6 +70,7 @@
 					</view>
 		      <view class="m_texTarea">
 		        <compTexTarea
+              minHeight="220"
 		          :placeholderText.sync="compPlaceholderText"
 		          :max.sync="max"
 		          :value.sync="compValue"
@@ -103,6 +104,7 @@ export default class chat extends wepy.page {
     enablePullDownRefresh: false
   }
   data = {
+    max: 500,
     list: [],
     blessingPage: 1,
     onToupperShow: false,
@@ -486,10 +488,11 @@ export default class chat extends wepy.page {
       const vm = this
       var myDate = new Date()
       if (this.chatValue == '') {
-        this.$showToast('内容不能为空')
+        this.$showToast('回复的内容不能为空')
         return
       }
       this.userNextId = +vm.list[0].id + 1
+      clearTimeout(vm.setIntervalList)
       vm.list.unshift({
         updated_at: vm.getTime(vm.curentTime()),
         user_name: vm.wxUserInfo.nickName,
@@ -497,15 +500,14 @@ export default class chat extends wepy.page {
         type: "chat",
         identity: "user",
         content: this.chatValue,
-        id: this.userNextId,
+        id: this.userNextId
       })
-      this.toView = `chat_${this.userNextId}`
+      vm.toView = `chat_${this.userNextId}`
       var data = {
         receiving_id: this.id,
         content: this.chatValue,
         version: 2
       }
-      clearTimeout(vm.setIntervalList)
       vm.chatValue = ''
       this.$post({
         url: `${service.bottleChat}`,
@@ -516,8 +518,8 @@ export default class chat extends wepy.page {
 					data
 				}) => {
           if(code == 0) {
+            vm.list[0].id = data.id
             vm.setIntervalCatch()
-            vm.getListNew(vm.list[0].id)
           }else {
             vm.$showToast('发送失败')
             vm.list.splice(0, 1)
@@ -883,6 +885,7 @@ page {
 		.m_texTarea {
 			margin: 50rpx 30rpx 40rpx;
 			background-color: #f5f5f5;
+      height: 240rpx;
 		}
 		.u_ble_bu {
 			width: 400rpx;

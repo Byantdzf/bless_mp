@@ -11,9 +11,9 @@
         src="https://image.fulllinkai.com/202201/07/28ab1ea067a7b563dbd779c233242aa7.png"
         mode="heightFix"
       ></image>
-      <view class="envelope_bto">
+      <view class="envelope_bto" @tap.stop="userInfoHandler">
         <view class="envelope_box_s">
-          <image class="envelope_box" mode="aspectFill" src="https://image.fulllinkai.com/202201/07/7eff257fe835c4a81e56ff3fa5d912dd.png"></image>
+          <image class="envelope_box {{BottomCoverShow?'sel':''}}" mode="aspectFill" src="https://image.fulllinkai.com/202201/07/7eff257fe835c4a81e56ff3fa5d912dd.png"></image>
         </view>
         <image class="envelope_box1" mode="aspectFill" src="https://image.fulllinkai.com/202201/07/57bb66b40a5e99575cde870790880d1f.png"></image>
       </view>
@@ -28,13 +28,12 @@
         <block wx:if="{{wxUserInfo}}">
           <view style="width: 80rpx;"></view>
           <view class="making_bto font_32 bold" @tap.stop="userInfoHandler">
-            <view class="dot_img">
-              <image
-                class="making_bto_img"
-                src="https://image.fulllinkai.com/202201/07/55be7dfeb7befd2b955c7053e1a7f408.png"
-                mode="widthFix"
-              ></image>
-            </view>
+            <view class="dot_img"></view>
+            <image
+              class="making_bto_img"
+              src="https://image.fulllinkai.com/202201/07/55be7dfeb7befd2b955c7053e1a7f408.png"
+              mode="widthFix"
+            ></image>
           </view>
           <view class="Wish_box f-fcc f-fdc" @tap.stop="userInfoHandlerV2">
             <image class="Wish_box_icon" src="https://image.fulllinkai.com/202201/07/599cb07e927af10ac6015e9c770b1da4.png" mode="aspectFill">
@@ -46,13 +45,12 @@
         <block wx:else>
           <view style="width: 80rpx;"></view>
           <view class="making_bto font_32 bold" @tap.stop="getWxUserInfo('userInfoHandler')">
-            <view class="dot_img">
-              <image
-                class="making_bto_img"
-                src="https://image.fulllinkai.com/202201/07/55be7dfeb7befd2b955c7053e1a7f408.png"
-                mode="widthFix"
-              ></image>
-            </view>
+            <view class="dot_img"></view>
+            <image
+              class="making_bto_img"
+              src="https://image.fulllinkai.com/202201/07/55be7dfeb7befd2b955c7053e1a7f408.png"
+              mode="widthFix"
+            ></image>
           </view>
           <view class="Wish_box f-fcc f-fdc" @tap.stop="getWxUserInfo('userInfoHandlerV2')">
             <image class="Wish_box_icon" src="https://image.fulllinkai.com/202201/07/599cb07e927af10ac6015e9c770b1da4.png" mode="aspectFill">
@@ -64,8 +62,8 @@
       </view>
     </view>
 		<!-- 捞祝福 -->
-    <view class="cu-modal {{modalName=='obtainModal'?'show':''}}" @tap.stop="hideModal">
-      <view class="perfect_data_box animation-slide-top" catchtap>
+    <view class="cu-modal {{modalName=='obtainModal'?'show':''}}">
+      <view class="perfect_data_box animation-slide-top">
         <view class="u_complaint font_28 color666" @tap="complaint">投诉</view>
         <view class="m_ble_con">
           <view class="m_ble_user f-fc">
@@ -116,8 +114,8 @@
 
 
     <!-- 选择祝福方式 -->
-    <view class="cu-modal bottom-modal {{modalName=='blessingTypeModal'?'show':''}}" @tap.stop="hideModal">
-      <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;" catchtap>
+    <view class="cu-modal bottom-modal {{modalName=='blessingTypeModal'?'show':''}}">
+      <view class="cu-dialog" style="border-radius: 32rpx 32rpx 0px 0px;">
         <view class="m_blTp_con">
           <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
           <view class="u_blTp_tt font_32 color333 bold">选择祝福方式</view>
@@ -144,9 +142,10 @@
         <view class="cancelPlaceholder" @tap="hideModal">
           <image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="widthFix"></image>
         </view>
+        <image class="blessing_buImg" src="https://image.fulllinkai.com/202201/10/8827741d6e923160c934ea5b2b7969ac.png" mode="widthFix"></image>
 		    <view class="m_send_con" wx:if="{{modalName=='sendOutModal'}}">
 		      <view class="m_texTarea">
-		        <senTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue" :readonly="false"></senTexTarea>
+		        <senTexTarea minHeight="420" :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="senValue" @textareaValue.user="senTextareaValue" :readonly="false"></senTexTarea>
 		      </view>
 		    </view>
         <view class="m_share_bu f-fcc">
@@ -169,11 +168,12 @@
             <view class="m_aud">
               <view class="u_audio_ct f-fcc">
                 <image class="u_audio_ct_img" @tap="listenRecord" wx:if="{{showhandle3}}" src="https://image.fulllinkai.com/202201/07/0266dc9357609ef981798b7af5f82e3c.png" mode="aspectFit"></image>
-                <image class="u_audio_ct_img" wx:else  src="https://image.fulllinkai.com/202201/07/9ef382e471a4a0e8ffe3dbbffcdb2f89.png" mode="aspectFit"></image>
+                <image class="u_audio_ct_img" wx:elif="{{showhandle4}}" @tap="continuePlaying" src="https://image.fulllinkai.com/202201/07/0266dc9357609ef981798b7af5f82e3c.png" mode="aspectFit"></image>
+                <image class="u_audio_ct_img" wx:else @tap="onPause" src="https://image.fulllinkai.com/202201/07/9ef382e471a4a0e8ffe3dbbffcdb2f89.png" mode="aspectFit"></image>
               </view>
               <!-- <image class="u_audio_ct f-fcc">
               </image> -->
-              <view class="u_audio_c3_tt font_28 color33">试听 {{recordingTimeqwe+'S'}}</view>
+              <view class="u_audio_c3_tt font_28 color33">{{showhandle4?'暂停':'试听'}} {{recordingTimeqwe+'S'}}</view>
               <view class="m_ca f-fcc f-fdc" @tap="reRecord">
                 <image class="u_ca_img {{reRecordShow?'sel':''}}" src="https://image.fulllinkai.com/202201/07/0f9ac211ba367b8f73882c16bdaf2c6d.png" mode="aspectFit"></image>
                 <view class="u_ca_tt font_24 color999">重录</view>
@@ -213,7 +213,7 @@
           <view class="m_vi_box f-fcc">
             <view class="m_vi f-fcc f-fdc" @tap="toChooseVideo" wx:if="{{videoUrl == ''}}">
               <image class="u_vi_img" src="https://image.fulllinkai.com/202201/07/0376ac53c931e74cdb8f5457b5222e1b.png" mode="aspectFit"></image>
-              <view class="font_28 white">录制</view>
+              <view class="font_28 white">点击录制</view>
             </view>
             <view class="m_video" wx:else>
               <video class="u_video" src="{{videoUrl}}"></video>
@@ -232,25 +232,28 @@
       <block  wx:if="{{wxUserInfo}}">
         <view class="envelope_bto_s" @tap.stop="userInfoHandlerV3">
           <view class="envelope_box_s">
-            <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202201/07/62eef60f786a488078669eb2c40d5392.png"></image>
+            <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202201/12/ee5e74f24053fb21aa8ec1fa7d6e3961.png"></image>
+            <view class="envelope_txt">点击拆开祝福</view>
           </view>
         </view>
       </block>
       <block wx:else>
         <view class="envelope_bto_s" @tap.stop="getWxUserInfo('userInfoHandlerV3')">
           <view class="envelope_box_s">
-            <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202201/07/62eef60f786a488078669eb2c40d5392.png"></image>
+            <image class="envelope_box" wx:if="{{modalName=='envelope'}}" mode="aspectFill" src="https://image.fulllinkai.com/202201/12/ee5e74f24053fb21aa8ec1fa7d6e3961.png"></image>
+            <view class="envelope_txt">点击拆开祝福</view>
           </view>
         </view>
       </block>
     </view>
     <!-- 信封内容 -->
-    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}" @tap.stop="hideModal">
-      <view class="openEnvelope_box" catchtap>
+    <view class="cu-modal {{modalName=='openEnvelope'?'show':''}}">
+      <view class="openEnvelope_box">
         <view class="cancelPlaceholder" @tap="hideModal">
           <image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="widthFix"></image>
         </view>
         <image class="openEnvelope_bg" src="{{openImage}}" mode="widthFix">
+          <image class="openEnvelope_buImg" src="https://image.fulllinkai.com/202201/10/8827741d6e923160c934ea5b2b7969ac.png" mode="widthFix"></image>
           <view class="m_open_info">
             <view class="m_open_ipc">
               <image class="u_open_ipcImg" src="{{openData.pic}}" mode="aspectFit"></image>
@@ -265,7 +268,8 @@
           </view>
           <view class="m_open_send_con" wx:if="{{modalName=='openEnvelope'}}">
             <view class="m_open_texTarea">
-              <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="openValue" @textareaValue.user="openTextareaValue"></openTexTarea>
+              {{openValue}}
+              <!-- <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="openValue" @textareaValue.user="openTextareaValue"></openTexTarea> -->
             </view>
           </view>
         </image>
@@ -276,15 +280,15 @@
       </view>
     </view>
     <!-- 信封语音 -->
-    <view class="cu-modal {{modalName=='vudioOpenEnvelope'?'show':''}}" @tap.stop="hideModal">
-      <view class="m_en" catchtap wx:if="{{modalName=='vudioOpenEnvelope'}}">
+    <view class="cu-modal {{modalName=='vudioOpenEnvelope'?'show':''}}">
+      <view class="m_en" wx:if="{{modalName=='vudioOpenEnvelope'}}">
         <view class="cancelPlaceholder" @tap="hideModal">
           <image class="cancelIcon" src="https://image.fulllinkai.com/202201/07/cbe8654a78d1606cac990b162ce9ce37.png" mode="aspectFit"></image>
         </view>
         <image class="u_en_img" src="https://image.fulllinkai.com/202201/07/5ef08fc2f4008e50873b7e3c25efe878.png" mode="widthFix">
           <view class="m_loader f-fcc f-fdc">
             <view class="m_loader_tt font_32 white">点击播放收获你的祝福</view>
-            <view class="loader-container_s f-fcc"  wx:if="{{playShow}}">
+            <view class="loader-container_s f-fcc"  wx:if="{{playShow || showhandle4}}">
               <view class="rectangle-3"></view>
               <view class="rectangle-2"></view>
               <view class="rectangle-1"></view>
@@ -320,10 +324,11 @@
               <view class="rectangle-1"></view>
               <view class="rectangle-3"></view>
             </view>
-            <view class="font_32 white" wx:if="{{playShow}}">{{voiceDuration}}S</view>
+            <view class="font_32 white" wx:if="{{playShow && !showhandle4}}">{{voiceDuration}}S</view>
             <view class="font_32 white" wx:else>{{recordingTimeqwe}}S</view>
             <image class="u_en_icon_t" @tap="playMethod" wx:if="{{playShow}}" src="https://image.fulllinkai.com/202201/07/1761207359aafcaf79967dc16e7b9e53.png" mode="aspectFit"></image>
-            <image class="u_en_icon_f" @tap="playMethod" wx:else src="https://image.fulllinkai.com/202201/07/cc9dcabde81e225c13f54779828b27af.png" mode="aspectFit"></image>
+            <image class="u_en_icon_t" @tap="continuePlaying" wx:elif="{{showhandle4}}" src="https://image.fulllinkai.com/202201/07/1761207359aafcaf79967dc16e7b9e53.png" mode="aspectFit"></image>
+            <image class="u_en_icon_f" @tap="onPause" wx:else src="https://image.fulllinkai.com/202201/07/cc9dcabde81e225c13f54779828b27af.png" mode="aspectFit"></image>
           </view>
         </image>
         <view class="m_oEn_bu f-fcc">
@@ -334,13 +339,13 @@
       </view>
     </view>
     <!-- 信封视频 -->
-    <view class="cu-modal {{modalName=='videoOpenEnvelope'?'show':''}}" @tap.stop="hideModal">
-      <view class="m_en_vi" catchtap wx:if="{{modalName=='videoOpenEnvelope'}}">
+    <view class="cu-modal {{modalName=='videoOpenEnvelope'?'show':''}}">
+      <view class="m_en_vi" wx:if="{{modalName=='videoOpenEnvelope'}}">
         <view class="cancelPlaceholder" @tap="hideModal">
           <image class="cancelIcon" src="https://image.fulllinkai.com/202201/07/cbe8654a78d1606cac990b162ce9ce37.png" mode="aspectFit"></image>
         </view>
         <view class="m_loader_tt font_32 white">点击播放收获你的祝福</view>
-        <view @tap="gotoTv()">
+        <view>
           <video id="video_" loop="loop" class="u_video" src="{{openValue}}"></video>
         </view>
         <image class="u_vi_buImg" src="https://image.fulllinkai.com/202201/07/96a9f8bb598890ce1410d92373c4a557.png" mode="widthFix"></image>
@@ -360,8 +365,8 @@
       </view>
 		</view>
 		<!-- 投诉 -->
-    <view class="cu-modal {{modalName=='complaintModal'?'show':''}}" @tap.stop="hideModal">
-      <view class="perfect_data_box animation-slide-top" catchtap>
+    <view class="cu-modal {{modalName=='complaintModal'?'show':''}}">
+      <view class="perfect_data_box animation-slide-top">
         <view class="m_comp_con">
           <image class="u_comp_icon" @tap.stop="hideModal" src="https://image.fulllinkai.com/202112/23/adc5c39ca19d2a9783be172f606b9498.png" mode="widthFix"></image>
           <view class="m_comp_tt font_32 color333 bold">举报{{openData.nickname}}</view>
@@ -375,8 +380,8 @@
           </view>
           <view class="m_texTarea">
             <compTexTarea
+              minHeight="220"
               wx:if="{{modalName=='complaintModal'}}"
-              :placeholderText.sync="compPlaceholderText"
               :max.sync="max"
               :value.sync="compValue"
               @textareaValue.user="compTextareaValue"
@@ -422,8 +427,7 @@ export default class home extends wepy.page {
     showEnvelope: false,
     showEnvelopeText: false,
     placeholderText: '写下你的暖心祝福',
-    compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
-    max: 800,
+    max: 500,
     value: '',
     senValue: '',
     compValue: '',
@@ -489,11 +493,14 @@ export default class home extends wepy.page {
     showhandle1: true,
     showhandle2: false,
     showhandle3: true,
+    showhandle4: false,
     videoUrl: '',
     aliyunVideoUrl: '',
     playShow: true,
     voiceDuration: 0,
-    reRecordShow: false
+    reRecordShow: false,
+    BottomCoverShow: true,
+    envelopeType: ''
   };
   computed = {};
   async onLoad(e) {
@@ -510,9 +517,9 @@ export default class home extends wepy.page {
         if (e.receiving_id) {
           this.receiving_id = e.receiving_id
           this.getDetail()
-          this.getBottleUnread()
           this.$apply()
         }
+        this.getBottleUnread()
       }
     }
   }
@@ -556,7 +563,7 @@ export default class home extends wepy.page {
     return {
       title: `来自${this.wxUserInfo.nickName}的祝福贺卡`,
       path: url,
-      imageUrl: 'https://image.fulllinkai.com/202112/22/cc2931000bf5f146229f3afd1f4eab43.png',
+      imageUrl: 'https://image.fulllinkai.com/202201/11/3571d5ea1644f765aac8ae2fb52ee7d8.png',
       success: function (res) {
         console.log('成功', res)
       }
@@ -571,24 +578,36 @@ export default class home extends wepy.page {
         this.chat_id = data.receiving_id
         this.claim_status = data.claim_status
         if (data.identity == 'holder') {
-          if(data.type == 'chat') {
-            this.modalName = 'envelope'
-            setTimeout(() => {
-              this.showEnvelope = true
-              this.$apply()
-            }, 1500)
-          }else if(data.type == 'voice'){
+          this.envelopeType = data.type
+          this.modalName = 'envelope'
+          this.BottomCoverShow = false
+          setTimeout(() => {
+            this.showEnvelope = true
+            this.$apply()
+          }, 1500)
+          if(data.type == 'voice'){
             this.voiceDuration = data.duration
-            this.modalName = 'vudioOpenEnvelope'
-            if(!data.claim_status) {
-              this.getBottleId(data.receiving_id)
-            }
-          }else {
-            this.modalName = 'videoOpenEnvelope'
-            if(!data.claim_status) {
-              this.getBottleId(data.receiving_id)
-            }
           }
+          // if(data.type == 'chat') {
+          //   this.modalName = 'envelope'
+          //   this.BottomCoverShow = false
+          //   setTimeout(() => {
+          //     this.showEnvelope = true
+          //     this.$apply()
+          //   }, 1500)
+          // }else if(data.type == 'voice'){
+          //   this.voiceDuration = data.duration
+          //   this.modalName = 'vudioOpenEnvelope'
+          //   if(!data.claim_status) {
+          //     this.getBottleId(data.receiving_id)
+          //   }
+          // }else {
+          //   this.modalName = 'videoOpenEnvelope'
+          //   if(!data.claim_status) {
+          //     this.getBottleId(data.receiving_id)
+          //   }
+          // }
+          wx.vibrateLong()
         }
         this.$apply()
       }
@@ -596,16 +615,21 @@ export default class home extends wepy.page {
   }
   // 祝福详情
   getBottleId (id) {
+    const that = this
     var data = {
-      id: this.receiving_id
+      id: that.receiving_id
     }
-    this.$get({url: `${service.host}/official/bottle`,data}, {
+    that.$get({url: `${service.host}/official/bottle`,data}, {
       success: ({code, data}) => {
-        this.chat_id = data.receiving_id
-        if(this.openData.type == 'chat') {
-          this.modalName = 'openEnvelope'
+        that.chat_id = data.receiving_id
+        if(that.envelopeType == 'chat') {
+          that.modalName = 'openEnvelope'
+        }else if(that.envelopeType == 'voice'){
+          that.modalName = 'vudioOpenEnvelope'
+        }else {
+          that.modalName = 'videoOpenEnvelope'
         }
-        this.getBottleUnread()
+        that.getBottleUnread()
         wx.hideLoading()
       }
     })
@@ -620,9 +644,15 @@ export default class home extends wepy.page {
 
   userInfoHandlerV3_sub(that = this) {
     if(!that.claim_status) {
-      that.getBottleId(that.receiving_id)
+      that.getBottleId()
     }else {
-      that.modalName = 'openEnvelope'
+      if(that.envelopeType == 'chat') {
+        that.modalName = 'openEnvelope'
+      }else if(that.envelopeType == 'voice'){
+        that.modalName = 'vudioOpenEnvelope'
+      }else {
+        that.modalName = 'videoOpenEnvelope'
+      }
     }
     setTimeout(() => {
       that.showEnvelopeText = true
@@ -632,7 +662,7 @@ export default class home extends wepy.page {
   }
 
   goToUrlId_sub(that = this) {
-    that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.bottle_id}`)
+    that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.id}`)
     that.modalName = ''
     that.$apply()
   }
@@ -746,7 +776,7 @@ export default class home extends wepy.page {
           }else if(type == 'userInfoHandlerV2') {
             that.$goto(`/pages/users/myNews`)
           }else if(type == 'otChat') {
-            that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.bottle_id}&nickname=${that.openData.nickname}`)
+            that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.id}&nickname=${that.openData.nickname}`)
           }else {
             this.getBottleId(this.receiving_id)
             setTimeout(() => {
@@ -794,13 +824,14 @@ export default class home extends wepy.page {
       }
       this.modalName = ''
       this.videoUrl = ''
+      this.BottomCoverShow = true
       this.$apply()
     },
     // 发祝福
     postBottle (type) {
       if(type == 'chat') {
         if(this.senValue == '') {
-          this.$showToast('内容不能为空')
+          this.$showToast('请先写下你的祝福哦！')
           return
         }
         var data = {
@@ -817,13 +848,13 @@ export default class home extends wepy.page {
         }
       }
       this.modalName = ''
-      // this.$showLoading('加载中...')
+      this.$showLoading('祝福生成中...')
       this.$post({
         url: `${service.bottle}`,
         data
       }, {
         success: ({code, data}) => {
-          // wx.hideLoading()
+          wx.hideLoading()
           this.senValue = ''
           this.bottleData = data
           this.getPoster()
@@ -838,7 +869,7 @@ export default class home extends wepy.page {
     goToUrlId() {
       const that =this
       this.getsubscrip_tion(function() {
-        that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.bottle_id}&nickname=${that.openData.nickname}`)
+        that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.id}&nickname=${that.openData.nickname}`)
         that.modalName = ''
         that.$apply()
       })
@@ -909,8 +940,18 @@ export default class home extends wepy.page {
       this.$invoke('backgroundAudio', 'shutRecord')
     },
     listenRecord() {
-      this.showhandle3 = false
-      this.$invoke('backgroundAudio', 'listenRecord')
+      const that = this
+      clearTimeout(that.throttle)
+      that.throttle = setTimeout(() => {
+        that.showhandle3 = false
+        that.$invoke('backgroundAudio', 'listenRecord')
+      }, 200)
+    },
+    onPause() {
+      this.$invoke('backgroundAudio', 'onPause')
+    },
+    continuePlaying() {
+      this.$invoke('backgroundAudio', 'continuePlaying')
     },
     reRecordBu() {
       this.modalName = ''
@@ -923,6 +964,7 @@ export default class home extends wepy.page {
         that.reRecordShow = false
         that.$apply()
       }, 500)
+      this.$invoke('backgroundAudio', 'endedVoice')
       this.$invoke('backgroundAudio', 'reRecord')
     },
     uploadVoice() {
@@ -954,10 +996,15 @@ export default class home extends wepy.page {
       })
     },
     playMethod() {
-      if(this.playShow) {
-        this.$invoke('backgroundAudio', 'listenRecord', {tempFilePath: this.openValue})
-        this.playShow = !this.playShow
-      }
+      const that = this
+      clearTimeout(that.throttle)
+      that.throttle = setTimeout(() => {
+        if(that.playShow) {
+          that.$invoke('backgroundAudio', 'listenRecord', {tempFilePath: that.openValue})
+          that.playShow = !this.playShow
+          that.$apply()
+        }
+      }, 200)
     },
     gotoTv() {
       var videoContext = wx.createVideoContext('video_', this)
@@ -983,8 +1030,10 @@ export default class home extends wepy.page {
         this.showhandle1 = e.data
       }else if(e.type == 'showhandle2') {
         this.showhandle2 = e.data
-      }else {
+      }else if(e.type == 'showhandle3') {
         this.showhandle3 = e.data
+      }else {
+        this.showhandle4 = e.data
       }
     },
     'UpLoadImage': (e) => {
@@ -997,7 +1046,7 @@ export default class home extends wepy.page {
       this.$apply()
     },
     'playEnded': (e) => {
-      this.playShow = true
+      this.playShow = e
       this.$apply()
     },
   }
@@ -1041,6 +1090,8 @@ page {
         .envelope_box{
           width: 500rpx;
           height: 400rpx;
+        }
+        .envelope_box.sel {
           animation: warn 1s ease-in-out 0s 1 alternate, zy 2s ease-in-out 2.2s infinite alternate;
         }
       }
@@ -1089,10 +1140,17 @@ page {
       top: 0;
       left: 50%;
       transform: translateX(-50%);
+      .envelope_txt {
+        font-size: 44rpx;
+        color: #FFFBF5;
+        line-height: 44rpx;
+        letter-spacing: 2rpx;
+        text-shadow: 0px 2rpx 2rpx rgba(0, 0, 0, 0.29);
+      }
       .envelope_box{
         width: 500rpx;
         height: 400rpx;
-        animation: warn 1s ease-in-out 0s 1 alternate, zy 2s ease-in-out 2.2s 20 alternate;
+        animation: warn 1s ease-in-out 0s 1 alternate, zy 2s ease-in-out 2.2s infinite alternate;
       }
     }
     @keyframes warn {
@@ -1135,15 +1193,14 @@ page {
         // background: linear-gradient(90deg, #FDE490 0%, #FFC164 100%);
         // border-radius: 60rpx;
         .making_bto_img {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
           width: 310rpx;
           height: 310rpx;
+          animation-iteration-count:infinite;
+          -webkit-animation: splooshImg .8s ease-in-out infinite;
+          animation: splooshImg .8s ease-in-out infinite;
         }
         .dot_img {
-          animation: splooshImg 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+          animation: splooshImg_b 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
         .dot3 {
           // animation: sploosh3 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -1159,7 +1216,7 @@ page {
           left: 50%;
           transform: translate(-50%, -50%);
         }
-        @keyframes splooshImg {
+        @keyframes splooshImg_b {
           0% {
             box-shadow: 0 0 0 0rpx rgba(255, 255, 255, .5);
             // background: rgba(255, 255, 255, 0);
@@ -1167,6 +1224,20 @@ page {
           100% {
             box-shadow: 0 0 0 40rpx rgba(255, 255, 255, 0);
             // background: rgba(255, 255, 255, 0.3);
+          }
+        }
+        @keyframes splooshImg {
+          0% {
+            transform: scale(1,1);
+            opacity:1;
+          }
+          25% {
+            transform: scale(1.1,1.1);
+            opacity:0.8;
+          }
+          100% {
+            transform: scale(1,1);
+            opacity:1;
           }
         }
       }
@@ -1270,6 +1341,13 @@ page {
       display: block;
       position: relative;
       overflow: hidden;
+      .openEnvelope_buImg {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 99;
+      }
       .m_open_info {
         width: 100%;
         position: absolute;
@@ -1305,11 +1383,18 @@ page {
     }
     .m_open_send_con{
       position: absolute;
-      padding: 0 24rpx;
+      padding: 0 48rpx;
       top: 330rpx;
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
+      height: 420rpx;
+      overflow-y: scroll;
+      .m_open_texTarea {
+        width: 100%;
+        padding-bottom: 40rpx;
+        text-align: left;
+      }
     }
     .cancelPlaceholder {
       width: 80rpx;
@@ -1560,6 +1645,13 @@ page {
     width: 568rpx;
     height: 832rpx;
     top: -10%;
+    .blessing_buImg {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 99;
+    }
     .m_send_con {
       padding: 258rpx 60rpx 50rpx;
       .m_texTarea {
@@ -1916,7 +2008,7 @@ page {
 		.m_texTarea {
 			margin: 50rpx 30rpx 40rpx;
 			background-color: #f5f5f5;
-      height: 340rpx;
+      height: 240rpx;
 		}
 		.u_ble_bu {
 			width: 400rpx;

@@ -112,6 +112,11 @@ textareaV2 {
 		text-align: justify;
     text-align-last: left;
   }
+  .areas::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    color: transparent;
+  }
   .placeholder_class {
     font-size: 28rpx;
     line-height: 40rpx;

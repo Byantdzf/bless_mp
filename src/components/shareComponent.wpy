@@ -141,6 +141,7 @@
       showPic() {
         const vm = this
         vm.$showLoading('海报生成中...')
+        vm.currentLeft = 0
         vm.timeoutId = setInterval(() => {
           if(vm.currentLeft > 20) {
             clearTimeout(vm.timeoutId)
@@ -175,6 +176,7 @@
       },
       listenerCancel () {
         this.modalName = ''
+        this.shareImage = ''
         this.$apply()
       },
       hideOpenSet () {

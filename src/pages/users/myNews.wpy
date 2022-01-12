@@ -70,6 +70,7 @@ export default class myNews extends wepy.page {
     let vm = this
     if (vm.loading || vm.noMoreList) return
     vm.loading = true
+    vm.$showLoading('加载中...')
     this.$get({
       url: `${service.host}/official/bottle/list`,
       data: {
@@ -77,6 +78,7 @@ export default class myNews extends wepy.page {
       }
     }, {
       success: ({code, data}) => {
+        wx.hideLoading()
         if (vm.blessingPage > 1 && data.data.length == 0) {
           vm.blessingMessage = true
           return

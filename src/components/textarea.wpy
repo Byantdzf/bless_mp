@@ -1,8 +1,8 @@
 <template>
-  <view class="textarea" style="{{tabSearch?'padding: 0;':''}}">
+  <view class="textarea" style="{{tabSearch?'padding: 0;':''}}height: {{minHeight}}rpx;">
     <textarea
       class="areas"
-      style="{{tabSearch?'text-align: left;min-height: 40rpx;font-size: 28rpx;border-bottom: #F2F2F2 solid 2rpx;line-height: 72rpx;':''}}"
+      style=""
       placeholder="{{placeholderText}}"
       placeholder-style="placeholder_class"
       minlength="{{min}}"
@@ -43,6 +43,10 @@ export default class textarea extends wepy.component {
       type: Number,
       default: 15
     },
+    minHeight: {
+      type: String,
+      default: '240'
+    },
     tabSearch: {
       type: Boolean,
       default: false
@@ -81,13 +85,13 @@ export default class textarea extends wepy.component {
       console.log(len)
       if(len >= this.max) {
         wx.showToast({
-          title: '内容不能超过300字',
+          title: `内容不能超过${this.max}字`,
           icon: 'none',
           duration: 1500
         })
-        return
       }
       this.value = e.detail.value;
+      console.log(e.detail.value)
       this.$emit('textareaValue', e.detail.value)
     }
   };
@@ -96,21 +100,26 @@ export default class textarea extends wepy.component {
 </script>
 <style lang="less" scoped>
 textarea {
-  width: 80%;
   caret-color:#8962ff;
 }
 .textarea {
-  padding: 20rpx 24rpx;
+  width: 100%;
+  padding: 20rpx 24rpx 0;
   box-sizing: border-box;
   border-radius: 32rpx;
   .areas {
     width: 100%;
-    min-height: 240rpx;
+    height: 100%;
     font-size: 30rpx;
     line-height: 40rpx;
     color: #333333;
 		text-align: justify;
     text-align-last: left;
+  }
+  .areas::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    color: transparent;
   }
   .placeholder_class {
     font-size: 28rpx;

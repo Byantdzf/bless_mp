@@ -1014,53 +1014,84 @@ export default class backgroundAudio extends wepy.component{
     }
 
     reRecordMe(){
-        clearInterval(this.setInter1)
-        this.showhandle1 = true
-        this.showhandle2 = false
-        this.voiceState = false
-        this.tempFilePath = ''
-        this.showWaveView = false
-        this.startClick = false
-        this.currentLeft = 10
-        this.recordingTimeqwe = 0
-        this.currentTime = 0
-        this.$emit('shutRecord', {type: 'showhandle1',data: this.showhandle1})
-        this.$emit('shutRecord', {type: 'showhandle2',data: this.showhandle2})
-        this.$emit('recording', this.currentTime)
+        const that = this
+        clearTimeout(that.throttle)
+        that.throttle = setTimeout(() => {
+            clearInterval(that.setInter1)
+            that.showhandle1 = true
+            that.showhandle2 = false
+            that.voiceState = false
+            that.tempFilePath = ''
+            that.showWaveView = false
+            that.startClick = false
+            that.currentLeft = 10
+            that.recordingTimeqwe = 0
+            that.currentTime = 0
+            that.$emit('shutRecord', {type: 'showhandle1',data: that.showhandle1})
+            that.$emit('shutRecord', {type: 'showhandle2',data: that.showhandle2})
+            that.$emit('shutRecord', {type: 'showhandle3',data: true})
+            that.$emit('recording', that.currentTime)
+        }, 300)
     }
+
+    continuePlaying() {
+        const that = this
+        clearTimeout(that.throttle)
+        that.throttle = setTimeout(() => {
+            backgroundAudioManager.play()
+            that.$emit('shutRecord', {type: 'showhandle4',data: false})
+            that.setInter1 = setInterval(() => {
+                let time = parseInt(that.currentTime) + 1
+                // let currentTime = time < 10 ? '0'+time : time;
+                // console.log(currentTime)
+                that.currentLeft = that.currentLeft + 65
+                that.currentTime = time
+                that.$emit('recording', that.currentTime)
+                that.$apply()
+            }, 1000)
+        }, 300)
+    }
+
     methods = {
         startRecord(){
             const that = this
-            if(this.startClick){
-                return
-            }
-            this.startClick = true
-            wx.authorize({
-                scope: 'scope.record',
-                success() {
-                    // 用户已经同意小程序使用录音功能，后续调用 wx.startRecord 接口不会弹窗询问
-                    const options = {
-                        duration: 600000,
-                        sampleRate: 44100,
-                        numberOfChannels: 1,
-                        encodeBitRate: 192000,
-                        format: 'mp3',
-                        frameSize: 50
-                    }
-                    that.recordingTimer()
-                    recorderManager.start(options)
-                    recorderManager.onStart(() => {
-                        console.log('recorder start')
-                    })
-                    recorderManager.onError((res) => {
-                        console.log(res);
-                    })
-                    that.$emit('shutRecord', {type: 'showhandle1',data: false})
+            clearTimeout(that.throttle)
+            that.throttle = setTimeout(() => {
+                if(that.startClick){
+                    return
                 }
-            })
+                that.startClick = true
+                wx.authorize({
+                    scope: 'scope.record',
+                    success() {
+                        // 用户已经同意小程序使用录音功能，后续调用 wx.startRecord 接口不会弹窗询问
+                        const options = {
+                            duration: 600000,
+                            sampleRate: 44100,
+                            numberOfChannels: 1,
+                            encodeBitRate: 192000,
+                            format: 'mp3',
+                            frameSize: 50
+                        }
+                        that.recordingTimer()
+                        recorderManager.start(options)
+                        recorderManager.onStart(() => {
+                            console.log('recorder start')
+                        })
+                        recorderManager.onError((res) => {
+                            console.log(res);
+                        })
+                        that.$emit('shutRecord', {type: 'showhandle1',data: false})
+                    }
+                })
+            }, 300)
         },
         shutRecord() {
-            this.shutRecordMe()
+            const that = this
+            clearTimeout(that.throttle)
+            that.throttle = setTimeout(() => {
+                that.shutRecordMe()
+            }, 300)
         },
         endedVoice() {
             this.reRecordMe()
@@ -1070,6 +1101,7 @@ export default class backgroundAudio extends wepy.component{
         },
         listenRecord(e){
             const that = this
+            clearInterval(that.setInter1)
             if(e.tempFilePath) {
                 console.log(e.tempFilePath, 'e.tempFilePath-------------------------')
                 that.tempFilePath = e.tempFilePath
@@ -1092,8 +1124,14 @@ export default class backgroundAudio extends wepy.component{
                 clearInterval(that.setInter1)
                 that.currentLeft = 10
                 that.showWaveView = false
-                that.$emit('playEnded')
+                that.$emit('playEnded', true)
                 that.$emit('shutRecord', {type: 'showhandle3',data: true})
+                that.$apply()
+            })
+            backgroundAudioManager.onPause(() => {
+                console.log('音乐播放暂停')
+                clearInterval(that.setInter1)
+                that.$emit('shutRecord', {type: 'showhandle4',data: true})
                 that.$apply()
             })
             backgroundAudioManager.play()
@@ -1109,6 +1147,13 @@ export default class backgroundAudio extends wepy.component{
         },
         reRecord(){
             this.reRecordMe()
+        },
+        onPause() {
+            const that = this
+            clearTimeout(that.throttle)
+            that.throttle = setTimeout(() => {
+                backgroundAudioManager.pause()
+            }, 300)
         },
         uploadVoice(){
             // let that = this
@@ -1137,7 +1182,7 @@ export default class backgroundAudio extends wepy.component{
             clearInterval(this.setInter1)
             backgroundAudioManager.stop()
             vm.uploadState = true
-            vm.$showLoading('加载中...')
+            vm.$showLoading('生成祝福中...')
             wx.uploadFile({
                 url: service.image_upload,
                 filePath: vm.tempFilePath,
