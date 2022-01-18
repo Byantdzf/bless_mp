@@ -11,9 +11,7 @@
             <view wx:if="{{item.identity != 'other_user'}}" class="clearfix message-box">
               <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
               <image class="right-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
-              <view class="right-message" wx:if="{{item.type == 'chat'}}">
-                {{item.content}}
-              </view>
+              <text class="right-message" wx:if="{{item.type == 'chat'}}">{{item.content}}</text>
               <view class="right-voice f-fcc" @tap="playMethod({{item.content}})" wx:elif="{{item.type == 'voice'}}">
                 <view class="font333" style="padding-right: 30rpx;">{{playShow?item.duration:recordingTimeqwe}}S"</view>
                 <view class="wifi-symbol">
@@ -29,9 +27,7 @@
             <view wx:else class="clearfix message-box">
               <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
               <image class="left-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
-              <view class="left-message" wx:if="{{item.type == 'chat'}}">
-                {{item.content}}
-              </view>
+              <text class="left-message" wx:if="{{item.type == 'chat'}}">{{item.content}}</text>
               <view class="left-voice f-fcc" @tap="playMethod({{item.content}})" wx:elif="{{item.type == 'voice'}}">
                 <view class="wifi-symbol">
                     <view class="wifi-circle first"></view>

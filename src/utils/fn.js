@@ -86,11 +86,12 @@ const getsubscription = (params) => {
     wx.getSetting({
       withSubscriptions: true,
       success(res) {
+        var flag
         console.log(res)
         if (res.subscriptionsSetting.itemSettings != undefined) {
-          var flag = res.subscriptionsSetting.itemSettings[tmplIds[0]]
+          flag = res.subscriptionsSetting.itemSettings[tmplIds[0]]
         } else {
-          var flag = undefined
+          flag = undefined
         }
         console.log(flag)
         if (flag == undefined) {

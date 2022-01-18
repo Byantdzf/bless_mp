@@ -267,10 +267,10 @@
             </view>
           </view>
           <view class="m_open_send_con" wx:if="{{modalName=='openEnvelope'}}">
-            <view class="m_open_texTarea">
+            <text class="m_open_texTarea">
               {{openValue}}
               <!-- <openTexTarea :placeholderText.sync="placeholderText" :max.sync="max" :value.sync="openValue" @textareaValue.user="openTextareaValue"></openTexTarea> -->
-            </view>
+            </text>
           </view>
         </image>
         <view class="m_oEn_bu f-fcc">
@@ -500,7 +500,8 @@ export default class home extends wepy.page {
     voiceDuration: 0,
     reRecordShow: false,
     BottomCoverShow: true,
-    envelopeType: ''
+    envelopeType: '',
+    gotoShow: true
   };
   computed = {};
   async onLoad(e) {
@@ -667,10 +668,10 @@ export default class home extends wepy.page {
     that.$apply()
   }
 
-  getsubscrip_tion(method) {
-    const that = this
+  getsubscrip_tion(that, method) {
     getsubscription(['XY_8qQRgcTj4fYWy8CfpKbbQ1Oo_9DR-OaZ1FXpopZI']).then((res) => {
       console.log(res, 'getsubscription-----res-------------')
+      console.log()
       method(that)
     }).catch((erro) => {
       console.log(erro, 'getsubscription----erro--------------')
@@ -792,15 +793,20 @@ export default class home extends wepy.page {
         }
       })
     },
+    userInfoHandlerV2(e) {
+      const that = this
+      if(that.gotoShow) {
+        console.log(that.gotoShow,'111111111')
+        that.gotoShow = false
+        that.$apply()
+        that.getsubscrip_tion(that, function() {
+          that.$goto(`/pages/users/myNews`)
+        })
+      }
+    },
     userInfoHandler(e) {
       this.modalName = 'blessingTypeModal'
       this.$apply()
-    },
-    userInfoHandlerV2(e) {
-      const that =this
-      this.getsubscrip_tion(function() {
-        that.$goto(`/pages/users/myNews`)
-      })
     },
     userInfoHandlerV3(e) {
       this.userInfoHandlerV3_sub(this)
@@ -868,7 +874,7 @@ export default class home extends wepy.page {
     },
     goToUrlId() {
       const that =this
-      this.getsubscrip_tion(function() {
+      this.getsubscrip_tion(that, function() {
         that.$goto(`/pages/users/chat?receiving_id=${that.chat_id}&bottle_id=${that.openData.id}&nickname=${that.openData.nickname}`)
         that.modalName = ''
         that.$apply()
