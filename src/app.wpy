@@ -88,6 +88,8 @@ export default class extends wepy.app {
   };
 
   globalData = {
+    ban_chat: 0,
+    ban_send: 0,
     openid: null,
     tourist: null,
     cart: null,
@@ -176,6 +178,8 @@ export default class extends wepy.app {
                 success: function ({code, data}) {
                   wx.setStorageSync('openid', data.data.openid)
                   that.globalData.openid = data.data.openid
+                  that.globalData.ban_chat = data.data.ban_chat
+                  that.globalData.ban_send = data.data.ban_send
                   if (that.userInfoReadyCallback) {
                     that.userInfoReadyCallback(data)
                   }

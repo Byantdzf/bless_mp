@@ -9,7 +9,7 @@
         <view class="chat_box" id="m_curr">
           <view class="" wx:for="{{list}}" wx:key="index" id="chat_{{item.id}}">
             <view wx:if="{{item.identity != 'other_user'}}" class="clearfix message-box">
-              <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
+              <view class="chat_time font_24 color-999 text-center">{{item.created_at}}</view>
               <image class="right-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
               <text class="right-message" wx:if="{{item.type == 'chat'}}">{{item.content}}</text>
               <view class="right-voice f-fcc" @tap="playMethod({{item.content}})" wx:elif="{{item.type == 'voice'}}">
@@ -21,11 +21,11 @@
                 </view>
               </view>
               <view class="right-video" wx:else>
-                <video class="u_video" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
+                <video class="u_video" custom-cache="{undefined{false}}" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
               </view>
             </view>
             <view wx:else class="clearfix message-box">
-              <view class="chat_time font_24 color-999 text-center">{{item.updated_at}}</view>
+              <view class="chat_time font_24 color-999 text-center">{{item.created_at}}</view>
               <image class="left-Avatar" src="{{item.user_pic}}" mode="aspectFill"></image>
               <text class="left-message" wx:if="{{item.type == 'chat'}}">{{item.content}}</text>
               <view class="left-voice f-fcc" @tap="playMethod({{item.content}})" wx:elif="{{item.type == 'voice'}}">
@@ -37,14 +37,22 @@
                 <view class="font333" style="padding-left: 30rpx;">{{playShow?item.duration:recordingTimeqwe}}S"</view>
               </view>
               <view class="left-video" wx:else>
-                <video class="u_video" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
+                <video class="u_video" custom-cache="{undefined{false}}" id="video_{{item.id}}" bindfullscreenchange="leaveVideo" src="{{item.content}}"></video>
               </view>
             </view>
           </view>
+          <view class="m_war">
+            <view class="m_war_icpn f-fc">
+              <image class="u_war_icpn" src="https://image.fulllinkai.com/202201/19/d81398429b75935d8c16162fc4a926bb.png" mode="aspectFit"></image>
+              <view class="font_26 bold color333" style="line-height: 26rpx;">警告</view>
+            </view>
+            <view class="font_24 color333">请各位自觉遵守法律法规，<span style="color: #A13791;">遇到转款切勿相信，谨防上当受骗，</span>请保持警惕；交友期保持必要的界限，保证自身安全，<span style="color: #A13791;">请勿轻易委身于人，</span>否则后果将自己承担。</view>
+          </view>
         </view>
+        <view class="Muted_tips f-fcc white font_32" wx:if="{{Muted == 1}}">你已被禁言，暂时不能发送消息</view>
       </view>
     </scroll-view>
-    <view class="m_inp">
+    <view class="m_inp" wx:if="{{Muted == 0}}">
       <view class="u_inp f-fcc">
         <input class="u_field" maxlength="1200" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
@@ -139,7 +147,9 @@ export default class chat extends wepy.page {
     focusShow: false,
     wxUserInfo: {},
     userNextId: '',
-    compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户'
+    compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
+    Muted: 0,
+    riskWarning: 0
   }
 
   computed = {}
@@ -148,15 +158,18 @@ export default class chat extends wepy.page {
     this.nickname = e.nickname
     this.id = e.receiving_id
     this.bottle_id = e.bottle_id
+    this.riskWarning = e.riskWarning
     this.wxUserInfo = wx.getStorageSync('wxUserInfo')
     wx.setNavigationBarTitle({
       title: e.nickname
     })
     if (wepy.$instance.globalData.openid) {
+      this.Muted = wepy.$instance.globalData.ban_chat
       this.setIntervalCatch()
       this.getList()
-    }else { 
+    }else {
       wepy.$instance.userInfoReadyCallback = res => {
+        this.Muted = wepy.$instance.globalData.ban_chat
         this.setIntervalCatch()
         this.getList()
       }
@@ -180,7 +193,7 @@ export default class chat extends wepy.page {
         vm.blessingMessage = false
         if(data.data && data.data.length > 0) {
           data.data.forEach(item => {
-            item.updated_at = vm.getTime(item.updated_at)
+            item.created_at = vm.getTime(item.created_at)
           })
         }
         if (vm.blessingPage == 1) {
@@ -239,7 +252,7 @@ export default class chat extends wepy.page {
         if (data.length > 0) {
           data.forEach(item => {
             var enceArr = []
-            item.updated_at = vm.getTime(item.updated_at)
+            item.created_at = vm.getTime(item.created_at)
             enceArr.push(item)
             let tempResArr = vm.getArrDifference(vm.list, enceArr)
             console.log(tempResArr, 'tempResArr---------------')
@@ -490,7 +503,7 @@ export default class chat extends wepy.page {
       this.userNextId = +vm.list[0].id + 1
       clearTimeout(vm.setIntervalList)
       vm.list.unshift({
-        updated_at: vm.getTime(vm.curentTime()),
+        created_at: vm.getTime(vm.curentTime()),
         user_name: vm.wxUserInfo.nickName,
         user_pic: vm.wxUserInfo.avatarUrl,
         type: "chat",
@@ -914,4 +927,27 @@ page {
 			align-items: center;
 		}
   }
+.Muted_tips {
+  width: 560rpx;
+  height: 72rpx;
+  background: rgba(0, 0, 0, .39);
+  border-radius: 36rpx;
+  margin: 0 auto;
+  line-height: 32rpx;
+}
+.m_war {
+  width: 650rpx;
+  padding: 26rpx 24rpx;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  margin: 30rpx auto;
+  .m_war_icpn {
+    margin-bottom: 10rpx;
+    .u_war_icpn {
+      width: 28rpx;
+      height: 28rpx;
+      margin-right: 6rpx;
+    }
+  }
+}
 </style>
