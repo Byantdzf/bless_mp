@@ -50,6 +50,7 @@
           </view>
         </view>
         <view class="Muted_tips f-fcc white font_32" wx:if="{{Muted == 1}}">你已被禁言，暂时不能发送消息</view>
+        <view class="Muted_tips f-fcc white font_32" wx:if="{{riskWarning == 1}}">对方已被禁言，暂时无法聊天互动</view>
       </view>
     </scroll-view>
     <view class="m_inp" wx:if="{{Muted == 0}}">

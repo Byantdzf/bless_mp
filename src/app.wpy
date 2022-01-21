@@ -109,7 +109,7 @@ export default class extends wepy.app {
 
   onLaunch(options) {
     const that = this
-    that.login()
+    that.login(options.query.channel)
     if (wx.canIUse('getUpdateManager')) {
       const updateManager = wx.getUpdateManager()
       updateManager.onCheckForUpdate(function (res) {
@@ -145,7 +145,7 @@ export default class extends wepy.app {
 
   openshareTicket(options) {}
 
-  login() {
+  login(channel) {
     return new Promise((resolve, reject) => {
       let that = this
       // if (wx.getStorageSync('token')) {
@@ -163,6 +163,8 @@ export default class extends wepy.app {
         success: (res) => {
           wepy.getUserInfo({
             success: (info) => {
+              console.log(info)
+              console.log(res)
               wx.request({
                 url: service.login,
                 data: {
@@ -176,6 +178,9 @@ export default class extends wepy.app {
                 // },
                 method: 'get',
                 success: function ({code, data}) {
+                  if(channel) {
+                    that.upChannel(data.data.id, channel)
+                  }
                   wx.setStorageSync('openid', data.data.openid)
                   that.globalData.openid = data.data.openid
                   that.globalData.ban_chat = data.data.ban_chat
@@ -195,6 +200,23 @@ export default class extends wepy.app {
           console.log('wepy.login.fail:', res)
         }
       })
+    })
+  }
+
+  upChannel(id, channel) {
+    wx.request({
+      url: `${service.host}/official/user/update/${id}`,
+      data: {
+        channel_id: channel
+      },
+      // header: {
+      //   'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+      // },
+      method: 'get',
+      success: function ({code, data}) {},
+      fail: function (res) {
+        wx.switchTab({ url: '/pages/tabBar/home' })
+      }
     })
   }
 
