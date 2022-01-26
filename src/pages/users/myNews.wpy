@@ -1,10 +1,14 @@
 <template>
-  <view style="background:#f5f5f5;height:100%;">
+  <view style="background:#f5f5f5;height:100%;padding-top: 30rpx;">
+    <tabSearchV2 title="搜索昵称" :BColor.sync="BColor" :inputBcolor.sync="inputBcolor"></tabSearchV2>
     <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
       <view class="m_abo">
         <view wx:if="{{!showNoData}}" class="no_data_box">
           <image class="no_data_icon" src="https://image.fulllinkai.com/202201/07/665010b5c361cc4fa1d5a4eed8911e27.png" mode="aspectFill"></image>
-          <view class="font_30 color-999 text-center">暂无内容</view>
+          <view class="font_30 color-999 text-center">
+            <view>暂无发过任何祝福</view>
+            <view>快去<span style="color: #A13791;" @tap="gotoUrl(`/pages/tabBar/home`)">制作祝福</span>吧</view>
+          </view>
         </view>
         <view wx:if="{{blessingMessage}}" style="padding-bottom: 20rpx;" class="text-center">没有更多数据了</view>
         <view class="blessingBox" wx:for="{{list}}" wx:key="index" @tap="goToUrlChat({{item}}, {{index}})">
@@ -39,14 +43,17 @@ import http from '../../mixins/http'
 import base from '../../mixins/base'
 import user from '../../mixins/user'
 import Loading from '../../components/loading'
+import tabSearchV2 from '../../components/tabSearchV2'
 
 export default class myNews extends wepy.page {
   mixins = [base, http, user]
   config = {
     navigationBarTitleText: '祝福箱',
   }
-  components = {Loading}
+  components = {Loading, tabSearchV2}
   data = {
+    BColor: '#ffffff',
+    inputBcolor: 'rgba(0,0,0,0)',
     list: [],
     showNoData: true,
     blessingPage: 1,
@@ -54,6 +61,8 @@ export default class myNews extends wepy.page {
     triggeredsBlessing: false,
     blessingTopHandle: -1,
     blessingTatus: false,
+    hottopic: [],
+    _searchArr: []
   }
 
   computed = {}
@@ -101,6 +110,7 @@ export default class myNews extends wepy.page {
             vm.$apply()
           })
         }
+        this._searchArr = this.list
         vm.triggeredsBlessing = false
         vm.$apply()
       },
@@ -155,10 +165,33 @@ export default class myNews extends wepy.page {
           }, 500)
         }
       })
-			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&bottle_id=${item.bottle_id}&nickname=${item.nickname}&riskWarning=${item.risk_warning}`)
+			this.$goto(`/pages/users/chat?receiving_id=${item.receiving_id}&bottle_id=${item.bottle_id}&nickname=${item.nickname}&riskWarning=${item.risk_warning}&riskContent=${item.risk_content}`)
 		},
+    gotoUrl(item) {
+      this.$goto(item)
+    }
   }
   events = {
+    // 搜索返回值
+    'search': (value) => {
+      if(value == '') {
+        this.list = this._searchArr
+        return
+      }
+      var searchArr = []
+      if(this.list && this.list.length > 0) {
+        this.list.forEach((item, index) => {
+          if(item.nickname.indexOf(value) != -1) {
+            searchArr.push(item)
+          }
+        })
+      }
+      if(searchArr.length == 0 && this.list.length == 0) {
+        return
+      }
+      this.list = searchArr
+      this.$apply()
+    },
   }
 }
 

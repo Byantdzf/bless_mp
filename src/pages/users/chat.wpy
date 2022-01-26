@@ -41,19 +41,20 @@
               </view>
             </view>
           </view>
-          <view class="m_war">
+          <view class="m_war" wx:if="{{riskWarning == 1}}">
             <view class="m_war_icpn f-fc">
               <image class="u_war_icpn" src="https://image.fulllinkai.com/202201/19/d81398429b75935d8c16162fc4a926bb.png" mode="aspectFit"></image>
-              <view class="font_26 bold color333" style="line-height: 26rpx;">警告</view>
+              <view class="font_26 bold color333" style="line-height: 26rpx;">风险提示</view>
             </view>
-            <view class="font_24 color333">请各位自觉遵守法律法规，<span style="color: #A13791;">遇到转款切勿相信，谨防上当受骗，</span>请保持警惕；交友期保持必要的界限，保证自身安全，<span style="color: #A13791;">请勿轻易委身于人，</span>否则后果将自己承担。</view>
+            <!-- <view class="font_24 color333">请各位自觉遵守法律法规，<span style="color: #A13791;">遇到转款切勿相信，谨防上当受骗，</span>请保持警惕；交友期保持必要的界限，保证自身安全，<span style="color: #A13791;">请勿轻易委身于人，</span>否则后果将自己承担。</view> -->
+            <view class="font_24 color333">{{riskContent}}</view>
           </view>
         </view>
-        <view class="Muted_tips f-fcc white font_32" wx:if="{{Muted == 1}}">你已被禁言，暂时不能发送消息</view>
-        <view class="Muted_tips f-fcc white font_32" wx:if="{{riskWarning == 1}}">对方已被禁言，暂时无法聊天互动</view>
+        <view id="muted_66" class="Muted_tips f-fcc white font_32" wx:if="{{MutedShow}}" style="margin-bottom: 15rpx;">你已被禁言，暂时不能发送消息</view>
+        <!-- <view class="Muted_tips f-fcc white font_32" wx:if="{{riskWarning == 1}}" style="margin-top: 15rpx;">对方已被禁言，暂时无法聊天互动</view> -->
       </view>
     </scroll-view>
-    <view class="m_inp" wx:if="{{Muted == 0}}">
+    <view class="m_inp">
       <view class="u_inp f-fcc">
         <input class="u_field" maxlength="1200" cursor-spacing="30rpx" type='text' confirm-type="send"  @confirm="postBottleChat" bindinput="sendMessage" value="{{chatValue}}" placeholder="回复{{nickname}}" />
         <view class="u_inp_bu" @tap="postBottleChat">发送</view>
@@ -150,7 +151,9 @@ export default class chat extends wepy.page {
     userNextId: '',
     compPlaceholderText: '请您详细描述举报内容，福恋会用心服务每一个反馈用户',
     Muted: 0,
-    riskWarning: 0
+    riskWarning: 0,
+    riskContent: '',
+    MutedShow: false
   }
 
   computed = {}
@@ -160,6 +163,7 @@ export default class chat extends wepy.page {
     this.id = e.receiving_id
     this.bottle_id = e.bottle_id
     this.riskWarning = e.riskWarning
+    this.riskContent = e.riskContent
     this.wxUserInfo = wx.getStorageSync('wxUserInfo')
     wx.setNavigationBarTitle({
       title: e.nickname
@@ -497,6 +501,15 @@ export default class chat extends wepy.page {
     postBottleChat() {
       const vm = this
       var myDate = new Date()
+      if(this.Muted == 1) {
+        this.MutedShow = true
+        vm.toView = 'muted_66'
+        setTimeout(() => {
+          vm.MutedShow = false
+          vm.$apply()
+        }, 2000)
+        return
+      }
       if (this.chatValue == '') {
         this.$showToast('回复的内容不能为空')
         return

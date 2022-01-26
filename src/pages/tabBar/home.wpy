@@ -828,6 +828,7 @@ export default class home extends wepy.page {
         that.$apply()
         that.getsubscrip_tion(that, function() {
           that.gotoShow = true
+          that.$apply()
           that.$goto(`/pages/users/myNews`)
         })
       }
@@ -1021,7 +1022,7 @@ export default class home extends wepy.page {
         camera: 'back',
         success(res) {
           wx.hideLoading()
-          that.videoDuration = red.duration
+          that.videoDuration = res.duration
           that.videoUrl = res.tempFilePath
           that.modalName = 'vudioOutModal'
           that.$apply()

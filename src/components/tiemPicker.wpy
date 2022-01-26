@@ -1,0 +1,226 @@
+<template>
+  <view class="popUp">
+    <view class="cu-modal bottom-modal {{modalName=='bottomModals'?'show':''}}" catchtap="hideModal"></view>
+    <view class="bouncedV2 ff"  wx:if="{{modalName=='bottomModals'}}">
+      <view class="cu-dialog bounced">
+        <view class="_title text-center ff animation-slide-top">
+          <view class="color-666 font_32" catchtap="hideModal">全部</view>
+          <view class="color-333 bold text-black ff font_32">请选择发送时间</view>
+          <view class="font_32" style="color: #F33B6C;" catchtap="confirm">确定</view>
+        </view>
+        <picker-view style="width: 100%; height: 500rpx;" indicator-style="height: 50px;" class="view_picker" value="{{value}}" bindchange="bindChange">
+        <picker-view-column style='margin-left: 20rpx;'>
+        <view wx:for="{{years}}" class="view_picker_text f-fcc" wx:key="index">{{item}}年</view>
+        </picker-view-column>
+        <picker-view-column>
+        <view wx:for="{{months}}" class="view_picker_text f-fcc" wx:key="index">{{item}}月</view>
+        </picker-view-column>
+        <picker-view-column style='margin-right: 20rpx;'>
+        <view wx:for="{{days}}" class="view_picker_text f-fcc" wx:key="index">{{item}}日</view>
+        </picker-view-column>
+        </picker-view>
+        <!-- <view class="font_28 cu-modal_nextStep text-center radius bg-blue" catchtap="confirm">确定</view> -->
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class popUp extends wepy.component {
+    mixins = [base, http]
+    props = {
+      modalNameS: {
+        type: String,
+        default: ''
+      }
+    }
+    data = {
+      modalName: '',
+      years: [],
+      months: [],
+      days: [],
+      year: [],
+      month: [],
+      day: [],
+      value: '',
+      tiemValue: ''
+    }
+    watch = {
+      modalNameS(e) {
+        console.log(e)
+        this.modalName = e
+        this.$apply()
+      }
+    }
+    async onLoad(e) {
+      // 定义初始日期为当前日期
+      const date = new Date()
+      const nowYear = date.getFullYear()
+      const nowMonth = date.getMonth() + 1
+      const nowDay = date.getDate()
+      this.setDate(nowYear, nowMonth, nowDay, this)
+    }
+
+    getDays (year, month) {
+      let daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+      if (month === 2) {
+        return ((year % 4 === 0) && ((year % 100) !== 0)) || (year % 400 === 0) ? 29 : 28
+      } else {
+        return daysInMonth[month - 1]
+      }
+    }
+
+    setDate (year, month, day, _this) {
+        // 定义初始日期为当前日期
+        const date = new Date()
+        const nowYear = date.getFullYear()
+        const nowMonth = date.getMonth() + 1
+        const nowDay = date.getDate()
+        let daysNum = year === nowYear && month === nowMonth ? nowDay : _this.getDays(nowYear, nowMonth)
+        day = day > daysNum ? 1 : day
+        let monthsNum = year === nowYear ? nowMonth : 12
+        let years = []
+        let months = []
+        let days = []
+        let yearIndex = 9999
+        let monthIndex = 0
+        let dayIndex = 0
+        // 重新设置年份列表
+        for (let i = 1990; i <= nowYear; i++) {
+          years.push(i)
+        }
+        years.map((v, idx) => {
+          if (v === year) {
+            yearIndex = idx
+          }
+        })
+        // 重新设置月份列表
+        for (let i = 1; i <= monthsNum; i++) {
+          var k = i < 10 ? '0'+ i : i
+          months.push(k)
+        }
+        months.map((v, idx) => {
+          if (v === month) {
+            monthIndex = idx
+          }
+        })
+        // 重新设置日期列表
+        for (let i = 1; i <= daysNum; i++) {
+          var k = i;
+          days.push(k)
+        }
+        days.map((v, idx) => {
+          if (v === day) {
+          dayIndex = idx
+          }
+        })
+        this.years = years
+        this.months = months
+        this.days = days
+        this.year = year
+        this.month = month
+        this.day = day
+        this.value = [yearIndex, monthIndex, dayIndex]
+        this.tiemValue = `${this.years[this.value[0]]}-${this.months[this.value[1]]}-${this.days[this.value[2]]}`
+      }
+
+    methods = {
+      hideModal() {
+        this.list = this.complexList
+        this.modalName = ''
+        this.tiemValue = ''
+        this.onLoad()
+        this.$emit('updateModalNameS', '')
+        this.$emit('tiemValue', '')
+        this.$apply()
+      },
+      confirm() {
+        this.modalName = ''
+        this.$emit('updateModalNameS', '')
+        this.$emit('tiemValue', this.tiemValue)
+        this.$apply()
+      },
+      bindChange(e) {
+        let val = e.detail.value
+        this.value = val
+        this.tiemValue = `${this.years[val[0]]}-${this.months[val[1]]}-${this.days[val[2]]}`
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+.popUp{
+  .bouncedV3{
+      position: absolute;
+      bottom: 0;
+      z-index: 1111;
+      border-radius: 32rpx 32rpx 0 0;
+      background: #fff;
+      width: 100%;
+      height: auto;
+      overflow: hidden;
+  }
+  .bouncedV2{
+    position: absolute;
+    bottom: 0;
+    z-index: 1111;
+    border-radius: 32rpx 32rpx 0 0;
+    background: #fff;
+    width: 100%;
+    height: 40vh;
+    overflow: hidden;
+    .bounced{
+      position: absolute;
+      bottom: 0;z-index: 1111;
+      border-radius:  0;
+      background: #fff;
+      width: 100%;
+      height: 40vh;
+    }
+    ._title{
+      padding: 30rpx 40rpx;
+      display: flex;
+      justify-content: space-between;
+    }
+    .picker-content-item {
+      width: 100%;
+      height: 350rpx;
+      text-align: center;
+      margin-bottom: 32rpx;
+      .tex{
+        font-size: 32rpx;
+        font-weight: 500;
+        color: #333333;
+      }
+      .picker_column_item{
+        height: 70rpx;
+        line-height: 70rpx;
+      }
+    }
+    .cu-modal_nextStep{
+      width: 260rpx;
+      height: 72rpx;
+      line-height: 72rpx;
+      position: absolute;
+      bottom: 60rpx;
+      left: 33%;
+      //margin-left: -120rpx;
+      //margin: 0 auto 32rpx auto;
+      //margin: auto;
+      border-radius: 60rpx;
+      z-index: 99999;
+      //margin-top: 58rpx;
+      background-image: linear-gradient(to right, #FF5380 0%, #FF85A5 100%);
+      color: #ffffff;
+    }
+  }
+}
+.view_picker_text {
+
+}
+</style>

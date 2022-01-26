@@ -1,0 +1,921 @@
+<template>
+  <view style="background:#f5f5f5;height:100%;padding-top: 70rpx;">
+    <!-- <pickerTop :pickerArr="pickerArr"></pickerTop> -->
+    <view class="pickerTop">
+      <view class="Menu-Tab f-fc">
+          <view class="item-Tab text-center">
+              <picker value="{{blessingType.value}}" range="{{blessingType.range}}" bindchange="blessingTypeChange" range-key="title">
+                  <view class="title ellipsis_1 font_28 color333">
+                      {{blessingType.sexText}}
+                      <image src="https://images.ufutx.com/202005/18/1a4515381adacd1fca67b3633320fb57.png" class="icon inline-block"
+                          mode="aspectFit"></image>
+                  </view>
+              </picker>
+          </view>
+          <view class="item-Tab text-center">
+            <view class="title ellipsis_1 font_28 color333" @tap="timeSelectionM">
+              {{TimeSelection.sexText}}
+              <image src="https://images.ufutx.com/202005/18/1a4515381adacd1fca67b3633320fb57.png" class="icon inline-block"
+                mode="aspectFit"></image>
+            </view>
+          </view>
+      </view>
+    </view>
+    <scroll-view scroll-top="{{blessingTopHandle}}" scroll-with-animation="true" scroll-anchoring="{{true}}" refresher-enabled="{{true}}" refresher-triggered="{{triggeredsBlessing}}" bindrefresherpulling="onPullingsBlessing" bindrefresherrefresh="onRefreshsBlessing" scroll-y="true" style="-webkit-overflow-scrolling: touch;height: 100%;" lower-threshold="0" bindscrolltolower="blessingScroll" bindscroll="blessingToupper">
+      <view class="m_abo">
+        <view wx:if="{{!showNoData}}" class="no_data_box">
+          <image class="no_data_icon" src="https://image.fulllinkai.com/202201/07/665010b5c361cc4fa1d5a4eed8911e27.png" mode="aspectFill"></image>
+          <view class="font_30 color-999 text-center">暂无内容</view>
+        </view>
+        <view wx:if="{{blessingMessage}}" style="padding-bottom: 20rpx;" class="text-center">没有更多数据了</view>
+        <view class="blessingBox" wx:for="{{list}}" wx:key="index" @tap="goToUrlChat({{item}}, {{index}})">
+          <view class="blessing_lst">
+            <!-- <view class="m_lstImg">
+              <image class="u_lstImg" src="{{item.pic}}" mode="aspectFill"></image>
+              <view class="u_lstHint" wx:if="{{item.status == 0}}"></view>
+            </view> -->
+            <view class="m_lstCt">
+              <view class="f-fbc">
+                <view class="font_32 bold color-333 ellipsis_1" style="width: 220rpx;" wx:if="{{item.type == 'chat'}}">文字祝福</view>
+                <view class="font_32 bold color-333 ellipsis_1" style="width: 220rpx;" wx:elif="{{item.type == 'voice'}}">语音祝福</view>
+                <view class="font_32 bold color-333 ellipsis_1" style="width: 220rpx;" wx:elif="{{item.type == 'video'}}">视频祝福</view>
+                <view class="font_24 color-999">{{ item.updated_at }}</view>
+              </view>
+              <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:if="{{item.type == 'chat'}}">{{ item.content }}</view>
+              <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:elif="{{item.type == 'voice'}}">我发送过的一条语音祝福</view>
+              <view class="font_28 color-666 ellipsis_1 m_lstCon" style="width: 440rpx;" wx:else>我发送过的一条视频祝福</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="m_returnTop {{blessingTatus?'show':'hide'}}">
+      <image class="u_returnTop_img" bindtap="blessingToReturnTop" src="https://images.ufutx.com/202106/23/f0d10551dc5d3399cc7f15805cf04f4f.png" mode="scaleToFill" lazy-load="false"></image>
+    </view>
+    <tiemPicker :modalNameS.sync="modalName_s"></tiemPicker>
+    <!-- 文字祝福 -->
+		<view class="cu-modal {{modalName=='sendOutModal'?'show':''}}">
+		  <view class="blessing_box">
+        <view class="cancelPlaceholder" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202112/18/1033c7b52cacddcebe999cefc6ad2c9b.png" mode="widthFix"></image>
+        </view>
+        <image class="blessing_buImg" src="https://image.fulllinkai.com/202201/10/8827741d6e923160c934ea5b2b7969ac.png" mode="widthFix"></image>
+		    <view class="m_send_con" wx:if="{{modalName=='sendOutModal'}}">
+		      <view class="m_texTarea">
+		        <text class="n_texTarea text-left">{{senValue}}</text>
+		      </view>
+		    </view>
+		  </view>
+		</view>
+    <!-- 语音祝福 -->
+    <view class="cu-modal {{modalName=='vudioOpenEnvelope'?'show':''}}">
+      <view class="m_en" wx:if="{{modalName=='vudioOpenEnvelope'}}">
+        <view class="cancelPlaceholder" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202201/07/cbe8654a78d1606cac990b162ce9ce37.png" mode="aspectFit"></image>
+        </view>
+        <image class="u_en_img" src="https://image.fulllinkai.com/202201/07/5ef08fc2f4008e50873b7e3c25efe878.png" mode="widthFix">
+          <view class="m_loader f-fcc f-fdc">
+            <view class="m_loader_tt font_32 white">点击播放你的语音祝福</view>
+            <view class="loader-container_s f-fcc"  wx:if="{{playShow || showhandle4}}">
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-3"></view>
+            </view>
+            <view class="loader-container f-fcc" wx:else>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-4"></view>
+              <view class="rectangle-3"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-2"></view>
+              <view class="rectangle-1"></view>
+              <view class="rectangle-3"></view>
+            </view>
+            <view class="font_32 white" wx:if="{{playShow && !showhandle4}}">{{voiceDuration}}S</view>
+            <view class="font_32 white" wx:else>{{recordingTimeqwe}}S</view>
+            <image class="u_en_icon_t" @tap="playMethod" wx:if="{{playShow}}" src="https://image.fulllinkai.com/202201/07/1761207359aafcaf79967dc16e7b9e53.png" mode="aspectFit"></image>
+            <image class="u_en_icon_t" @tap="continuePlaying" wx:elif="{{showhandle4}}" src="https://image.fulllinkai.com/202201/07/1761207359aafcaf79967dc16e7b9e53.png" mode="aspectFit"></image>
+            <image class="u_en_icon_f" @tap="onPause" wx:else src="https://image.fulllinkai.com/202201/07/cc9dcabde81e225c13f54779828b27af.png" mode="aspectFit"></image>
+          </view>
+        </image>
+      </view>
+    </view>
+    <!-- 视频祝福 -->
+    <view class="cu-modal {{modalName=='videoOpenEnvelope'?'show':''}}">
+      <view class="m_en_vi" wx:if="{{modalName=='videoOpenEnvelope'}}">
+        <view class="cancelPlaceholder" @tap="hideModal">
+          <image class="cancelIcon" src="https://image.fulllinkai.com/202201/07/cbe8654a78d1606cac990b162ce9ce37.png" mode="aspectFit"></image>
+        </view>
+        <view class="m_loader_tt font_32 white">点击播放你的视频祝福</view>
+        <view>
+          <video custom-cache="{undefined{false}}" id="video_" loop="loop" class="u_video" src="{{senValue}}"></video>
+        </view>
+        <image class="u_vi_buImg" src="https://image.fulllinkai.com/202201/07/96a9f8bb598890ce1410d92373c4a557.png" mode="widthFix"></image>
+      </view>
+    </view>
+    <backgroundAudio></backgroundAudio>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import { service } from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+import Loading from '../../components/loading'
+import tiemPicker from '../../components/tiemPicker'
+import backgroundAudio from '../../components/backgroundAudio'
+
+export default class myNews extends wepy.page {
+  mixins = [base, http, user]
+  config = {
+    navigationBarTitleText: '祝福箱',
+  }
+  components = {Loading, tiemPicker, backgroundAudio}
+  data = {
+    modalName: '',
+    modalName_s: '',
+    BColor: '#ffffff',
+    inputBcolor: 'rgba(0,0,0,0)',
+    list: [],
+    showNoData: true,
+    blessingPage: 1,
+    blessingMessage: false,
+    triggeredsBlessing: false,
+    blessingTopHandle: -1,
+    blessingTatus: false,
+    hottopic: [],
+    blessingType: {
+      value: 0,
+      range: [
+        {title: '全部', value: '祝福类型', active: true},
+        {title: '文字祝福', value: '文字祝福', active: true},
+        {title: '语音祝福', value: '语音祝福', active: true},
+        {title: '视频祝福', value: '视频祝福', active: true}
+      ],
+      sexText: '祝福类型'
+    },
+    TimeSelection: {
+      value: '',
+      sexText: '发送时间'
+    },
+    complexList: [],
+    itemComplexList: [],
+    typeArr: [],
+    senValue: '',
+    throttle: '',
+    playShow: true,
+    showhandle4: false,
+    voiceDuration: 0,
+    recordingTimeqwe: 0,
+  }
+
+  computed = {}
+
+  onLoad(e) {
+    this.getList()
+  }
+
+  onShow() {
+    this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+  }
+
+  getList() {
+    let vm = this
+    if (vm.loading || vm.noMoreList) return
+    vm.loading = true
+    vm.$showLoading('加载中...')
+    this.$get({
+      url: `${service.host}/official/my/bottle`,
+      data: {
+        page: vm.blessingPage
+      }
+    }, {
+      success: ({code, data}) => {
+        wx.hideLoading()
+        if(data.data && data.data.length > 0) {
+          data.data.forEach(item => {
+            item.updated_ats = item.updated_at
+            item.updated_at = vm.getTime(item.updated_at)
+          })
+        }
+        if (vm.blessingPage > 1 && data.data.length == 0) {
+          vm.blessingMessage = true
+          return
+        } else {
+          vm.blessingMessage = false
+        }
+        if (vm.blessingPage == 1) {
+          vm.list = [...vm.list, ...data.data]
+          vm.$apply()
+          if (vm.list.length == 0) {
+            vm.showNoData = false
+            vm.$apply()
+          } else {
+            vm.showNoData = true
+            vm.$apply()
+          }
+        } else {
+          data.data.map(function (item, index) {
+            vm.list.push(item)
+            vm.$apply()
+          })
+        }
+        vm.complexList = vm.list
+        vm.triggeredsBlessing = false
+        vm.$apply()
+      },
+      fail: ({code, data}) => {
+        // 失败了什么也不做
+      },
+      complete: () => {
+        vm.loading = false
+      }
+    })
+  }
+
+  blessingToupper(e) {
+    clearTimeout(this._st)
+    this._st = setTimeout(() => {
+      console.log(e)
+      if (e.detail.scrollTop > 380) {
+        this.blessingTatus = true
+      } else {
+        this.blessingTatus = false
+      }
+      this.$apply()
+    }, 200)
+  }
+
+  blessingScroll() {
+    if (this.blessingMessage) return
+    this.blessingPage += 1
+    this.getList()
+  }
+
+  // 显示时间
+  showTme (startTime, endTime) {
+    let dateEnd = new Date(startTime.replace(/-/g, '/'))
+    let dateBegin = new Date(endTime.replace(/-/g, '/'))
+    var retValue = {}
+    var date3 = dateEnd.getTime() - dateBegin.getTime()  // 时间差的毫秒数
+    // 计算出相差天数
+    var days = Math.floor(date3 / (24 * 3600 * 1000))
+    retValue.Days = days
+    var years = Math.floor(days / 365)
+    retValue.Years = years
+    var months = Math.floor(days / 30)
+    retValue.Months = months
+    // 计算出小时数
+    var leave1 = date3 % (24 * 3600 * 1000)    // 计算天数后剩余的毫秒数
+    var hours = Math.floor(leave1 / (3600 * 1000))
+    retValue.Hours = hours
+    // 计算相差分钟数
+    var leave2 = leave1 % (3600 * 1000)        // 计算小时数后剩余的毫秒数
+    var minutes = Math.floor(leave2 / (60 * 1000))
+    retValue.Minutes = minutes
+    // 计算相差秒数
+    var leave3 = leave2 % (60 * 1000)      // 计算分钟数后剩余的毫秒数
+    var seconds = Math.round(leave3 / 1000)
+    retValue.Seconds = seconds
+    var strTime = ''
+    if (years >= 1) {
+      strTime = years + '年前'
+    } else if (months >= 1) {
+      strTime = months + '个月前'
+    } else if (days >= 1) {
+      strTime = days + '天前'
+    } else if (hours >= 1) {
+      strTime = hours + '小时前'
+    } else {
+      strTime = minutes + '分钟前'
+    }
+    retValue.PubTime = strTime
+    if (minutes < 5) {
+      return false
+    } else {
+      return true
+    }
+  }
+
+  // 转换时间
+  getTime (time) {
+    // 时间统一函数
+    function getTimeText (argument) {
+      var timeS = argument
+      var todayT = ''
+      var yestodayT = ''
+      var timeCha = getTimeS(timeS)
+      timeS = timeS.slice(-8)
+      todayT = new Date().getHours() * 60 * 60 * 1000 + new Date().getMinutes() * 60 * 1000 + new Date().getSeconds() * 1000
+      yestodayT = todayT + 24 * 60 * 60 * 1000
+      const date = new Date()
+      var year = date.getFullYear()
+      var yea = Number(argument.slice(0, 4))
+      if (timeCha > yestodayT) {
+        if (yea == year) {
+          return argument.slice(5, 11) + (timeS.slice(0, 2) >= 12 ? '下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '上午' + timeS.slice(0, 5))
+        } else {
+          return timeS.slice(0, 2) >= 12 ? '下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '上午' + timeS.slice(0, 5)
+        }
+      }
+      if (timeCha > todayT && timeCha < yestodayT) {
+        return timeS.slice(0, 2) > 12 ? '昨天 下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '昨天 上午' + timeS.slice(0, 5)
+      }
+      if (timeCha < todayT) {
+        return timeS.slice(0, 2) >= 12 ? '下午' + (timeS.slice(0, 2) == 12 ? 12 : timeS.slice(0, 2) - 12) + timeS.slice(2, 5) : '上午' + timeS.slice(0, 5)
+      }
+    }
+
+    // 时间戳获取
+    function getTimeS (argument) {
+      var timeS = argument
+      timeS = timeS.replace(/[-]/g, '/').replace(/[-]/, '')
+      timeS = timeS.replace(/[年月]/g, '/').replace(/[日]/, '')
+      return new Date().getTime() - new Date(timeS).getTime() - 1000 // 有一秒的误差
+    }
+    var timeText = getTimeText(time)
+    return timeText
+  }
+
+  screen() {
+    const vm = this
+    var data = []
+    var s_data = []
+    var a = ''
+    var b = ''
+    if(vm.typeArr.length == 0) {
+      this.list = this.complexList
+      return
+    }
+    if (vm.typeArr.length == 1) {
+      vm.typeArr.forEach((s_type) => {
+        if (s_type.type == 'type_s') {
+          this.complexList.forEach(item => {
+            if(item.type == s_type.value) {
+              data.push(item)
+            }
+          })
+        }
+        if (s_type.type == 'time') {
+          this.complexList.forEach(item => {
+            if(item.updated_ats.indexOf(s_type.value) != -1) {
+              data.push(item)
+            }
+          })
+        }
+      })
+    }else {
+      // s_data = vm.complexList
+      vm.typeArr.forEach((s_type, index) => {
+        if(s_type.type == 'type_s') {
+          a = s_type.value
+        }else {
+          b = s_type.value
+        }
+      })
+      this.complexList.forEach(item => {
+        if(a == item.type && item.updated_ats.indexOf(b) != -1) {
+          s_data.push(item)
+        }
+      })
+      data = s_data
+    }
+    vm.list = data
+  }
+
+  filterBy(aim, name, age) {
+    return aim.filter(item => item.name == name || item.age == age)
+  }
+
+  methods = {
+    onPullingsBlessing(e) {
+      this.triggeredsBlessing = true
+    },
+    onRefreshsBlessing(e) {
+      this.blessingMessage = false
+      this.list = []
+      this.blessingPage = 1
+      this.getList()
+    },
+    blessingToReturnTop(e) {
+      this.blessingTopHandle = Math.random()
+      this.blessingTatus = false
+      this.$apply()
+    },
+    goToUrlChat(item, index) {
+      var vm = this
+      vm.list.forEach((item, i) => {
+        if(i == index) {
+          if(item.type == 'chat') {
+            vm.modalName = 'sendOutModal'
+          }else if(item.type == 'voice') {
+            vm.voiceDuration = item.duration
+            vm.modalName = 'vudioOpenEnvelope'
+          }else if(item.type == 'video') {
+            vm.modalName = 'videoOpenEnvelope'
+          }
+          vm.senValue = item.content
+        }
+      })
+		},
+    blessingTypeChange(e) {
+      const vm = this
+      var index = e.detail.value
+      var typeTxt = ''
+      vm.blessingType.value = index
+      vm.blessingType.sexText = vm.blessingType.range[index].value
+      vm.typeArr.forEach((item, index) => {
+        if(item.type == 'type_s') {
+          vm.typeArr.splice(index, 1)
+        }
+      })
+      if(index == 0) {
+        vm.screen()
+        return
+      }
+      if(index == 1) {
+        typeTxt = 'chat'
+      }else if(index == 2) {
+        typeTxt = 'voice'
+      }else if(index == 3) {
+        typeTxt = 'video'
+      }
+      vm.typeArr.push({
+        type: 'type_s',
+        value: typeTxt
+      })
+      vm.screen()
+    },
+    timeSelectionM() {
+      this.modalName_s = 'bottomModals'
+      this.$apply()
+    },
+    hideModal() {
+      const that = this
+      if(this.modalName = 'vudioOpenEnvelope' || this.modalName == 'vudioOpenEnvelope') {
+        this.$invoke('backgroundAudio', 'endedVoice')
+      }
+      this.modalName = ''
+      this.senValue = ''
+      this.$apply()
+    },
+    playMethod() {
+      const that = this
+      clearTimeout(that.throttle)
+      that.throttle = setTimeout(() => {
+        if(that.playShow) {
+          that.$invoke('backgroundAudio', 'listenRecord', {tempFilePath: that.senValue})
+          that.playShow = !this.playShow
+          that.$apply()
+        }
+      }, 200)
+    },
+    continuePlaying() {
+      this.$invoke('backgroundAudio', 'continuePlaying')
+    },
+    onPause() {
+      this.$invoke('backgroundAudio', 'onPause')
+    },
+  }
+  events = {
+    // 搜索返回值
+    'tiemValue': (value) => {
+      const vm = this
+      console.log(value)
+      vm.typeArr.forEach((item, index) => {
+        if(item.type == 'time') {
+          vm.typeArr.splice(index, 1)
+        }
+      })
+      if(value == '') {
+        this.screen()
+        this.TimeSelection.sexText = '发送时间'
+      }else {
+        vm.typeArr.push({
+          type: 'time',
+          value
+        })
+        this.TimeSelection.sexText = value
+        this.screen()
+      }
+    },
+    'updateModalNameS': (value) => {
+      this.modalName_s = ''
+      this.$apply()
+    },
+    'hideShare': (e) => {
+      this.hide = e
+    },
+    'shareImageShare': (e) => {
+      this.pic = e
+    },
+    'recording': (e) => {
+      this.recordingTimeqwe = e
+    },
+    'shutRecord': (e) => {
+      if(e.type == 'showhandle1') {
+        this.showhandle1 = e.data
+      }else if(e.type == 'showhandle2') {
+        this.showhandle2 = e.data
+      }else if(e.type == 'showhandle3') {
+        this.showhandle3 = e.data
+      }else {
+        this.showhandle4 = e.data
+      }
+    },
+    'UpLoadImage': (e) => {
+      console.log(e,'UpLoadImage---------------------')
+      this.modalName = ''
+      this.senValue = ''
+      this.bottleData = e
+      this.getPoster()
+      this.hide = true
+      this.$apply()
+    },
+    'playEnded': (e) => {
+      this.playShow = e
+      this.$apply()
+    },
+  }
+}
+
+</script>
+
+<style lang="less">
+@import "../../styles/weui/base/fn.wxss";
+@import "../../styles/custom/fn";
+page {
+  height: 100%;
+  background-color: #f5f5f5 !important;
+}
+scroll-view {
+  height: 100%;
+  box-sizing: border-box;
+}
+.m_abo{
+  padding: 30rpx;
+  .blessingBox{
+    padding: 30rpx;
+    background: #ffffff;
+    margin-bottom: 24rpx;
+    border-radius: 16rpx;
+    .blessing_lst{
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      .m_lstImg{
+        position: relative;
+        margin-right: 24rpx;
+        .u_lstImg{
+          width: 124rpx;
+          height: 124rpx;
+          border-radius: 50%;
+          display: block;
+        }
+        .u_lstHint{
+          position: absolute;
+          right: 4rpx;
+          top: 4rpx;
+          border-radius: 50%;
+          width: 24rpx;
+          height: 24rpx;
+          background: #FF4B41;
+          border: 2rpx solid #FFFFFF;
+        }
+      }
+      .m_lstCt{
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        .m_lstCon{
+          margin-top: 12rpx;
+        }
+      }
+    }
+  }
+}
+.m_returnTop {
+  position: fixed;
+  right: 36rpx;
+  bottom: 160rpx;
+  -webkit-transition: opacity 1s;
+  transition: opacity 1s;
+  .u_returnTop_img {
+    width: 92rpx;
+    height: 92rpx;
+    border-radius: 50%;
+    box-shadow: 0 0 12rpx 6rpx rgba(0, 0, 0, .06);
+  }
+}
+.m_returnTop.show {
+  opacity: 1;
+}
+.m_returnTop.hide {
+  opacity: 0;
+}
+.no_data_box{
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.no_data_icon{
+  width: 440rpx;
+  height: 300rpx;
+  display: block;
+  margin: 0 auto -50rpx auto;
+}
+.pickerTop {
+  width: 100vw;
+  position: fixed;
+  left: 0%;
+  top: 0;
+  z-index: 99;
+  background-color: #F5F5F5;
+  .Menu-Tab{
+    padding: 30rpx;
+    .item-Tab{
+      height: 40rpx;
+      margin-right: 120rpx;
+      // .title{
+
+      // }
+      .icon{
+        width: 32rpx;
+        height: 32rpx;
+        vertical-align: middle;
+        margin-bottom: 4rpx;
+
+      }
+    }
+  }
+}
+.blessing_box{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    background: url("https://image.fulllinkai.com/202201/07/fb6459201f2a22e180f92a44c6b2ec27.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 568rpx;
+    height: 832rpx;
+    top: -10%;
+    .blessing_buImg {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 99;
+    }
+    .m_send_con {
+      padding: 258rpx 60rpx 50rpx;
+      .m_texTarea {
+        background-color: #ffffff;
+        overflow: hidden;
+        width: 100%;
+        height: 450rpx;
+        overflow-y: scroll;
+        .n_texTarea {
+          width: 100%;
+          padding: 30rpx 30rpx 50rpx;
+          box-sizing: border-box;
+        }
+      }
+    }
+    .cancelPlaceholder {
+      width: 80rpx;
+      height: 80rpx;
+      position: absolute;
+      right: -16rpx;
+      top: 80rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+  }
+  .m_en_vi{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    height: 840rpx;
+    border-radius: 32rpx;
+    background: linear-gradient(225deg, #FF61A3 0%, #9648F2 100%);
+    .m_oEn_bu {
+      padding-top: 34rpx;
+      .u_oEn_bu {
+        width: 224rpx;
+        height: 90rpx;
+        margin: 0 20rpx;
+      }
+    }
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 30rpx;
+      margin-top: 30rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+    .u_en_img {
+      width: 100%;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .u_vi_buImg {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 132rpx;
+    }
+    .m_loader_tt {
+      padding: 64rpx 0 30rpx;
+    }
+    .u_video {
+      width: 508rpx;
+      height: 678rpx;
+      border-radius: 16px;
+    }
+  }
+  .m_en{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600rpx;
+    .m_oEn_bu {
+      padding-top: 34rpx;
+      .u_oEn_bu {
+        width: 224rpx;
+        height: 90rpx;
+        margin: 0 20rpx;
+      }
+    }
+    .cancelPlaceholder {
+      width: 60rpx;
+      height: 60rpx;
+      position:absolute;
+      right: 30rpx;
+      margin-top: 30rpx;
+      z-index: 22;
+      .cancelIcon {
+        width: 40rpx;
+        height: 40rpx;
+        display: block;
+        margin: 0 auto;
+        text-align: right;
+      }
+    }
+    .u_en_img {
+      width: 100%;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .m_loader {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      .m_loader_tt {
+        padding-top: 64rpx;
+      }
+      .u_en_icon_t,
+      .u_en_icon_f {
+        margin-top: 50rpx;
+        width: 132rpx;
+        height: 132rpx;
+      }
+    }
+    .loader-container_s > view {
+        display: inline-block;
+        background: #FFFFFF;
+        width: 6rpx;
+        margin: 0 6rpx;
+        border-radius: 100rpx;
+    }
+    .loader-container_s {
+        margin-top: 98rpx;
+        width: 100%;
+        margin-bottom: 30rpx;
+        .rectangle-1 {
+          height: 24rpx;
+        }
+        .rectangle-2 {
+          height: 32rpx;
+        }
+        .rectangle-3 {
+          height: 46rpx;
+        }
+        .rectangle-4 {
+          height: 64rpx;
+        }
+    }
+    .loader-container {
+      margin-top: 118rpx;
+      width: 100%;
+      margin-bottom: 50rpx;
+      // width: 160rpx;
+      // margin: 200px auto 0;
+    }
+    .loader-container > view {
+        display: inline-block;
+        background: #FFFFFF;
+        width: 6rpx;
+        height: 24rpx;
+        margin: 0 6rpx;
+        border-radius: 100rpx;
+        -webkit-animation: load 4s ease-in-out infinite;
+        animation: load 4s ease-in-out infinite;
+    }
+    .loader-container .rectangle-2 {
+      -webkit-animation-delay: 0.3s;
+      animation-delay: 0.3s;
+    }
+    .loader-container .rectangle-3 {
+      -webkit-animation-delay: 0.6s;
+      animation-delay: 0.6s;
+    }
+    .loader-container .rectangle-4 {
+      -webkit-animation-delay: 0.9s;
+      animation-delay: 0.9s;
+    }
+    .loader-container .rectangle-5 {
+      -webkit-animation-delay: 1.2s;
+      animation-delay: 1.2s;
+    }
+    .loader-container .rectangle-6 {
+      -webkit-animation-delay: 0.5s;
+      animation-delay: 0.5s;
+    }
+    @keyframes load {
+        0%, 100% {
+            transform: scaleY(1);
+            background: #FFFFFF;
+        }
+        16.67% {
+            transform: scaleY(2.6);
+            background: #FFFFFF;
+        }
+        33.33% {
+            transform: scaleY(1);
+            background: #FFFFFF;
+        }
+        50% {
+            transform: scaleY(2.6);
+            background: #FFFFFF;
+        }
+        66.67% {
+            transform: scaleY(1);
+            background: #FFFFFF;
+        }
+        83.34% {
+            transform: scaleY(2.6);
+            background: #FFFFFF;
+        }
+    }
+  }
+</style>

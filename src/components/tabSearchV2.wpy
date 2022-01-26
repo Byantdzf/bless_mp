@@ -1,9 +1,9 @@
 <template>
-  <view class="cu-bar search _tab__content bc_BoxTab ">
-    <view class="search-form round m_search_sea">
+  <view class="cu-bar search _tab__content bc_BoxTab" style="background: {{inputBcolor}};">
+    <view class="search-form round m_search_sea f-fcc" style="background: {{BColor}} !important;">
       <!-- <text class="cuIcon-search"></text> -->
       <view class="m_sea f-fcc">
-        <image class="u_sea_img" src="https://images.ufutx.com/202106/19/c607aaf49440b0df3308d6e048fd9ad7.png" mode="aspectFit" lazy-load="false"></image>
+        <image class="u_sea_img" src="https://image.fulllinkai.com/202201/21/74708c1799da7f0e26c1967395f20c18.png" mode="aspectFit" lazy-load="false"></image>
       </view>
       <input type="text" class="m_sea_input"  placeholder="{{title}}" bindfocus="TabSearchBindfocus" bindinput="inputTyping" confirm-type="search" value="{{inputVal}}" focus="{{inputShowed}}" @confirm="confirmTyping" ></input>
       <image wx:if="{{inputVal.length > 0}}" bindtap="searchEmpty" class="m_search_icon_add" src="https://images.ufutx.com/202106/30/03404c702dc077428d7af781f98e15a3.png" mode="aspectFit" lazy-load="false"></image>
@@ -11,6 +11,7 @@
     <!--<view class="action">-->
     <!--<button class="cu-btn bg-white shadow round " style="">搜索</button>-->
     <!--</view>-->
+    <image @tap="goto('/pages/users/myBottle')" class="right_icon_img" src="https://image.fulllinkai.com/202201/21/62dcc70e5524e95aa4dadaba4687945c.png" mode="aspectFit" lazy-load="false"></image>
   </view>
   <view style="height: {{bc_height}}"></view>
   <!--<view class="weui-tab__content bc_BoxTab">-->
@@ -64,7 +65,11 @@
       BColor: {
         type: String,
         default: '#d92553'
-      }
+      },
+      inputBcolor: {
+        type: String,
+        default: '#ffffff'
+      },
     }
     data = {
       inputShowed: false,
@@ -112,6 +117,7 @@
       },
       inputTyping(e) {
         this.inputVal = e.detail.value
+        this.$emit('search', this.inputVal)
         this.$apply()
       },
       goto(url) {
@@ -121,7 +127,7 @@
         this.inputVal = ''
         this.$emit('search',this.inputVal)
         this.$apply()
-      }
+      },
     }
   }
 </script>
@@ -133,7 +139,7 @@
     position: fixed;
     left: 0%;
     z-index: 9999;
-    background: white;
+    padding: 0 30rpx;
     /*background-image: url("https://images.ufutx.com/202005/18/6414327d32bfc37345dafec4410854b5.png");*/
     /*background-size: cover;*/
     /*background-repeat: no-repeat;*/
@@ -141,7 +147,7 @@
   .m_search_sea {
     height: 72rpx !important;
     border-radius: 100rpx !important;
-    background-color: #f5f5f5 !important;
+    margin: 0 22rpx 0 0 !important;
     .m_sea {
       width: 60rpx;
       height: 100%;
@@ -161,5 +167,9 @@
       height: 28rpx;
       margin: 0 20rpx;
     }
+  }
+  .right_icon_img {
+    width: 46rpx;
+    height: 46rpx;
   }
 </style>

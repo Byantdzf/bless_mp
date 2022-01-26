@@ -37,6 +37,7 @@ export default class extends wepy.app {
       {
 			  'root': 'pages/users',
 			  'pages': [
+			    'myBottle',
 			    'myNews',
 			    'audio',
           'chat'

@@ -1,0 +1,74 @@
+<template>
+  <view class="pickerTop">
+    <view class="Menu-Tab cu-bar">
+        <view class="item-Tab text-center" wx:for="{{pickerArr}}" wx:key="index">
+            <picker value="{{index}}" range="{{item.range}}" bindchange="sexChange" range-key="title">
+                <view class="title ellipsis_1">
+                    {{item.sexText}}
+                    <image src="https://images.ufutx.com/202005/18/1a4515381adacd1fca67b3633320fb57.png" class="icon inline-block"
+                        mode="aspectFit"></image>
+                </view>
+            </picker>
+        </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class pickertop extends wepy.component {
+    mixins = [base, http]
+    props = {
+      pickerArr: {
+        type: Object,
+        default: []
+      }
+    }
+    data = {
+    }
+    watch = {
+      
+    }
+    async onLoad(e) {
+    }
+    methods = {
+      sexChange_0(e) {
+        console.log(e)
+      },
+      sexChange_1(e) {
+        console.log(e)
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+.pickerTop {
+    .Menu-Tab{
+      width: 100vw;
+      position: fixed;
+      left: 0%;
+      top: 0;
+      z-index: 9999;
+      height: 80rpx;
+      background: #ffffff;
+      .item-Tab{
+        width: 25%;
+        height: 46rpx;
+        // .title{
+
+        // }
+        .icon{
+          width: 32rpx;
+          height: 32rpx;
+          vertical-align: middle;
+          margin-bottom: 4rpx;
+
+        }
+      }
+    }
+}
+</style>
